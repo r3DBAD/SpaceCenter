@@ -1,0 +1,49 @@
+@startuml launch_state
+' Диаграмма состояний пуска (класс Launch, этапы — lcc/model/stages.py)
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 11
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam state {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+
+[*] --> Запланирован : register_launch()\n[окно ≥ сейчас, площадка готова]
+
+state "Подготовка (площадка занята)" as Prep {
+  state "Сборка на ТК" as Asm
+  state "Транспортировка на СК" as Tr
+  state "Заправка" as Fuel
+  state "Предстартовый контроль" as Chk
+  state "Готов к пуску" as Ready
+  Asm --> Tr : advance()\n[окно не истекло]
+  Tr --> Fuel : advance()\n[площадка исправна]
+  Fuel : refuel() — списание по партиям
+  Fuel --> Chk : advance()\n[горючее > 0 и окислитель > 0]
+  Chk --> Ready : advance()\n[метео ≤ 3 ч и в норме]
+}
+
+Запланирован --> Asm : advance()\n[лимит подготовок не превышен]
+Ready --> Выполнен : record_result(success)\n[окно открыто]
+Ready --> Авария : record_result(fail)
+Запланирован --> Отменён : cancel(reason)
+Prep --> Отменён : cancel(reason)
+
+Запланирован --> Запланирован : postpone()\n(новое окно)
+note left of Prep
+  postpone() допустим в любом
+  состоянии подготовки: сдвигается
+  окно, статус сохраняется
+end note
+
+Выполнен --> [*]
+Авария --> [*]
+Отменён --> [*]
+
+note right of Выполнен
+  +1 цикл и моточасы площадки;
+  при достижении норматива —
+  площадка «Требует ТО»
+end note
+@enduml

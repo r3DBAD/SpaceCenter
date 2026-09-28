@@ -51,6 +51,10 @@ View ничего не знает о Model: Controller передаёт ему �
 
 ## 5.4. Статусная модель пуска
 
+![Диаграмма состояний](diagrams/uml/launch_state.png)
+
+Исходник: [`diagrams/uml/launch_state.puml`](diagrams/uml/launch_state.puml). То же на Mermaid:
+
 ```mermaid
 stateDiagram-v2
     [*] --> Запланирован
