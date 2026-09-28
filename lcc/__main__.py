@@ -21,6 +21,7 @@ def main(argv: list[str] | None = None) -> int:
     group.add_argument("--web", action="store_true", help="запустить веб-интерфейс (Vue) вместо консоли")
     parser.add_argument("--host", default="127.0.0.1", help="адрес веб-сервера (по умолчанию только локально)")
     parser.add_argument("--port", type=int, default=8000, help="порт веб-сервера")
+    parser.add_argument("--open", action="store_true", help="с --web: открыть браузер автоматически")
     args = parser.parse_args(argv)
     view = ConsoleView()
 
@@ -53,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.web:
         from .controller.web import run_server
         try:
-            run_server(services, args.host, args.port)
+            run_server(services, args.host, args.port, open_browser=args.open)
         finally:
             db.close()
         return 0

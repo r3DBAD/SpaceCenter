@@ -318,11 +318,15 @@ class _Handler(BaseHTTPRequestHandler):
         print(f"{self.address_string()} {self.command} {urlparse(self.path).path} → {args[1] if len(args) > 1 else ''}")
 
 
-def run_server(services: Services, host: str = "127.0.0.1", port: int = 8000) -> None:
+def run_server(services: Services, host: str = "127.0.0.1", port: int = 8000, open_browser: bool = False) -> None:
     """Однопоточный сервер: соединение SQLite используется в одном потоке."""
     _Handler.api = WebApi(services)
     server = HTTPServer((host, port), _Handler)
-    print(f"Веб-интерфейс: http://{host}:{port}  (Ctrl+C — остановить)")
+    url = f"http://{'127.0.0.1' if host in ('0.0.0.0', '') else host}:{port}"
+    print(f"Веб-интерфейс: {url}  (Ctrl+C — остановить)")
+    if open_browser:
+        import webbrowser
+        webbrowser.open(url)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
