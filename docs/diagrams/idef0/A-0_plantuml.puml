@@ -1,0 +1,34 @@
+@startuml
+skinparam BackgroundColor white
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam component {
+    BackgroundColor white
+    BorderColor black
+    BorderThickness 2
+}
+title Контекстная диаграмма IDEF0 (A-0) АИС ЦУП космических пусков
+
+component A0 as "A0: Автоматизировать управление\nцентром космических пусков"
+
+' Входы — слева
+[I1 Заявки на пуск] -right-> A0
+[I2 Сведения о партиях топлива] -right-> A0
+[I3 Метеорологические данные] -right-> A0
+[I4 Телеметрические данные] -right-> A0
+
+' Управление — сверху
+[C1 Регламент подготовки и проведения пусков] -down-> A0
+[C2 Предельные метеоусловия] -down-> A0
+[C3 Нормативы площадок] -down-> A0
+[C4 Правила учёта топлива] -down-> A0
+
+' Механизмы — снизу
+[M1 Персонал ЦУП] -up-> A0
+[M2 ПО АИС ЦУП и СУБД] -up-> A0
+
+' Выходы — справа
+A0 -right-> [O1 Расписание и статусы пусков]
+A0 -right-> [O2 Журнал НС и переносов]
+A0 -right-> [O3 Отчёты руководителю]
+@enduml
