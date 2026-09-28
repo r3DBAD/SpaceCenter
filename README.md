@@ -44,7 +44,9 @@ python -m unittest discover -s tests   # тесты (модель, сервис�
 
 Регистрация пуска: ошибка валидации в Model → понятное сообщение во View, затем успешная регистрация:
 
-![](docs/screens/04_register.png)
+![](docs/screens/04a_register_error.png)
+
+![](docs/screens/04b_register_ok.png)
 
 Метеоконтроль: превышение пределов → перенос пуска:
 
