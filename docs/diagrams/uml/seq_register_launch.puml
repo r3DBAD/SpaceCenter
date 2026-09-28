@@ -17,11 +17,11 @@ database ":LaunchPadRepository" as PR <<Model/DAO>>
 database ":LaunchRepository" as LR <<Model/DAO>>
 
 U -> V : выбрать «Зарегистрировать пуск»
-V -> C : on_register()
-C -> V : ask_launch_form()
+V -> C : register()
+C -> V : show_table(типы РН, площадки);\nask_int / ask_text / ask_datetime
 V -> U : форма (тип РН, ПН, орбита,\nплощадка, начало/конец окна)
 U -> V : ввод данных
-V --> C : LaunchForm (сырые строки/даты)
+V --> C : значения (int, str, datetime)
 
 C -> S : register_launch(session, form)
 activate S
@@ -32,9 +32,9 @@ alt нет права
   C -> V : show_error("Недостаточно прав")
 end
 
-S -> L ** : Launch(vehicle_type_id, payload,\norbit, pad_id, window)
+S -> L ** : LaunchWindow(start, end);\nLaunch(vehicle_type_id, pad_id,\npayload, orbit, window)
 activate L
-L -> L : _validate()\n(непустые поля, начало < конец,\n1 мин ≤ окно ≤ 24 ч)
+L -> L : require_text / require_int\n(непустые поля, начало < конец,\n1 мин ≤ окно ≤ 24 ч, не в прошлом)
 alt данные некорректны
   L --> S : ValidationError
   S --> C : ValidationError
@@ -44,9 +44,9 @@ deactivate L
 
 S -> PR : get(pad_id)
 PR --> S : pad:LaunchPad
-S -> LR : count_active_on_pad(pad_id)
-LR --> S : active
-S -> S : pad.ensure_can_accept(active)
+S -> PR : usage(pad_id)\n(COUNT активных подготовок,\nциклы и моточасы с ТО)
+PR --> S : usage:PadUsage
+S -> S : pad.ensure_can_accept(usage)
 alt площадка на ТО / лимит подготовок исчерпан
   S --> C : BusinessRuleError
   C -> V : show_error("Площадка недоступна: …")
@@ -54,7 +54,7 @@ end
 
 S -> LR : add(launch)\n(параметризованный INSERT)
 LR --> S : launch_id
-S -> LR : log_status(launch_id, PLANNED, staff)
+S -> LR : log_status(launch_id, PLANNED,\nnow, staff_id)
 S --> C : launch
 deactivate S
 C -> V : show_message("Пуск №… зарегистрирован,\nстатус «Запланирован»")

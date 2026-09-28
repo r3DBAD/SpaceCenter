@@ -1,0 +1,184 @@
+@startuml class_domain
+' Диаграмма классов предметной области (пакет lcc.model)
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 11
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class Entity {
+  -_id: int
+  +id: int
+  +assign_id(id)
+}
+
+class Staff {
+  -_login: str
+  -_full_name: str
+  -_role: Role
+  -_password_hash: str
+  -_password_salt: str
+  -_is_active: bool
+  +deactivate()
+}
+class VehicleType {
+  -_name: str
+  -_vehicle_class: VehicleClass
+  -_stages_count: int
+}
+class LaunchPad {
+  -_code: str
+  -_max_concurrent: int
+  -_cycle_limit: int
+  -_hours_limit: float
+  -_is_faulty: bool
+  +state(usage: PadUsage): PadState
+  +ensure_can_accept(usage)
+  +ensure_operational(usage)
+  +mark_faulty(flag)
+}
+class PadUsage <<value>> {
+  +cycles_since_maintenance: int
+  +hours_since_maintenance: float
+  +has_open_maintenance: bool
+  +active_preparations: int
+}
+class Launch {
+  -_vehicle_type_id: int
+  -_pad_id: int
+  -_payload: str
+  -_target_orbit: str
+  -_status: LaunchStatus
+  -_pad_hours: float
+  -_cancel_reason: str
+  +next_status(): LaunchStatus
+  +advance(): LaunchStatus
+  +complete(success, pad_hours, moment)
+  +postpone(window, reason, ...): Postponement
+  +cancel(reason)
+}
+class LaunchWindow <<value>> {
+  +start: datetime
+  +end: datetime
+  +contains(moment): bool
+}
+class FuelBatch {
+  -_batch_no: str
+  -_component: FuelComponent
+  -_initial_volume: float
+  -_expires_on: date
+  +is_expired(on): bool
+  +remaining(used): float
+  +ensure_can_withdraw(volume, used, on, component)
+}
+class FuelConsumption <<record>> {
+  +launch_id, batch_id
+  +volume: float
+  +consumed_at: datetime
+}
+class TelemetryChannel {
+  -_channel_no: str
+  -_vehicle_system: str
+  -_frequency_hz: float
+}
+
+abstract class JournalRecord {
+  -_launch_id: int
+  -_recorded_at: datetime
+  +{abstract} summary(): str
+}
+class Incident {
+  -_channel_id: int?
+  -_description: str
+  -_measures: str
+  +summary(): str
+}
+class Postponement {
+  -_reason: PostponeReason
+  -_old_window: LaunchWindow
+  -_new_window: LaunchWindow
+  +summary(): str
+}
+
+abstract class PreparationStage {
+  +status: LaunchStatus
+  +permission: Permission
+  +{abstract} check_completion(ctx: StageContext)
+}
+class PlanningStage
+class AssemblyStage
+class TransportStage
+class FuelingStage
+class PrelaunchCheckStage
+class StageContext {
+  +launch, pad, pad_usage, now
+  +fuel_loaded: dict
+  +last_weather: WeatherObservation
+  +weather_limits: WeatherLimits
+}
+class WeatherObservation {
+  -_ground_wind, _altitude_wind: float
+  -_temperature, _cloud_base: float
+  -_thunderstorm: bool
+}
+class WeatherLimits <<value>> {
+  +max_ground_wind = 15
+  +max_altitude_wind = 30
+  +min/max_temperature = -35/40
+  +min_cloud_base = 300
+  +violations(obs): list[str]
+}
+
+abstract class Report {
+  +key, title
+  +{abstract} build(period): ReportTable
+}
+class LaunchesByVehicleReport
+class FuelUsageReport
+class PadLoadReport
+class IncidentsReport
+class Period <<value>> {
+  +date_from, date_to
+  +days: int
+}
+
+Entity <|-- Staff
+Entity <|-- VehicleType
+Entity <|-- LaunchPad
+Entity <|-- Launch
+Entity <|-- FuelBatch
+Entity <|-- TelemetryChannel
+
+Launch *-- "1" LaunchWindow : окно
+Launch "0..*" --> "1" VehicleType
+Launch "0..*" --> "1" LaunchPad : назначен на
+Launch "0..*" --> "1" Staff : зарегистрировал
+LaunchPad ..> PadUsage : state()
+FuelConsumption "0..*" --> "1" Launch
+FuelConsumption "0..*" --> "1" FuelBatch
+
+JournalRecord <|-- Incident
+JournalRecord <|-- Postponement
+Incident "0..*" --> "0..1" TelemetryChannel
+Postponement *-- "2" LaunchWindow
+Launch ..> Postponement : создаёт
+
+PreparationStage <|-- PlanningStage
+PreparationStage <|-- AssemblyStage
+PreparationStage <|-- TransportStage
+PreparationStage <|-- FuelingStage
+PreparationStage <|-- PrelaunchCheckStage
+PreparationStage ..> StageContext
+StageContext o-- Launch
+StageContext o-- LaunchPad
+StageContext o-- WeatherObservation
+StageContext o-- WeatherLimits
+WeatherObservation "0..*" --> "1" Launch
+
+Report <|-- LaunchesByVehicleReport
+Report <|-- FuelUsageReport
+Report <|-- PadLoadReport
+Report <|-- IncidentsReport
+Report ..> Period
+@enduml

@@ -15,18 +15,18 @@ database ":FuelRepository" as FR <<Model/DAO>>
 participant ":CsvExporter" as X <<View>>
 
 U -> V : «Отчёты» → «Расход топлива по партиям»
-V -> C : on_report(kind="fuel")
-C -> V : ask_period()
+V -> C : run(); choose() → "fuel"
+C -> V : ask_date() ×2
 U -> V : с 01.09.2026 по 30.09.2026
-V --> C : Period(date_from, date_to)
-C -> S : build(session, "fuel", period)
+V --> C : date_from, date_to
+C -> S : build(session, "fuel",\nPeriod(date_from, date_to))
 activate S
 S -> S : session.require(VIEW_REPORTS)
-S -> S : period.validate() (с ≤ по)
-S -> R ** : REPORTS["fuel"](repositories)
+note right of S : Period.__post_init__:\nначало ≤ конец, ≤ 10 лет
+S -> R ** : REPORTS["fuel"](repos, now)
 S -> R : build(period)
 activate R
-R -> FR : batch_usage(period)\n(SELECT … SUM(volume) … GROUP BY batch)
+R -> FR : batch_usage(start, end)\n(SELECT … SUM(volume) … GROUP BY batch,\nпараметры через «?»)
 FR --> R : строки
 R -> R : вычисление остатка и % использования\n(остаток не хранится — вычисляется)
 R --> S : ReportTable(title, columns, rows, totals)
@@ -37,8 +37,8 @@ C -> V : show_table(report)
 V -> U : таблица в консоли
 opt экспорт
   U -> V : «Сохранить в CSV»
-  V -> C : on_export()
-  C -> X : export(report, path)
+  V --> C : confirm() = да
+  C -> X : export(report)
   X --> C : путь к файлу
   C -> V : show_message("Сохранено: …")
 end

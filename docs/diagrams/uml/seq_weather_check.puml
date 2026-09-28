@@ -13,16 +13,18 @@ participant ":WeatherService" as S <<Model>>
 participant ":WeatherLimits" as Lim <<Model>>
 entity "obs:WeatherObservation" as O <<Model>>
 entity "launch:Launch" as L <<Model>>
+participant ":LaunchService" as LS <<Model>>
+database ":WeatherRepository" as WR <<Model/DAO>>
 database ":LaunchRepository" as LR <<Model/DAO>>
 database ":JournalRepository" as JR <<Model/DAO>>
 
 U -> V : выбрать «Ввести метеоданные»
-V -> C : on_weather()
-C -> V : ask_weather_form()
+V -> C : record()
+C -> V : pick_launch(); ask_float() ×4;\nconfirm("гроза?")
 U -> V : № пуска, ветер у земли / на высотах,\nt°, нижняя граница облачности, гроза
-V --> C : WeatherForm
+V --> C : значения полей
 
-C -> S : record_observation(session, form)
+C -> S : record_observation(session, launch_id,\nground, altitude, t°, cloud, storm)
 activate S
 S -> S : session.require(RECORD_WEATHER)
 S -> O ** : WeatherObservation(...)
@@ -31,24 +33,29 @@ S -> LR : get(launch_id)
 LR --> S : launch
 S -> Lim : violations(obs)
 Lim --> S : список нарушений
-S -> LR : add_weather(obs)
+S -> WR : add(obs)
 
+deactivate S
 alt нарушений нет
   S --> C : WeatherDecision(allowed=True)
   C -> V : show_message("Метеоусловия в норме,\nдопуск к пуску разрешён")
 else есть нарушения
   S --> C : WeatherDecision(allowed=False, reasons)
-  C -> V : ask_new_window(reasons)
+  C -> V : show_error(reasons);\nconfirm("перенести?"); ask_datetime() ×2
   U -> V : новое стартовое окно
   V --> C : (start, end)
-  C -> S : postpone(session, launch_id, WEATHER, start, end, reasons)
-  S -> L : postpone(start, end)
+  C -> LS : postpone(session, launch_id, WEATHER,\nstart, end, reasons)
+  activate LS
+  LS -> LS : session.require(POSTPONE_LAUNCH)
+  LS -> LR : get(launch_id)
+  LR --> LS : launch
+  LS -> L : postpone(window, reason, ...)
   L -> L : проверка: статус не финальный,\nновое окно позже старого
-  L --> S : Postponement
-  S -> LR : update(launch)
-  S -> JR : add_postponement(postponement)
-  S --> C : postponement
+  L --> LS : Postponement
+  LS -> LR : update(launch)
+  LS -> JR : add_postponement(postponement)
+  LS --> C : postponement
+  deactivate LS
   C -> V : show_message("Пуск перенесён: " + причины)
 end
-deactivate S
 @enduml
