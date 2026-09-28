@@ -20,6 +20,7 @@ View ничего не знает о Model: Controller передаёт ему �
 | Интерфейс | Где определён | Кто использует | Назначение |
 |---|---|---|---|
 | `View` (ABC) | `lcc/view/base.py` | все контроллеры | `show_*`, `ask_*`, `choose`, `confirm`; реализации: `ConsoleView`, тестовый `ScriptedView` |
+| JSON API `/api/*` | `lcc/controller/web.py` (`WebApi`) | веб-представление на Vue (`lcc/view/web/`) | второе представление: HTTP-запрос → те же сервисы Model → JSON; ошибки `DomainError` → коды 400/401/403/404 |
 | `Services` (фасад) | `lcc/model/services.py` | все контроллеры | единая точка входа в сценарии Model (`auth`, `launches`, `fuel`, `weather`, `telemetry`, `pads`, `reference`, `staff`, `reports`) |
 | `Session` | `lcc/model/security.py` | сервисы Model | передаётся в каждый метод сервиса; `require(Permission)` проверяет права |
 | `DomainError` и наследники | `lcc/model/errors.py` | `BaseController.safe()` | Model сообщает об ошибке исключением; Controller не подавляет её, а показывает текст через `View.show_error` |

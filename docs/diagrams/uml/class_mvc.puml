@@ -33,6 +33,11 @@ package "View  (lcc.view)" as V #E3F2FD {
     -_safe_cell(value): str
   }
   ConsoleView ..|> View
+  class "index.html + app.js" as WebUI <<Vue 3>> {
+    +login() / reload()
+    +post(url, body)
+    +openCard(id) / buildReport()
+  }
 }
 
 package "Controller  (lcc.controller)" as C #FFF8E1 {
@@ -90,6 +95,13 @@ package "Controller  (lcc.controller)" as C #FFF8E1 {
   ReportController --|> BaseController
   AppController *-- "1..*" MenuItem
   AppController ..> BaseController : создаёт
+  class WebApi {
+    -_sessions: dict[token, Session]
+    +handle(method, url, headers, body): Response
+    +login() / launches() / register()
+    +advance() / refuel() / weather()
+    +report() / report_csv()
+  }
 }
 
 package "Model  (lcc.model)" as M #E8F5E9 {
@@ -148,6 +160,10 @@ BaseController --> Session
 AppController --> View
 AppController --> Services
 ReportController --> CsvExporter
+WebUI ..> WebApi : HTTP / JSON
+WebApi --> Services
+WebApi --> Session
+WebApi ..> CsvExporter : to_text()
 CsvExporter ..> ReportTable : читает
 
 note bottom of M
