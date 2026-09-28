@@ -1,0 +1,24 @@
+digraph dfd_context {
+ graph [rankdir=LR fontname="Arial" nodesep=0.5 ranksep=1.0 splines=true overlap=false pad=0.3 bgcolor=white];
+ node [fontname="Arial" fontsize=11];
+ edge [fontname="Arial" fontsize=9 arrowsize=0.7];
+ HEAD [shape=plain label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" BGCOLOR="#EDEDED"><TR><TD BORDER="3" SIDES="LT" WIDTH="150">Руководитель центра</TD></TR></TABLE>>];
+ ENG [shape=plain label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" BGCOLOR="#EDEDED"><TR><TD BORDER="3" SIDES="LT" WIDTH="150">Инженер ТК</TD></TR></TABLE>>];
+ FUEL [shape=plain label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" BGCOLOR="#EDEDED"><TR><TD BORDER="3" SIDES="LT" WIDTH="150">Инженер по заправке</TD></TR></TABLE>>];
+ MET [shape=plain label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" BGCOLOR="#EDEDED"><TR><TD BORDER="3" SIDES="LT" WIDTH="150">Метеоролог</TD></TR></TABLE>>];
+ TM [shape=plain label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" BGCOLOR="#EDEDED"><TR><TD BORDER="3" SIDES="LT" WIDTH="150">Оператор телеметрии</TD></TR></TABLE>>];
+ SUP [shape=plain label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" BGCOLOR="#EDEDED"><TR><TD BORDER="3" SIDES="LT" WIDTH="150">Поставщик топлива</TD></TR></TABLE>>];
+ RN [shape=plain label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="10" BGCOLOR="#EDEDED"><TR><TD BORDER="3" SIDES="LT" WIDTH="150">Бортовые системы РН<br/>(телеметрия)</TD></TR></TABLE>>];
+ P0 [shape=plain label=<<TABLE BORDER="1.5" STYLE="ROUNDED" CELLBORDER="0" CELLSPACING="0" CELLPADDING="6" BGCOLOR="white"><TR><TD BORDER="1" SIDES="B" ALIGN="LEFT"><B>0</B></TD></TR><TR><TD WIDTH="140" HEIGHT="50">АИС «Центр управления<br/>космическими пусками»</TD></TR></TABLE>>];
+ HEAD -> P0 [label="заявка на пуск,\nрезультат пуска,\nзапрос отчёта"];
+ P0 -> HEAD [label="расписание пусков,\nотчёты"];
+ ENG -> P0 [label="отметки этапов,\nакты ТО площадок"];
+ SUP -> FUEL [label="накладная\nна партию" style=dashed];
+ FUEL -> P0 [label="данные партии,\nрасход при заправке"];
+ P0 -> FUEL [label="остатки и сроки\nгодности партий"];
+ MET -> P0 [label="метеонаблюдения"];
+ P0 -> MET [label="решение: допуск /\nперенос"];
+ RN -> TM [label="сигналы ТМ-каналов" style=dashed];
+ TM -> P0 [label="потеря сигнала,\nпринятые меры"];
+ P0 -> TM [label="список каналов"];
+}
