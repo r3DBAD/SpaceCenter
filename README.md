@@ -145,6 +145,8 @@ python -m unittest discover -s tests   # тесты (модель, сервис�
 | 3 | DFD (Гейн–Сарсон): контекст и уровень 1 | [docs/03_dfd.md](docs/03_dfd.md) |
 | 4 | IDEF1X — модель данных | [docs/04_idef1x.md](docs/04_idef1x.md) |
 | 5 | Архитектура MVC, диаграммы классов, статусная модель | [docs/05_architecture.md](docs/05_architecture.md) |
+| 6 | Аудит собственного кода | [docs/06_audit.md](docs/06_audit.md) |
+| — | Документация кода (pdoc, HTML) | [docs/api/index.html](docs/api/index.html) — генерация: `tools/gen_docs.sh` |
 
 ## 4. Архитектура (MVC)
 

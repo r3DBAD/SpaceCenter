@@ -27,7 +27,8 @@ ENTITIES = [
                        ("pad_id", "INTEGER", "FK"), ("created_by", "INTEGER", "FK"),
                        ("payload", "TEXT", ""), ("target_orbit", "TEXT", ""),
                        ("window_start", "TEXT", ""), ("window_end", "TEXT", ""),
-                       ("status", "TEXT", ""), ("pad_hours", "REAL", "")]),
+                       ("status", "TEXT", ""), ("pad_hours", "REAL", ""),
+                       ("cancel_reason", "TEXT", "")]),
     ("STAGE_LOG", True, [("launch_id", "INTEGER", "PK,FK"), ("seq_no", "INTEGER", "PK"),
                          ("status", "TEXT", ""), ("changed_at", "TEXT", ""), ("staff_id", "INTEGER", "FK")]),
     ("PAD_MAINTENANCE", True, [("pad_id", "INTEGER", "PK,FK"), ("maint_no", "INTEGER", "PK"),
@@ -53,7 +54,7 @@ ENTITIES = [
     ("POSTPONEMENT", True, [("launch_id", "INTEGER", "PK,FK"), ("postpone_no", "INTEGER", "PK"),
                             ("reason", "TEXT", ""), ("old_start", "TEXT", ""), ("old_end", "TEXT", ""),
                             ("new_start", "TEXT", ""), ("new_end", "TEXT", ""), ("comment", "TEXT", ""),
-                            ("staff_id", "INTEGER", "FK")]),
+                            ("recorded_at", "TEXT", ""), ("staff_id", "INTEGER", "FK")]),
 ]
 
 # (родитель, потомок, идентифицирующая?, глагольная фраза, мощность, необязательная?)

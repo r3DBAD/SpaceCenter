@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Callable
 
 from .entities import (FuelBatch, FuelConsumption, Launch, LaunchPad, LaunchWindow, PadUsage, Staff,
@@ -46,20 +46,25 @@ class AuthService(Service):
     """Вход в систему с блокировкой после серии неудачных попыток."""
 
     MAX_FAILED = 5
+    LOCK_TIME = timedelta(minutes=15)
 
     def __init__(self, repos: Repositories, clock: Clock = _now_default):
         super().__init__(repos, clock)
-        self._failed: dict[str, int] = {}
+        self._failed: dict[str, tuple[int, datetime]] = {}     # логин → (число ошибок, время последней)
 
     def login(self, login: str, password: str) -> Session:
         key = (login or "").strip().lower()
-        if self._failed.get(key, 0) >= self.MAX_FAILED:
-            raise AuthenticationError("Учётная запись временно заблокирована: слишком много неудачных попыток")
+        count, last = self._failed.get(key, (0, self._now()))
+        if count >= self.MAX_FAILED:
+            if self._now() - last < self.LOCK_TIME:
+                raise AuthenticationError("Учётная запись временно заблокирована на 15 минут: "
+                                          "слишком много неудачных попыток")
+            count = 0                                          # блокировка истекла
         staff = self._repos.staff.find_by_login(key) if key else None
         # одинаковое сообщение для «нет логина» и «неверный пароль» — не раскрываем существование логина
         if staff is None or not staff.is_active or not PasswordHasher.verify(password or "", staff.password_hash,
                                                                            staff.password_salt):
-            self._failed[key] = self._failed.get(key, 0) + 1
+            self._failed[key] = (count + 1, self._now())
             raise AuthenticationError("Неверный логин или пароль")
         self._failed.pop(key, None)
         return Session(staff)
@@ -83,7 +88,7 @@ class StaffService(Service):
 
     def list_staff(self, session: Session) -> list[Staff]:
         session.require(Permission.MANAGE_STAFF)
-        return self._repos.staff.list()
+        return self._repos.staff.list_all()
 
     def deactivate(self, session: Session, staff_id: int) -> None:
         session.require(Permission.MANAGE_STAFF)
@@ -105,7 +110,7 @@ class ReferenceService(Service):
 
     def list_vehicle_types(self, session: Session) -> list[VehicleType]:
         session.require(Permission.VIEW_SCHEDULE)
-        return self._repos.vehicle_types.list()
+        return self._repos.vehicle_types.list_all()
 
     def add_pad(self, session: Session, code: str, name: str, max_concurrent: int, cycle_limit: int,
                 hours_limit: float) -> LaunchPad:
@@ -114,7 +119,7 @@ class ReferenceService(Service):
 
     def list_pads(self, session: Session) -> list[tuple[LaunchPad, PadUsage]]:
         session.require(Permission.VIEW_SCHEDULE)
-        return [(p, self._repos.pads.usage(p.id)) for p in self._repos.pads.list()]
+        return [(p, self._repos.pads.usage(p.id)) for p in self._repos.pads.list_all()]
 
     def add_channel(self, session: Session, channel_no: str, vehicle_system: str, parameter: str,
                     frequency_hz: float) -> TelemetryChannel:
@@ -201,7 +206,7 @@ class LaunchService(Service):
 
     def list_launches(self, session: Session, statuses: tuple[LaunchStatus, ...] | None = None) -> list[Launch]:
         session.require(Permission.VIEW_SCHEDULE)
-        return self._repos.launches.list(statuses)
+        return self._repos.launches.list_all(statuses)
 
     def launch_card(self, session: Session, launch_id: int) -> LaunchCard:
         session.require(Permission.VIEW_SCHEDULE)
@@ -297,6 +302,8 @@ class FuelService(Service):
             if launch.status is not LaunchStatus.FUELING:
                 raise BusinessRuleError(f"Заправка возможна только на этапе «Заправка» "
                                         f"(текущий статус — «{launch.status.title}»)")
+            pad = self._repos.pads.get(launch.pad_id)
+            pad.ensure_operational(self._repos.pads.usage(pad.id))
             batch = self._repos.fuel.get_batch(batch_id)
             used = self._repos.fuel.used_volume(batch_id)
             volume = batch.ensure_can_withdraw(volume, used, self._now().date(), batch.component)

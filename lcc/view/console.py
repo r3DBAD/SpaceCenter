@@ -70,8 +70,10 @@ class ConsoleView(View):
                 return answer
             self._print("  Нет такого пункта, повторите ввод")
 
-    def _ask(self, label: str, parse, default=None, hint: str = ""):
-        suffix = f" [{default}]" if default not in (None, "") else ""
+    def _ask(self, label: str, parse, default=None, hint: str = "", shown_default: str | None = None):
+        """Спрашивать, пока строка не разберётся; пустой ввод — значение по умолчанию."""
+        shown = shown_default if shown_default is not None else default
+        suffix = f" [{shown}]" if shown not in (None, "") else ""
         while True:
             raw = self._input(f"{label}{hint}{suffix}: ").strip()
             if not raw and default is not None:
@@ -94,14 +96,12 @@ class ConsoleView(View):
         return self._ask(label, lambda s: float(s.replace(",", ".")), default)
 
     def ask_date(self, label: str, default: date | None = None) -> date:
-        value = self._ask(label, lambda s: datetime.strptime(s, DATE_FMT).date(),
-                          default.strftime(DATE_FMT) if default else None, " (ДД.ММ.ГГГГ)")
-        return datetime.strptime(value, DATE_FMT).date() if isinstance(value, str) else value
+        return self._ask(label, lambda s: datetime.strptime(s, DATE_FMT).date(), default, " (ДД.ММ.ГГГГ)",
+                         default.strftime(DATE_FMT) if default else None)
 
     def ask_datetime(self, label: str, default: datetime | None = None) -> datetime:
-        value = self._ask(label, lambda s: datetime.strptime(s, DT_FMT),
-                          default.strftime(DT_FMT) if default else None, " (ДД.ММ.ГГГГ ЧЧ:ММ)")
-        return datetime.strptime(value, DT_FMT) if isinstance(value, str) else value
+        return self._ask(label, lambda s: datetime.strptime(s, DT_FMT), default, " (ДД.ММ.ГГГГ ЧЧ:ММ)",
+                         default.strftime(DT_FMT) if default else None)
 
     def confirm(self, question: str) -> bool:
         return self._ask(question, self._yes_no, hint=" (д/н)")

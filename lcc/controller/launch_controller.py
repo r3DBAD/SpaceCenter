@@ -45,16 +45,15 @@ class LaunchController(BaseController):
     def register(self) -> None:
         self.view.show_title("Регистрация пуска")
         vts = self.safe(lambda: self.services.reference.list_vehicle_types(self.session))
-        pads = self.safe(lambda: self.services.reference.list_pads(self.session))
-        if not vts or not pads:
-            self.view.show_error("Сначала заведите типы РН и стартовые площадки")
+        if not vts:
+            self.view.show_error("Сначала заведите типы РН")
             return
         self.view.show_table("Типы РН", ["№", "Наименование", "Класс"],
                              [[v.id, v.name, v.vehicle_class.title] for v in vts])
         vt_id = self.view.ask_int("Тип РН (№)")
-        self.view.show_table("Стартовые площадки", ["№", "Код", "Наименование", "Подготовок", "Состояние"],
-                             [[p.id, p.code, p.name, f"{u.active_preparations}/{p.max_concurrent}", p.state(u).title]
-                              for p, u in pads])
+        if not self.show_pads():
+            self.view.show_error("Сначала заведите стартовые площадки")
+            return
         pad_id = self.view.ask_int("Площадка (№)")
         payload = self.view.ask_text("Полезная нагрузка")
         orbit = self.view.ask_text("Целевая орбита")

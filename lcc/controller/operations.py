@@ -98,8 +98,11 @@ class TelemetryController(BaseController):
         if launch_id is None:
             return
         self.list_channels()
-        raw = self.view.ask_text("Канал (№, пусто — не определён)", "")
-        channel_id = int(raw) if raw.strip().isdigit() else None
+        raw = self.view.ask_text("Канал (№, пусто — не определён)", "").strip()
+        if raw and not raw.isdigit():
+            self.view.show_error("Номер канала должен быть целым числом (или оставьте поле пустым)")
+            return
+        channel_id = int(raw) if raw else None
         description = self.view.ask_text("Описание (что произошло)", "Потеря сигнала")
         measures = self.view.ask_text("Принятые меры")
         incident = self.safe(lambda: self.services.telemetry.register_incident(

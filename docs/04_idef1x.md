@@ -88,6 +88,7 @@ erDiagram
         text window_end
         text status
         real pad_hours
+        text cancel_reason
     }
     FUEL_BATCH {
         int batch_id PK

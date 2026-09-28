@@ -11,14 +11,8 @@ from .base import BaseController
 
 class PadController(BaseController):
     def list_pads(self) -> None:
-        pads = self.safe(lambda: self.services.reference.list_pads(self.session))
-        if pads is None:
-            return
-        self.view.show_table("Стартовые площадки", ["№", "Код", "Наименование", "Подготовок", "Циклов с ТО",
-                                                    "Моточасов с ТО", "Состояние"],
-                             [[p.id, p.code, p.name, f"{u.active_preparations}/{p.max_concurrent}",
-                               f"{u.cycles_since_maintenance}/{p.cycle_limit}",
-                               f"{u.hours_since_maintenance:g}/{p.hours_limit:g}", p.state(u).title] for p, u in pads])
+        if not self.show_pads():
+            self.view.show_message("Стартовые площадки не заведены")
 
     def add_pad(self) -> None:
         code = self.view.ask_text("Код площадки")

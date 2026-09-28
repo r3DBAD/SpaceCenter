@@ -33,6 +33,18 @@ class BaseController:
         return [[l.id, vt.get(l.vehicle_type_id, "?"), l.payload, l.target_orbit, pads.get(l.pad_id, "?"),
                  f"{l.window.start:{DT}} – {l.window.end:%H:%M}", l.status.title] for l in launches]
 
+    def show_pads(self) -> bool:
+        """Таблица площадок с вычисляемыми показателями; False — если показать нечего."""
+        pads = self.safe(lambda: self.services.reference.list_pads(self.session))
+        if not pads:
+            return False
+        self.view.show_table("Стартовые площадки", ["№", "Код", "Наименование", "Подготовок", "Циклов с ТО",
+                                                    "Моточасов с ТО", "Состояние"],
+                             [[p.id, p.code, p.name, f"{u.active_preparations}/{p.max_concurrent}",
+                               f"{u.cycles_since_maintenance}/{p.cycle_limit}",
+                               f"{u.hours_since_maintenance:g}/{p.hours_limit:g}", p.state(u).title] for p, u in pads])
+        return True
+
     def pick_launch(self, statuses: tuple[LaunchStatus, ...] | None = None, title: str = "Пуски") -> int | None:
         launches = self.services.launches.list_launches(self.session, statuses)
         if not launches:

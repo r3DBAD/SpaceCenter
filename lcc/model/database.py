@@ -1,6 +1,7 @@
 """Подключение к SQLite и управление транзакциями."""
 from __future__ import annotations
 
+import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import date, datetime
@@ -36,7 +37,10 @@ class Database:
     """
 
     def __init__(self, path: str | Path = ":memory:"):
+        is_new_file = str(path) != ":memory:" and not Path(path).exists()
         self._conn = sqlite3.connect(str(path))
+        if is_new_file and os.name == "posix":
+            os.chmod(path, 0o600)          # БД содержит ФИО и хеши паролей — только владельцу
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA foreign_keys = ON")
         self._in_tx = False

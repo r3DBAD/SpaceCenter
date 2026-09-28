@@ -8,12 +8,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from typing import TYPE_CHECKING
 
 from .enums import (FINAL_STATUSES, PREPARATION_ORDER, FuelComponent, LaunchStatus, MaintenanceKind, PadState,
                     PostponeReason, Role, VehicleClass)
 from .errors import BusinessRuleError, ValidationError
 from .validation import (optional_text, require_date, require_datetime, require_enum, require_int,
                          require_number, require_text)
+
+if TYPE_CHECKING:                       # только для аннотаций: journal импортирует entities
+    from .journal import Postponement
 
 
 class Entity:
@@ -224,6 +228,8 @@ class Launch(Entity):
         moment = require_datetime(moment, "Время пуска")
         if moment < self._window.start:
             raise BusinessRuleError("Стартовое окно ещё не открыто")
+        if moment > self._window.end:
+            raise BusinessRuleError("Стартовое окно закрыто — перенесите пуск на новое окно")
         self._pad_hours = require_number(pad_hours, "Наработка площадки, моточасы", min_value=0, max_value=1000)
         self._status = LaunchStatus.LAUNCHED if success else LaunchStatus.FAILED
         return self._status

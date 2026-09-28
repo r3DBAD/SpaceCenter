@@ -180,3 +180,58 @@ class ReportsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AuditFixesTest(unittest.TestCase):
+    """Регрессионные тесты к исправлениям из docs/06_audit.md."""
+
+    def setUp(self):
+        self.w = World()
+
+    def test_lockout_expires(self):                         # №5
+        for _ in range(5):
+            with self.assertRaises(AuthenticationError):
+                self.w.s.auth.login("eng", "wrong")
+        with self.assertRaises(AuthenticationError):
+            self.w.s.auth.login("eng", PWD)
+        self.w.clock.advance(minutes=16)
+        self.assertEqual(self.w.s.auth.login("eng", PWD).staff.login, "eng")
+
+    def test_result_after_window_rejected(self):            # №3
+        w = self.w
+        l = w.new_launch(days_ahead=1)
+        w.to_ready(l)
+        w.clock.now = l.window.end + timedelta(minutes=1)
+        with self.assertRaises(BusinessRuleError):
+            w.s.launches.record_result(w.head, l.id, True, 5)
+
+    def test_refuel_on_faulty_pad_rejected(self):           # №4
+        w = self.w
+        l = w.new_launch()
+        w.to_fueling(l)
+        w.s.pads.mark_faulty(w.eng, w.pad.id)
+        with self.assertRaises(BusinessRuleError):
+            w.s.fuel.refuel(w.fuel, l.id, w.kero.id, 10)
+
+    def test_sequence_whitelist(self):                      # №2
+        with self.assertRaises(ValueError):
+            w = self.w
+            w.repos.launches._next_no(("staff; DROP TABLE staff", "x", "y"), 1)
+
+    def test_db_file_permissions(self):                     # №6
+        import os
+        import stat
+        import tempfile
+        from lcc.model import Database
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "t.db")
+            Database(path).close()
+            self.assertEqual(stat.S_IMODE(os.stat(path).st_mode), 0o600)
+
+    def test_postponements_by_vehicle(self):                # №7
+        w = self.w
+        l = w.new_launch()
+        w.s.launches.postpone(w.head, l.id, PostponeReason.TECHNICAL, l.window.start + timedelta(days=1),
+                              l.window.end + timedelta(days=1), "замена агрегата")
+        r = w.s.reports.build(w.head, "launches", Period(date(2026, 9, 1), date(2026, 9, 30)))
+        self.assertEqual(r.rows[0][-1], 1)

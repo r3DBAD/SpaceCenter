@@ -83,9 +83,7 @@ class LaunchesByVehicleReport(Report):
         per_type: dict[tuple[str, str], Counter] = defaultdict(Counter)
         for r in self._repos.launches.stats_by_vehicle(period.start, period.end):
             per_type[(r["name"], r["vehicle_class"])][LaunchStatus(r["status"])] += r["n"]
-        postponed = Counter()
-        for p in self._repos.journal.postponements(date_from=period.start, date_to=period.end):
-            postponed[self._repos.vehicle_types.get(self._repos.launches.get(p.launch_id).vehicle_type_id).name] += 1
+        postponed = Counter(self._repos.journal.postponements_by_vehicle(period.start, period.end))
         table = ReportTable(self.title, period, ["Тип РН", "Класс", "Всего", "Выполнено", "Авария",
                                                  "Отменено", "В подготовке", "Переносов"])
         total = Counter()
@@ -137,7 +135,7 @@ class PadLoadReport(Report):
         table = ReportTable(self.title, period, ["Площадка", "Лимит подготовок", "Подготовок за период",
                                                  "Пусков за период", "Занятость, сут", "Загрузка, %",
                                                  "Циклов до ТО", "Моточасов до ТО", "Состояние"])
-        for pad in self._repos.pads.list():
+        for pad in self._repos.pads.list_all():
             usage = self._repos.pads.usage(pad.id)
             prepared = launched = 0
             busy = timedelta()

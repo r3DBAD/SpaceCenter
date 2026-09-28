@@ -25,10 +25,16 @@ class Repository:
     def __init__(self, db: Database):
         self._db = db
 
+    #: Допустимые (таблица, колонка номера, колонка родителя) для составных ключей зависимых сущностей.
+    _SEQ_KEYS = frozenset({("pad_maintenance", "maint_no", "pad_id"), ("stage_log", "seq_no", "launch_id"),
+                           ("weather_observation", "obs_no", "launch_id"),
+                           ("postponement", "postpone_no", "launch_id")})
+
     def _next_no(self, table_col: tuple[str, str, str], parent_id: int) -> int:
         """Следующий порядковый номер зависимой сущности (часть составного PK)."""
+        if table_col not in self._SEQ_KEYS:        # имена нельзя передать параметром «?» — только белый список
+            raise ValueError(f"Недопустимый ключ последовательности: {table_col}")
         table, col, parent_col = table_col
-        # имена таблиц/колонок — константы кода, не пользовательский ввод
         value = self._db.scalar(f"SELECT COALESCE(MAX({col}), 0) + 1 FROM {table} WHERE {parent_col} = ?",
                                 (parent_id,))
         return int(value)
@@ -59,7 +65,7 @@ class StaffRepository(Repository):
             raise NotFoundError(f"Сотрудник №{staff_id} не найден")
         return self._row(row)
 
-    def list(self) -> list[Staff]:
+    def list_all(self) -> list[Staff]:
         return [self._row(r) for r in self._db.query("SELECT * FROM staff ORDER BY staff_id")]
 
     def count(self) -> int:
@@ -87,7 +93,7 @@ class VehicleTypeRepository(Repository):
             raise NotFoundError(f"Тип РН №{vehicle_type_id} не найден")
         return self._row(row)
 
-    def list(self) -> list[VehicleType]:
+    def list_all(self) -> list[VehicleType]:
         return [self._row(r) for r in self._db.query("SELECT * FROM vehicle_type ORDER BY name")]
 
     @staticmethod
@@ -116,7 +122,7 @@ class LaunchPadRepository(Repository):
             raise NotFoundError(f"Площадка №{pad_id} не найдена")
         return self._row(row)
 
-    def list(self) -> list[LaunchPad]:
+    def list_all(self) -> list[LaunchPad]:
         return [self._row(r) for r in self._db.query("SELECT * FROM launch_pad ORDER BY code")]
 
     def usage(self, pad_id: int) -> PadUsage:
@@ -188,7 +194,7 @@ class LaunchRepository(Repository):
             raise NotFoundError(f"Пуск №{launch_id} не найден")
         return self._row(row)
 
-    def list(self, statuses: tuple[LaunchStatus, ...] | None = None) -> list[Launch]:
+    def list_all(self, statuses: tuple[LaunchStatus, ...] | None = None) -> list[Launch]:
         if not statuses:
             rows = self._db.query("SELECT * FROM launch ORDER BY window_start")
         else:
@@ -383,6 +389,13 @@ class JournalRepository(Repository):
                              LaunchWindow(dt_from_db(r["old_start"]), dt_from_db(r["old_end"])),
                              LaunchWindow(dt_from_db(r["new_start"]), dt_from_db(r["new_end"])),
                              r["comment"], r["staff_id"], dt_from_db(r["recorded_at"])) for r in rows]
+
+    def postponements_by_vehicle(self, date_from: datetime, date_to: datetime) -> dict[str, int]:
+        rows = self._db.query(
+            "SELECT v.name, COUNT(*) AS n FROM postponement p JOIN launch l ON l.launch_id = p.launch_id "
+            "JOIN vehicle_type v ON v.vehicle_type_id = l.vehicle_type_id "
+            "WHERE p.recorded_at BETWEEN ? AND ? GROUP BY v.name", (dt_to_db(date_from), dt_to_db(date_to)))
+        return {r["name"]: r["n"] for r in rows}
 
     def incidents_by_system(self, date_from: datetime, date_to: datetime) -> list[tuple[str, int]]:
         rows = self._db.query(
