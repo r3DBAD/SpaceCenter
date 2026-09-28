@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ЦУП — космические пуски</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app" v-cloak>
+
+  <!-- ============ Вход ============ -->
+  <main v-if="!me" class="login">
+    <form class="card" @submit.prevent="login">
+      <h1>АИС «Центр управления космическими пусками»</h1>
+      <label>Логин <input v-model="auth.login" autocomplete="username" autofocus></label>
+      <label>Пароль <input v-model="auth.password" type="password" autocomplete="current-password"></label>
+      <button class="primary">Войти</button>
+      <p class="hint">Демо: head, engineer, fuel, meteo, telemetry — пароль demo2026</p>
+    </form>
+  </main>
+
+  <template v-else>
+    <header>
+      <b>🚀 ЦУП</b>
+      <nav>
+        <button v-for="t in tabs" :key="t.id" :class="{active: tab === t.id}" @click="tab = t.id">{{ t.title }}</button>
+      </nav>
+      <span class="user">{{ me.full_name }} · {{ me.role_title }}</span>
+      <button @click="logout">Выйти</button>
+    </header>
+
+    <main>
+      <!-- ============ Пуски ============ -->
+      <section v-if="tab === 'launches'" class="split">
+        <div>
+          <h2>Расписание и статусы пусков</h2>
+          <table>
+            <thead><tr><th>№</th><th>Тип РН</th><th>Полезная нагрузка</th><th>Орбита</th><th>Площадка</th><th>Окно</th><th>Статус</th></tr></thead>
+            <tbody>
+              <tr v-for="l in launches" :key="l.id" @click="openCard(l.id)" :class="{selected: card && card.id === l.id}">
+                <td>{{ l.id }}</td><td>{{ l.vehicle }}</td><td>{{ l.payload }}</td><td>{{ l.orbit }}</td>
+                <td>{{ l.pad }}</td><td>{{ l.window }}</td>
+                <td><span class="badge" :class="l.status">{{ l.status_title }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside v-if="card" class="card">
+          <h3>Пуск №{{ card.id }}: {{ card.vehicle }} / {{ card.payload }}</h3>
+          <dl>
+            <dt>Орбита</dt><dd>{{ card.orbit }}</dd>
+            <dt>Площадка</dt><dd>{{ card.pad }} — {{ card.pad_name }}</dd>
+            <dt>Окно</dt><dd>{{ card.window }}</dd>
+            <dt>Статус</dt><dd><span class="badge" :class="card.status">{{ card.status_title }}</span></dd>
+            <dt>Заправлено</dt><dd>{{ card.fuel.map(f => f.component + ': ' + f.volume + ' т').join(', ') || '—' }}</dd>
+            <dt>Метео</dt><dd>{{ card.last_weather || '—' }}</dd>
+            <dt v-if="card.cancel_reason">Отмена</dt><dd v-if="card.cancel_reason">{{ card.cancel_reason }}</dd>
+          </dl>
+
+          <div class="actions" v-if="!card.final">
+            <button v-if="card.next_stage" class="primary" @click="post(`/api/launches/${card.id}/advance`)">{{ card.next_stage }}</button>
+            <template v-if="card.status === 'ready' && can('record_result')">
+              <input type="number" v-model.number="result.pad_hours" min="0" placeholder="моточасы" class="short">
+              <button class="primary" @click="post(`/api/launches/${card.id}/result`, {success: true, pad_hours: result.pad_hours})">Пуск выполнен</button>
+              <button class="danger" @click="post(`/api/launches/${card.id}/result`, {success: false, pad_hours: result.pad_hours})">Авария</button>
+            </template>
+          </div>
+
+          <details v-if="!card.final && (can('manage_launches') || can('postpone_launch'))">
+            <summary>Перенести / отменить</summary>
+            <form @submit.prevent="post(`/api/launches/${card.id}/postpone`, postponeForm)">
+              <select v-model="postponeForm.reason">
+                <option v-for="r in ref.postpone_reasons" :value="r.value">{{ r.title }}</option>
+              </select>
+              <input type="datetime-local" v-model="postponeForm.new_start">
+              <input type="datetime-local" v-model="postponeForm.new_end">
+              <input v-model="postponeForm.comment" placeholder="комментарий">
+              <button>Перенести</button>
+            </form>
+            <form v-if="can('manage_launches')" @submit.prevent="post(`/api/launches/${card.id}/cancel`, {reason: cancelReason})">
+              <input v-model="cancelReason" placeholder="причина отмены">
+              <button class="danger">Отменить пуск</button>
+            </form>
+          </details>
+
+          <h4>Журнал этапов</h4>
+          <ol class="log"><li v-for="s in card.stage_log">{{ s.at }} — {{ s.status }} <small>({{ s.who }})</small></li></ol>
+          <template v-if="card.journal.length">
+            <h4>НС и переносы</h4>
+            <ul class="log"><li v-for="j in card.journal"><b>{{ j.category }}</b> {{ j.at }}: {{ j.text }}</li></ul>
+          </template>
+        </aside>
+      </section>
+
+      <!-- ============ Новый пуск ============ -->
+      <section v-if="tab === 'register'">
+        <h2>Регистрация пуска</h2>
+        <form class="card form" @submit.prevent="register">
+          <label>Тип РН
+            <select v-model="reg.vehicle_type_id"><option v-for="v in ref.vehicle_types" :value="v.id">{{ v.name }} ({{ v.class }})</option></select>
+          </label>
+          <label>Площадка
+            <select v-model="reg.pad_id"><option v-for="p in ref.pads" :value="p.id">{{ p.code }} — {{ p.state }}, подготовок {{ p.preparations }}</option></select>
+          </label>
+          <label>Полезная нагрузка <input v-model="reg.payload"></label>
+          <label>Целевая орбита <input v-model="reg.target_orbit"></label>
+          <label>Начало окна <input type="datetime-local" v-model="reg.window_start"></label>
+          <label>Конец окна <input type="datetime-local" v-model="reg.window_end"></label>
+          <button class="primary">Зарегистрировать</button>
+          <p class="hint">Проверки (пустые поля, окно в прошлом, лимит площадки) выполняет сервер — слой Model.</p>
+        </form>
+      </section>
+
+      <!-- ============ Топливо ============ -->
+      <section v-if="tab === 'fuel'">
+        <h2>Партии топлива</h2>
+        <table>
+          <thead><tr><th>№</th><th>Партия</th><th>Компонент</th><th>Марка</th><th>Объём, т</th><th>Остаток, т</th><th>Годна до</th></tr></thead>
+          <tbody><tr v-for="b in batches"><td>{{ b.id }}</td><td>{{ b.batch_no }}</td><td>{{ b.component }}</td><td>{{ b.grade }}</td><td>{{ b.volume }}</td><td>{{ b.remaining }}</td><td>{{ b.expires_on }}</td></tr></tbody>
+        </table>
+        <div class="row">
+          <form class="card form" @submit.prevent="refuel">
+            <h3>Заправить РН</h3>
+            <label>Пуск (этап «Заправка»)
+              <select v-model="refuelForm.launch_id"><option v-for="l in launchesIn('fueling')" :value="l.id">№{{ l.id }} {{ l.vehicle }} / {{ l.payload }}</option></select>
+            </label>
+            <label>Партия <select v-model="refuelForm.batch_id"><option v-for="b in batches" :value="b.id">{{ b.batch_no }} ({{ b.component }}, остаток {{ b.remaining }} т)</option></select></label>
+            <label>Объём, т <input type="number" step="0.1" v-model.number="refuelForm.volume"></label>
+            <button class="primary">Списать расход</button>
+          </form>
+          <form class="card form" @submit.prevent="post('/api/fuel', batchForm)">
+            <h3>Принять партию</h3>
+            <label>Номер <input v-model="batchForm.batch_no"></label>
+            <label>Компонент <select v-model="batchForm.component"><option v-for="c in ref.fuel_components" :value="c.value">{{ c.title }}</option></select></label>
+            <label>Марка <input v-model="batchForm.grade"></label>
+            <label>Объём, т <input type="number" step="0.1" v-model.number="batchForm.volume"></label>
+            <label>Изготовлена <input type="date" v-model="batchForm.produced_on"></label>
+            <label>Годна до <input type="date" v-model="batchForm.expires_on"></label>
+            <button>Принять</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ Метео ============ -->
+      <section v-if="tab === 'weather'">
+        <h2>Метеоконтроль</h2>
+        <p class="hint">Пределы: {{ ref.weather_limits }}</p>
+        <div class="row">
+          <form class="card form" @submit.prevent="weather">
+            <label>Пуск <select v-model="wx.launch_id"><option v-for="l in activeLaunches" :value="l.id">№{{ l.id }} {{ l.vehicle }} — {{ l.status_title }}</option></select></label>
+            <label>Ветер у земли, м/с <input type="number" step="0.1" v-model.number="wx.ground_wind"></label>
+            <label>Ветер на высотах, м/с <input type="number" step="0.1" v-model.number="wx.altitude_wind"></label>
+            <label>Температура, °C <input type="number" step="0.1" v-model.number="wx.temperature"></label>
+            <label>Нижняя граница облачности, м <input type="number" v-model.number="wx.cloud_base"></label>
+            <label class="check"><input type="checkbox" v-model="wx.thunderstorm"> Гроза в радиусе 10 км</label>
+            <button class="primary">Проверить и сохранить</button>
+          </form>
+          <div v-if="wxResult" class="card">
+            <h3 :class="wxResult.allowed ? 'ok' : 'bad'">{{ wxResult.allowed ? 'Допуск разрешён' : 'Пуск по метео запрещён' }}</h3>
+            <ul><li v-for="r in wxResult.reasons">{{ r }}</li></ul>
+            <form v-if="!wxResult.allowed" @submit.prevent="post(`/api/launches/${wx.launch_id}/postpone`, {...postponeForm, reason: 'weather', comment: wxResult.reasons.join('; ')})">
+              <h4>Перенести пуск</h4>
+              <input type="datetime-local" v-model="postponeForm.new_start">
+              <input type="datetime-local" v-model="postponeForm.new_end">
+              <button>Перенести</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Телеметрия ============ -->
+      <section v-if="tab === 'telemetry'">
+        <h2>Нештатные ситуации</h2>
+        <form class="card form" @submit.prevent="post(`/api/launches/${inc.launch_id}/incidents`, inc)">
+          <label>Пуск <select v-model="inc.launch_id"><option v-for="l in launches.filter(l => l.status !== 'planned' && l.status !== 'cancelled')" :value="l.id">№{{ l.id }} {{ l.vehicle }} — {{ l.status_title }}</option></select></label>
+          <label>Канал <select v-model="inc.channel_id"><option :value="null">не определён</option><option v-for="c in ref.channels" :value="c.id">{{ c.no }} — {{ c.system }}</option></select></label>
+          <label>Описание <input v-model="inc.description"></label>
+          <label>Принятые меры <input v-model="inc.measures"></label>
+          <button class="primary">Зарегистрировать НС</button>
+        </form>
+      </section>
+
+      <!-- ============ Площадки ============ -->
+      <section v-if="tab === 'pads'">
+        <h2>Стартовые площадки</h2>
+        <table>
+          <thead><tr><th>Код</th><th>Наименование</th><th>Подготовок</th><th>Циклов с ТО</th><th>Моточасов с ТО</th><th>Состояние</th></tr></thead>
+          <tbody><tr v-for="p in ref.pads"><td>{{ p.code }}</td><td>{{ p.name }}</td><td>{{ p.preparations }}</td><td>{{ p.cycles }}</td><td>{{ p.hours }}</td><td>{{ p.state }}</td></tr></tbody>
+        </table>
+      </section>
+
+      <!-- ============ Отчёты ============ -->
+      <section v-if="tab === 'reports'">
+        <h2>Отчёты</h2>
+        <form class="card inline" @submit.prevent="buildReport">
+          <select v-model="rep.key"><option v-for="r in reportList" :value="r.key">{{ r.title }}</option></select>
+          с <input type="date" v-model="rep.from"> по <input type="date" v-model="rep.to">
+          <button class="primary">Сформировать</button>
+          <button type="button" @click="downloadCsv" :disabled="!report">CSV</button>
+        </form>
+        <template v-if="report">
+          <h3>{{ report.title }} за {{ report.period }}</h3>
+          <table>
+            <thead><tr><th v-for="c in report.columns">{{ c }}</th></tr></thead>
+            <tbody><tr v-for="row in report.rows"><td v-for="v in row">{{ v }}</td></tr></tbody>
+          </table>
+          <ul class="notes"><li v-for="n in report.notes">{{ n }}</li></ul>
+        </template>
+      </section>
+    </main>
+  </template>
+
+  <div v-if="toast" class="toast" :class="toast.type" @click="toast = null">{{ toast.text }}</div>
+</div>
+<script src="/vendor/vue.global.prod.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

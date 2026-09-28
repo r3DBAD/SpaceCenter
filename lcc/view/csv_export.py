@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import io
 import re
 from datetime import datetime
 from pathlib import Path
@@ -24,19 +25,29 @@ class CsvExporter:
             return "'" + text
         return text
 
+    @classmethod
+    def file_name(cls, report) -> str:
+        name = _UNSAFE.sub("_", report.title).strip("_")[:60]      # имя файла без пути от пользователя
+        return f"{name}_{datetime.now():%Y%m%d_%H%M%S}.csv"
+
+    @classmethod
+    def to_text(cls, report) -> str:
+        """CSV-представление отчёта строкой (для веб-интерфейса — без записи на диск)."""
+        buf = io.StringIO()
+        w = csv.writer(buf, delimiter=";", lineterminator="\r\n")
+        w.writerow([report.title])
+        w.writerow([f"Период: {report.period}"])
+        w.writerow([cls._safe_cell(c) for c in report.columns])
+        for row in report.rows:
+            w.writerow([cls._safe_cell(v) for v in row])
+        for note in report.notes:
+            w.writerow([cls._safe_cell(note)])
+        return buf.getvalue()
+
     def export(self, report) -> Path:
         self._dir.mkdir(parents=True, exist_ok=True)
-        name = _UNSAFE.sub("_", report.title).strip("_")[:60]      # имя файла без пути от пользователя
-        path = self._dir / f"{name}_{datetime.now():%Y%m%d_%H%M%S}.csv"
-        with path.open("w", newline="", encoding="utf-8-sig") as f:
-            w = csv.writer(f, delimiter=";")
-            w.writerow([report.title])
-            w.writerow([f"Период: {report.period}"])
-            w.writerow([self._safe_cell(c) for c in report.columns])
-            for row in report.rows:
-                w.writerow([self._safe_cell(v) for v in row])
-            for note in report.notes:
-                w.writerow([self._safe_cell(note)])
+        path = self._dir / self.file_name(report)
+        path.write_text(self.to_text(report), encoding="utf-8-sig", newline="")
         return path
 
 
