@@ -1,0 +1,98 @@
+@startuml usecase
+' UseCase-диаграмма АИС «Центр управления космическими пусками»
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+skinparam rectangle {
+  BorderColor #333333
+}
+left to right direction
+
+actor "Сотрудник ЦУП" as Staff
+actor "Руководитель\nцентра" as Head
+actor "Инженер ТК" as Eng
+actor "Инженер\nпо заправке" as Fuel
+actor "Метеоролог" as Met
+actor "Оператор\nтелеметрии" as Tm
+
+Head -up-|> Staff
+Eng -up-|> Staff
+Fuel -up-|> Staff
+Met -up-|> Staff
+Tm -up-|> Staff
+
+rectangle "АИС «Центр управления космическими пусками»" {
+  usecase "Войти в систему" as UC_Login
+  usecase "Просмотреть расписание\nи статусы пусков" as UC_Schedule
+
+  usecase "Зарегистрировать пуск" as UC_Reg
+  usecase "Проверить доступность\nстартовой площадки" as UC_PadCheck
+  usecase "Отменить пуск" as UC_Cancel
+  usecase "Управлять персоналом" as UC_Staff
+  usecase "Управлять площадками\nи типами РН" as UC_Pads
+
+  usecase "Отметить этап подготовки\n(сборка, транспортировка,\nпредстартовый контроль)" as UC_Stage
+  usecase "Закрыть ТО площадки" as UC_Maint
+
+  usecase "Принять партию топлива" as UC_Batch
+  usecase "Провести заправку\n(списать расход)" as UC_Refuel
+  usecase "Проверить срок годности\nи остаток партии" as UC_Expire
+
+  usecase "Ввести метеоданные" as UC_Weather
+  usecase "Проверить предельные\nметеоусловия" as UC_Limits
+  usecase "Перенести пуск" as UC_Postpone
+
+  usecase "Зарегистрировать\nнештатную ситуацию\n(потеря сигнала)" as UC_Incident
+  usecase "Вести каналы телеметрии" as UC_Channels
+
+  usecase "Зафиксировать\nрезультат пуска" as UC_Result
+  usecase "Учесть цикл площадки" as UC_Cycle
+
+  usecase "Сформировать отчёт" as UC_Report
+  usecase "Пуски по типам РН" as UC_R1
+  usecase "Расход топлива\nпо партиям" as UC_R2
+  usecase "Загрузка стартовых\nплощадок" as UC_R3
+  usecase "НС и переносы\nпо причинам" as UC_R4
+  usecase "Экспортировать в CSV" as UC_Csv
+}
+
+Staff --> UC_Login
+Staff --> UC_Schedule
+
+Head --> UC_Reg
+Head --> UC_Cancel
+Head --> UC_Staff
+Head --> UC_Pads
+Head --> UC_Result
+Head --> UC_Postpone
+Head --> UC_Report
+
+Eng --> UC_Stage
+Eng --> UC_Maint
+
+Fuel --> UC_Batch
+Fuel --> UC_Refuel
+
+Met --> UC_Weather
+
+Tm --> UC_Channels
+Tm --> UC_Incident
+
+UC_Reg ..> UC_PadCheck : <<include>>
+UC_Refuel ..> UC_Expire : <<include>>
+UC_Weather ..> UC_Limits : <<include>>
+UC_Postpone .up.> UC_Limits : <<extend>>\n[превышены пределы]
+UC_Result ..> UC_Cycle : <<include>>
+UC_Maint ..> UC_Cycle : сбрасывает\nсчётчик
+UC_R1 -up-|> UC_Report
+UC_R2 -up-|> UC_Report
+UC_R3 -up-|> UC_Report
+UC_R4 -up-|> UC_Report
+UC_Csv .up.> UC_Report : <<extend>>
+@enduml

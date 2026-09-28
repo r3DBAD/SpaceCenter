@@ -1,0 +1,54 @@
+@startuml seq_weather_check
+' Сценарий S4 «Метеоконтроль и допуск к пуску / перенос»
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam BackgroundColor white
+skinparam shadowing false
+autonumber
+
+actor "Метеоролог" as U
+boundary ":ConsoleView" as V <<View>>
+control ":WeatherController" as C <<Controller>>
+participant ":WeatherService" as S <<Model>>
+participant ":WeatherLimits" as Lim <<Model>>
+entity "obs:WeatherObservation" as O <<Model>>
+entity "launch:Launch" as L <<Model>>
+database ":LaunchRepository" as LR <<Model/DAO>>
+database ":JournalRepository" as JR <<Model/DAO>>
+
+U -> V : выбрать «Ввести метеоданные»
+V -> C : on_weather()
+C -> V : ask_weather_form()
+U -> V : № пуска, ветер у земли / на высотах,\nt°, нижняя граница облачности, гроза
+V --> C : WeatherForm
+
+C -> S : record_observation(session, form)
+activate S
+S -> S : session.require(RECORD_WEATHER)
+S -> O ** : WeatherObservation(...)
+O -> O : _validate() (скорость ≥ 0,\nt° в физическом диапазоне)
+S -> LR : get(launch_id)
+LR --> S : launch
+S -> Lim : violations(obs)
+Lim --> S : список нарушений
+S -> LR : add_weather(obs)
+
+alt нарушений нет
+  S --> C : WeatherDecision(allowed=True)
+  C -> V : show_message("Метеоусловия в норме,\nдопуск к пуску разрешён")
+else есть нарушения
+  S --> C : WeatherDecision(allowed=False, reasons)
+  C -> V : ask_new_window(reasons)
+  U -> V : новое стартовое окно
+  V --> C : (start, end)
+  C -> S : postpone(session, launch_id, WEATHER, start, end, reasons)
+  S -> L : postpone(start, end)
+  L -> L : проверка: статус не финальный,\nновое окно позже старого
+  L --> S : Postponement
+  S -> LR : update(launch)
+  S -> JR : add_postponement(postponement)
+  S --> C : postponement
+  C -> V : show_message("Пуск перенесён: " + причины)
+end
+deactivate S
+@enduml
