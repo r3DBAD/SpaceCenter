@@ -1,10 +1,10 @@
-"""Веб-контроллер: JSON API для интерфейса на Vue (второе представление той же Model).
+"""Слой Controller: JSON API для веб-интерфейса на Vue.
 
 Контроллер принимает HTTP-запрос, разбирает формат (JSON, даты ISO), вызывает
-сервисы Model и сериализует результат. Бизнес-правил и SQL здесь нет — как и в
-консольных контроллерах; ошибки Model возвращаются клиенту текстом с кодом 4xx.
+сервисы Model и сериализует результат. Бизнес-правил и SQL здесь нет; ошибки
+Model возвращаются клиенту текстом с кодом 4xx.
 
-Запуск: ``python -m lcc --db demo.db --web`` → http://127.0.0.1:8000
+Запуск: ``python -m lcc --db demo.db`` → http://127.0.0.1:8000
 """
 from __future__ import annotations
 
@@ -19,7 +19,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
 
-from ..model.enums import (FINAL_STATUSES, ROLE_PERMISSIONS, FuelComponent, LaunchStatus, PostponeReason)
+from ..model.enums import (FINAL_STATUSES, ROLE_PERMISSIONS, FuelComponent, LaunchStatus, MaintenanceKind,
+                           PadState, PostponeReason, Role, VehicleClass)
 from ..model.errors import (AccessDeniedError, AuthenticationError, DomainError, NotFoundError,
                             ValidationError)
 from ..model.reports import Period
@@ -84,6 +85,15 @@ class WebApi:
             ("POST", r"/api/launches/(\d+)/incidents", self.incident, True),
             ("GET", r"/api/fuel", self.fuel, True),
             ("POST", r"/api/fuel", self.receive_batch, True),
+            ("GET", r"/api/staff", self.staff, True),
+            ("POST", r"/api/staff", self.add_staff, True),
+            ("POST", r"/api/staff/(\d+)/deactivate", self.deactivate_staff, True),
+            ("POST", r"/api/pads", self.add_pad, True),
+            ("POST", r"/api/pads/(\d+)/maintenance", self.open_maintenance, True),
+            ("POST", r"/api/pads/(\d+)/maintenance/close", self.close_maintenance, True),
+            ("POST", r"/api/pads/(\d+)/faulty", self.mark_faulty, True),
+            ("POST", r"/api/vehicle-types", self.add_vehicle_type, True),
+            ("POST", r"/api/channels", self.add_channel, True),
             ("GET", r"/api/reports", self.report_list, True),
             ("GET", r"/api/reports/(\w+)", self.report, True),
             ("GET", r"/api/reports/(\w+)\.csv", self.report_csv, True),
@@ -175,8 +185,13 @@ class WebApi:
                           "preparations": f"{u.active_preparations}/{p.max_concurrent}",
                           "cycles": f"{u.cycles_since_maintenance}/{p.cycle_limit}",
                           "hours": f"{u.hours_since_maintenance:g}/{p.hours_limit:g}",
-                          "state": p.state(u).title} for p, u in self.s.reference.list_pads(session)],
+                          "state": p.state(u).title, "state_key": p.state(u).value,
+                          "in_maintenance": p.state(u) is PadState.IN_MAINTENANCE}
+                         for p, u in self.s.reference.list_pads(session)],
                 "postpone_reasons": [{"value": r.value, "title": r.title} for r in PostponeReason],
+                "maintenance_kinds": [{"value": k.value, "title": k.title} for k in MaintenanceKind],
+                "vehicle_classes": [{"value": c.value, "title": c.title} for c in VehicleClass],
+                "roles": [{"value": r.value, "title": r.title} for r in Role],
                 "fuel_components": [{"value": c.value, "title": c.title} for c in FuelComponent]}
         try:
             data["channels"] = [{"id": c.id, "no": c.channel_no, "system": c.vehicle_system,
@@ -265,6 +280,47 @@ class WebApi:
         i = self.s.telemetry.register_incident(session, int(launch_id), int(ch) if ch else None,
                                                data.get("description", ""), data.get("measures", ""))
         return _json(201, {"message": f"НС зарегистрирована в {i.recorded_at:{DT}}"})
+
+    # ------------------------------------------------------------------ персонал и справочники
+    def staff(self, session, **_):
+        return _json(200, [{"id": st.id, "login": st.login, "full_name": st.full_name, "role": st.role.title,
+                            "active": st.is_active} for st in self.s.staff.list_staff(session)])
+
+    def add_staff(self, session, data, **_):
+        st = self.s.staff.create_staff(session, data.get("login", ""), data.get("full_name", ""),
+                                       data.get("role", ""), data.get("password", ""))
+        return _json(201, {"message": f"Сотрудник {st.login} ({st.role.title}) добавлен"})
+
+    def deactivate_staff(self, session, staff_id, **_):
+        self.s.staff.deactivate(session, int(staff_id))
+        return _json(200, {"message": "Учётная запись заблокирована"})
+
+    def add_pad(self, session, data, **_):
+        p = self.s.reference.add_pad(session, data.get("code", ""), data.get("name", ""), data.get("max_concurrent"),
+                                     data.get("cycle_limit"), data.get("hours_limit"))
+        return _json(201, {"message": f"Площадка {p.code} добавлена"})
+
+    def open_maintenance(self, session, pad_id, data, **_):
+        rec = self.s.pads.open_maintenance(session, int(pad_id), data.get("kind", ""), data.get("notes", ""))
+        return _json(200, {"message": f"ТО №{rec.maint_no} открыто, площадка на обслуживании"})
+
+    def close_maintenance(self, session, pad_id, **_):
+        self.s.pads.close_maintenance(session, int(pad_id))
+        return _json(200, {"message": "ТО закрыто, счётчики циклов и моточасов обнулены"})
+
+    def mark_faulty(self, session, pad_id, **_):
+        self.s.pads.mark_faulty(session, int(pad_id))
+        return _json(200, {"message": "Площадка помечена неисправной"})
+
+    def add_vehicle_type(self, session, data, **_):
+        v = self.s.reference.add_vehicle_type(session, data.get("name", ""), data.get("vehicle_class", ""),
+                                              data.get("stages_count"))
+        return _json(201, {"message": f"Тип РН «{v.name}» добавлен"})
+
+    def add_channel(self, session, data, **_):
+        ch = self.s.reference.add_channel(session, data.get("channel_no", ""), data.get("vehicle_system", ""),
+                                          data.get("parameter", ""), data.get("frequency_hz"))
+        return _json(201, {"message": f"Канал {ch.channel_no} добавлен"})
 
     # ------------------------------------------------------------------ отчёты
     def report_list(self, session, **_):

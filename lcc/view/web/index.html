@@ -172,23 +172,91 @@
 
       <!-- ============ Телеметрия ============ -->
       <section v-if="tab === 'telemetry'">
-        <h2>Нештатные ситуации</h2>
+        <h2>Телеметрия</h2>
+        <table v-if="ref.channels.length">
+          <thead><tr><th>Канал</th><th>Система РН</th><th>Параметр</th></tr></thead>
+          <tbody><tr v-for="c in ref.channels"><td>{{ c.no }}</td><td>{{ c.system }}</td><td>{{ c.parameter }}</td></tr></tbody>
+        </table>
+        <div class="row">
         <form class="card form" @submit.prevent="post(`/api/launches/${inc.launch_id}/incidents`, inc)">
+          <h3>Зарегистрировать НС</h3>
           <label>Пуск <select v-model="inc.launch_id"><option v-for="l in launches.filter(l => l.status !== 'planned' && l.status !== 'cancelled')" :value="l.id">№{{ l.id }} {{ l.vehicle }} — {{ l.status_title }}</option></select></label>
           <label>Канал <select v-model="inc.channel_id"><option :value="null">не определён</option><option v-for="c in ref.channels" :value="c.id">{{ c.no }} — {{ c.system }}</option></select></label>
           <label>Описание <input v-model="inc.description"></label>
           <label>Принятые меры <input v-model="inc.measures"></label>
           <button class="primary">Зарегистрировать НС</button>
         </form>
+        <form v-if="can('manage_channels')" class="card form" @submit.prevent="post('/api/channels', chForm)">
+          <h3>Добавить канал</h3>
+          <label>Номер канала <input v-model="chForm.channel_no"></label>
+          <label>Система РН <input v-model="chForm.vehicle_system"></label>
+          <label>Параметр <input v-model="chForm.parameter"></label>
+          <label>Частота опроса, Гц <input type="number" v-model.number="chForm.frequency_hz"></label>
+          <button>Добавить</button>
+        </form>
+        </div>
       </section>
 
       <!-- ============ Площадки ============ -->
       <section v-if="tab === 'pads'">
         <h2>Стартовые площадки</h2>
         <table>
-          <thead><tr><th>Код</th><th>Наименование</th><th>Подготовок</th><th>Циклов с ТО</th><th>Моточасов с ТО</th><th>Состояние</th></tr></thead>
-          <tbody><tr v-for="p in ref.pads"><td>{{ p.code }}</td><td>{{ p.name }}</td><td>{{ p.preparations }}</td><td>{{ p.cycles }}</td><td>{{ p.hours }}</td><td>{{ p.state }}</td></tr></tbody>
+          <thead><tr><th>Код</th><th>Наименование</th><th>Подготовок</th><th>Циклов с ТО</th><th>Моточасов с ТО</th><th>Состояние</th><th v-if="can('maintain_pads')">Обслуживание</th></tr></thead>
+          <tbody><tr v-for="p in ref.pads">
+            <td>{{ p.code }}</td><td>{{ p.name }}</td><td>{{ p.preparations }}</td><td>{{ p.cycles }}</td><td>{{ p.hours }}</td>
+            <td><span class="badge" :class="'pad-' + p.state_key">{{ p.state }}</span></td>
+            <td v-if="can('maintain_pads')" class="nowrap">
+              <template v-if="p.in_maintenance">
+                <button @click="post(`/api/pads/${p.id}/maintenance/close`)">Закрыть ТО</button>
+              </template>
+              <template v-else>
+                <select v-model="maint.kind"><option v-for="k in ref.maintenance_kinds" :value="k.value">{{ k.title }}</option></select>
+                <button @click="post(`/api/pads/${p.id}/maintenance`, maint)">Начать ТО</button>
+                <button class="danger" @click="post(`/api/pads/${p.id}/faulty`)">Неисправна</button>
+              </template>
+            </td>
+          </tr></tbody>
         </table>
+        <div class="row" v-if="can('manage_pads')">
+          <form class="card form" @submit.prevent="post('/api/pads', padForm)">
+            <h3>Добавить площадку</h3>
+            <label>Код <input v-model="padForm.code"></label>
+            <label>Наименование <input v-model="padForm.name"></label>
+            <label>Макс. одновременных подготовок <input type="number" v-model.number="padForm.max_concurrent"></label>
+            <label>Норматив циклов до ТО <input type="number" v-model.number="padForm.cycle_limit"></label>
+            <label>Норматив моточасов до ТО <input type="number" v-model.number="padForm.hours_limit"></label>
+            <button>Добавить</button>
+          </form>
+          <form class="card form" @submit.prevent="post('/api/vehicle-types', vtForm)">
+            <h3>Добавить тип РН</h3>
+            <label>Наименование <input v-model="vtForm.name"></label>
+            <label>Класс <select v-model="vtForm.vehicle_class"><option v-for="c in ref.vehicle_classes" :value="c.value">{{ c.title }}</option></select></label>
+            <label>Число ступеней <input type="number" v-model.number="vtForm.stages_count"></label>
+            <button>Добавить</button>
+            <p class="hint">Уже есть: {{ ref.vehicle_types.map(v => v.name).join(', ') }}</p>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ Персонал ============ -->
+      <section v-if="tab === 'staff'">
+        <h2>Персонал</h2>
+        <table>
+          <thead><tr><th>Логин</th><th>ФИО</th><th>Роль</th><th>Статус</th><th></th></tr></thead>
+          <tbody><tr v-for="st in staff">
+            <td>{{ st.login }}</td><td>{{ st.full_name }}</td><td>{{ st.role }}</td>
+            <td>{{ st.active ? 'активен' : 'заблокирован' }}</td>
+            <td><button v-if="st.active && st.login !== me.login" @click="post(`/api/staff/${st.id}/deactivate`)">Заблокировать</button></td>
+          </tr></tbody>
+        </table>
+        <form class="card form" style="margin-top:16px" @submit.prevent="post('/api/staff', staffForm)">
+          <h3>Добавить сотрудника</h3>
+          <label>Логин (латиница) <input v-model="staffForm.login"></label>
+          <label>ФИО <input v-model="staffForm.full_name"></label>
+          <label>Роль <select v-model="staffForm.role"><option v-for="r in ref.roles" :value="r.value">{{ r.title }}</option></select></label>
+          <label>Пароль (≥ 8 символов, буквы и цифры) <input type="password" v-model="staffForm.password" autocomplete="new-password"></label>
+          <button class="primary">Добавить</button>
+        </form>
       </section>
 
       <!-- ============ Отчёты ============ -->

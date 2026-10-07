@@ -1,68 +1,54 @@
-"""Точка входа: ``python -m lcc [--db PATH] [--init | --demo]``."""
+"""Точка входа: ``python -m lcc [--db PATH] [--demo | --init] [--port N] [--no-browser]``."""
 from __future__ import annotations
 
 import argparse
+import getpass
 import sys
 from pathlib import Path
 
-from .controller import AppController
+from .controller import run_server
 from .model import Database, Repositories, Services
 from .model.enums import Role
 from .model.errors import DomainError
-from .view import ConsoleView, CsvExporter
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="lcc", description="АИС «Центр управления космическими пусками»")
-    parser.add_argument("--db", default="lcc.db", help="файл базы данных SQLite (по умолчанию lcc.db)")
+    parser.add_argument("--db", default="demo.db", help="файл базы данных SQLite (по умолчанию demo.db)")
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--init", action="store_true", help="создать пустую базу и учётную запись руководителя")
-    group.add_argument("--demo", action="store_true", help="создать демо-базу с тестовыми данными")
-    group.add_argument("--web", action="store_true", help="запустить веб-интерфейс (Vue) вместо консоли")
-    parser.add_argument("--host", default="127.0.0.1", help="адрес веб-сервера (по умолчанию только локально)")
+    group.add_argument("--demo", action="store_true", help="только создать демо-базу и выйти")
+    group.add_argument("--init", action="store_true", help="создать пустую рабочую базу с учётной записью руководителя")
+    parser.add_argument("--host", default="127.0.0.1", help="адрес веб-сервера (по умолчанию только этот компьютер)")
     parser.add_argument("--port", type=int, default=8000, help="порт веб-сервера")
-    parser.add_argument("--open", action="store_true", help="с --web: открыть браузер автоматически")
+    parser.add_argument("--no-browser", action="store_true", help="не открывать браузер автоматически")
     args = parser.parse_args(argv)
-    view = ConsoleView()
 
-    if args.demo:
+    from .seed import DEMO_PASSWORD, DEMO_USERS, seed_demo
+    if args.demo or (not args.init and not Path(args.db).exists()):
         if Path(args.db).exists():
-            view.show_error(f"Файл {args.db} уже существует — укажите другой --db или удалите файл")
+            print(f"Файл {args.db} уже существует — укажите другой --db или удалите файл")
             return 1
-        from .seed import DEMO_PASSWORD, DEMO_USERS, seed_demo
         seed_demo(args.db)
-        view.show_message(f"Демо-база создана: {args.db}")
-        view.show_table("Демо-пользователи", ["Логин", "Пароль", "Роль"],
-                        [[u[0], DEMO_PASSWORD, u[2].title] for u in DEMO_USERS])
-        return 0
+        print(f"Создана демо-база {args.db}. Логины: {', '.join(u[0] for u in DEMO_USERS)}; пароль {DEMO_PASSWORD}")
+        if args.demo:
+            return 0
 
     db = Database(args.db)
     db.init_schema()
     services = Services(Repositories(db))
 
     if args.init:
-        view.show_title("Первичная настройка: учётная запись руководителя центра")
+        print("Первичная настройка: учётная запись руководителя центра")
         try:
-            services.staff.create_staff(None, view.ask_text("Логин"), view.ask_text("ФИО"), Role.HEAD,
-                                        view.ask_password("Пароль (≥ 8 символов, буквы и цифры)"))
+            services.staff.create_staff(None, input("Логин: "), input("ФИО: "), Role.HEAD,
+                                        getpass.getpass("Пароль (≥ 8 символов, буквы и цифры): "))
         except DomainError as e:
-            view.show_error(str(e))
+            print(f"Ошибка: {e}")
             return 1
-        view.show_message("Руководитель создан. Запустите программу без --init и войдите")
-        return 0
-
-    if args.web:
-        from .controller.web import run_server
-        try:
-            run_server(services, args.host, args.port, open_browser=args.open)
-        finally:
-            db.close()
-        return 0
+        print("Руководитель создан.")
 
     try:
-        AppController(view, services, CsvExporter()).run()
-    except (KeyboardInterrupt, EOFError):
-        print("\nВыход")
+        run_server(services, args.host, args.port, open_browser=not args.no_browser)
     finally:
         db.close()
     return 0

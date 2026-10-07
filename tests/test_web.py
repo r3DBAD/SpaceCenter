@@ -1,4 +1,4 @@
-"""Тесты веб-контроллера (JSON API) — вызываются напрямую через WebApi.handle, без сети."""
+"""Тесты контроллера (JSON API) и сквозной сценарий — вызовы напрямую через WebApi.handle, без сети."""
 import json
 import unittest
 from datetime import timedelta
@@ -70,6 +70,50 @@ class WebApiTest(unittest.TestCase):
                                      token=self.login("head"))
         self.assertEqual(status, 200)
         self.assertIn("Расход топлива по партиям", csv_body.decode("utf-8-sig"))
+
+    def test_full_launch_end_to_end(self):
+        """Сквозной сценарий всеми ролями через API: от регистрации до отчёта и ТО площадки."""
+        head, eng, fuel, meteo, tm = (self.login(u) for u in ("head", "eng", "fuel", "meteo", "tm"))
+        start = self.w.clock.now + timedelta(days=2)
+        _, d = self.call("POST", "/api/launches", {
+            "vehicle_type_id": self.w.vt.id, "pad_id": self.w.pad.id, "payload": "Метеор-М", "target_orbit": "ССО",
+            "window_start": start.isoformat(), "window_end": (start + timedelta(hours=1)).isoformat()}, head)
+        lid = d["id"]
+        for _ in range(3):
+            self.assertEqual(self.call("POST", f"/api/launches/{lid}/advance", {}, eng)[0], 200)
+        status, d = self.call("POST", f"/api/launches/{lid}/advance", {}, fuel)       # без топлива
+        self.assertEqual(status, 400)
+        self.assertIn("не заправлено", d["error"])
+        for batch, vol in ((self.w.kero.id, 30), (self.w.lox.id, 70)):
+            self.call("POST", f"/api/launches/{lid}/refuel", {"batch_id": batch, "volume": vol}, fuel)
+        self.assertEqual(self.call("POST", f"/api/launches/{lid}/advance", {}, fuel)[0], 200)
+        bad = {"ground_wind": 22, "altitude_wind": 35, "temperature": 5, "cloud_base": 1000, "thunderstorm": False}
+        _, d = self.call("POST", f"/api/launches/{lid}/weather", bad, meteo)
+        self.assertFalse(d["allowed"])
+        new_start = start + timedelta(days=1)
+        self.assertEqual(self.call("POST", f"/api/launches/{lid}/postpone", {
+            "reason": "weather", "new_start": new_start.isoformat(),
+            "new_end": (new_start + timedelta(hours=1)).isoformat(), "comment": "; ".join(d["reasons"])}, meteo)[0], 200)
+        good = {"ground_wind": 4, "altitude_wind": 12, "temperature": 8, "cloud_base": 1500, "thunderstorm": False}
+        self.assertTrue(self.call("POST", f"/api/launches/{lid}/weather", good, meteo)[1]["allowed"])
+        self.assertEqual(self.call("POST", f"/api/launches/{lid}/advance", {}, eng)[0], 200)
+        self.w.clock.now = new_start + timedelta(minutes=3)
+        self.assertEqual(self.call("POST", f"/api/launches/{lid}/incidents",
+                                   {"channel_id": None, "description": "Потеря сигнала", "measures": "Резерв"}, tm)[0], 201)
+        self.assertEqual(self.call("POST", f"/api/launches/{lid}/result", {"success": True, "pad_hours": 12}, head)[0], 200)
+        _, card = self.call("GET", f"/api/launches/{lid}", token=head)
+        self.assertEqual(card["status"], "launched")
+        self.assertEqual([j["category"] for j in card["journal"]], ["Перенос", "НС"])
+        _, rep = self.call("GET", "/api/reports/incidents?from=2026-09-01&to=2026-09-30", token=head)
+        self.assertIn(["Перенос пуска", "Метеоусловия", "1"], rep["rows"])
+        # ТО площадки и персонал
+        self.assertEqual(self.call("POST", f"/api/pads/{self.w.pad.id}/maintenance", {"kind": "inspection"}, eng)[0], 200)
+        self.assertEqual(self.call("POST", f"/api/pads/{self.w.pad.id}/maintenance/close", {}, eng)[0], 200)
+        self.assertEqual(self.call("POST", "/api/staff", {"login": "new", "full_name": "Новиков", "role": "meteorologist",
+                                                         "password": "123"}, head)[0], 400)      # слабый пароль
+        self.assertEqual(self.call("POST", "/api/staff", {"login": "new", "full_name": "Новиков", "role": "meteorologist",
+                                                         "password": "secret123"}, head)[0], 201)
+        self.assertEqual(self.call("GET", "/api/staff", token=eng)[0], 403)
 
     def test_bad_json_and_period(self):
         head = self.login("head")

@@ -1,4 +1,4 @@
-// Веб-представление (View): только отображение и передача ввода на сервер.
+// Слой View: веб-интерфейс. Только отображение и передача ввода на сервер.
 // Все проверки и права — на сервере (слой Model), здесь их нет.
 const { createApp } = Vue;
 
@@ -14,6 +14,7 @@ const TABS = [
   { id: "weather", title: "Метео", perm: "record_weather" },
   { id: "telemetry", title: "Телеметрия", perm: "record_incident" },
   { id: "pads", title: "Площадки", perm: "view_schedule" },
+  { id: "staff", title: "Персонал", perm: "manage_staff" },
   { id: "reports", title: "Отчёты", perm: "view_reports" },
 ];
 
@@ -23,7 +24,12 @@ createApp({
     auth: { login: "", password: "" },
     me: null, tab: "launches", toast: null,
     ref: { vehicle_types: [], pads: [], channels: [], postpone_reasons: [], fuel_components: [] },
-    launches: [], card: null, batches: [], reportList: [], report: null,
+    launches: [], card: null, batches: [], reportList: [], report: null, staff: [],
+    maint: { kind: "inspection", notes: "" },
+    padForm: { code: "", name: "", max_concurrent: 1, cycle_limit: 5, hours_limit: 250 },
+    vtForm: { name: "", vehicle_class: "medium", stages_count: 2 },
+    chForm: { channel_no: "", vehicle_system: "", parameter: "", frequency_hz: 10 },
+    staffForm: { login: "", full_name: "", role: "pad_engineer", password: "" },
     result: { pad_hours: 10 }, cancelReason: "",
     postponeForm: { reason: "weather", new_start: isoLocal(inDays(1, 1)), new_end: isoLocal(inDays(1, 2)), comment: "" },
     reg: { vehicle_type_id: null, pad_id: null, payload: "", target_orbit: "", window_start: isoLocal(inDays(7)), window_end: isoLocal(inDays(7, 1)) },
@@ -84,6 +90,7 @@ createApp({
       this.launches = await this.api("GET", "/api/launches");
       if (this.can("manage_fuel")) this.batches = await this.api("GET", "/api/fuel");
       if (this.can("view_reports")) this.reportList = await this.api("GET", "/api/reports");
+      if (this.can("manage_staff")) this.staff = await this.api("GET", "/api/staff");
       if (this.card) await this.openCard(this.card.id);
       // значения по умолчанию для выпадающих списков
       this.reg.vehicle_type_id ??= this.ref.vehicle_types[0]?.id;

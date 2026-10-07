@@ -1,9 +1,7 @@
-"""Слой View: представление данных и приём пользовательского ввода.
+"""Слой View: веб-интерфейс на Vue (каталог ``web/``) и экспорт отчётов в CSV.
 
-Не импортирует :mod:`lcc.model` — работает только с данными, которые передаёт Controller.
+Не импортирует :mod:`lcc.model`: получает данные только через JSON API контроллера.
 """
-from .base import View
-from .console import ConsoleView
 from .csv_export import CsvExporter
 
-__all__ = ["View", "ConsoleView", "CsvExporter"]
+__all__ = ["CsvExporter"]

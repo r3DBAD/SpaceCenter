@@ -1,4 +1,4 @@
-"""Слой Controller: принимает действия пользователя из View, вызывает Model, передаёт результат во View."""
-from .app import AppController
+"""Слой Controller: JSON API — принимает запросы веб-интерфейса, вызывает Model, возвращает результат."""
+from .web import WebApi, run_server
 
-__all__ = ["AppController"]
+__all__ = ["WebApi", "run_server"]
