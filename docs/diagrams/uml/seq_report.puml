@@ -7,18 +7,15 @@ skinparam shadowing false
 autonumber
 
 actor "Руководитель\nцентра" as U
-boundary ":ConsoleView" as V <<View>>
-control ":ReportController" as C <<Controller>>
+boundary ":Vue (app.js)" as V <<View>>
+control ":WebApi" as C <<Controller>>
 participant ":ReportService" as S <<Model>>
 participant "report:FuelUsageReport" as R <<Model>>
 database ":FuelRepository" as FR <<Model/DAO>>
-participant ":CsvExporter" as X <<View>>
+participant "CsvExporter" as X <<View>>
 
-U -> V : «Отчёты» → «Расход топлива по партиям»
-V -> C : run(); choose() → "fuel"
-C -> V : ask_date() ×2
-U -> V : с 01.09.2026 по 30.09.2026
-V --> C : date_from, date_to
+U -> V : вкладка «Отчёты»: «Расход топлива по партиям»,\nс 01.09.2026 по 30.09.2026, «Сформировать»
+V -> C : GET /api/reports/fuel?from=…&to=…
 C -> S : build(session, "fuel",\nPeriod(date_from, date_to))
 activate S
 S -> S : session.require(VIEW_REPORTS)
@@ -33,13 +30,15 @@ R --> S : ReportTable(title, columns, rows, totals)
 deactivate R
 S --> C : ReportTable
 deactivate S
-C -> V : show_table(report)
-V -> U : таблица в консоли
+C --> V : 200 {title, columns, rows, notes}
+V -> U : таблица отчёта
 opt экспорт
-  U -> V : «Сохранить в CSV»
-  V --> C : confirm() = да
-  C -> X : export(report)
-  X --> C : путь к файлу
-  C -> V : show_message("Сохранено: …")
+  U -> V : «CSV»
+  V -> C : GET /api/reports/fuel.csv?from=…&to=…
+  C -> S : build(...)
+  C -> X : to_text(report)
+  X --> C : CSV (с защитой от формул)
+  C --> V : файл (Content-Disposition: attachment)
+  V -> U : скачивание файла
 end
 @enduml

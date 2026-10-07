@@ -124,6 +124,33 @@
                                 <a class="function" href="#WebApi.incident">incident</a>
                         </li>
                         <li>
+                                <a class="function" href="#WebApi.staff">staff</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_staff">add_staff</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.deactivate_staff">deactivate_staff</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_pad">add_pad</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.open_maintenance">open_maintenance</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.close_maintenance">close_maintenance</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.mark_faulty">mark_faulty</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_vehicle_type">add_vehicle_type</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_channel">add_channel</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#WebApi.report_list">report_list</a>
                         </li>
                         <li>
@@ -154,13 +181,13 @@
                     <h1 class="modulename">
 <a href="./../../lcc.html">lcc</a><wbr>.<a href="./../controller.html">controller</a><wbr>.web    </h1>
 
-                        <div class="docstring"><p>Веб-контроллер: JSON API для интерфейса на Vue (второе представление той же Model).</p>
+                        <div class="docstring"><p>Слой Controller: JSON API для веб-интерфейса на Vue.</p>
 
 <p>Контроллер принимает HTTP-запрос, разбирает формат (JSON, даты ISO), вызывает
-сервисы Model и сериализует результат. Бизнес-правил и SQL здесь нет — как и в
-консольных контроллерах; ошибки Model возвращаются клиенту текстом с кодом 4xx.</p>
+сервисы Model и сериализует результат. Бизнес-правил и SQL здесь нет; ошибки
+Model возвращаются клиенту текстом с кодом 4xx.</p>
 
-<p>Запуск: <code>python -m lcc --db demo.db --web</code> → <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a></p>
+<p>Запуск: <code>python -m lcc --db demo.db</code> → <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a></p>
 </div>
 
                 
@@ -545,6 +572,123 @@
     
 
                             </div>
+                            <div id="WebApi.staff" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">staff</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.staff"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_staff" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_staff</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_staff"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.deactivate_staff" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">deactivate_staff</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">staff_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.deactivate_staff"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_pad" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_pad</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_pad"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.open_maintenance" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">open_maintenance</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">pad_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.open_maintenance"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.close_maintenance" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">close_maintenance</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">pad_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.close_maintenance"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.mark_faulty" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">mark_faulty</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">pad_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.mark_faulty"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_vehicle_type" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_vehicle_type</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_vehicle_type"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_channel" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_channel</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_channel"></a>
+    
+    
+
+                            </div>
                             <div id="WebApi.report_list" class="classattr">
                                 <div class="attr function">
             
@@ -589,7 +733,7 @@
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">run_server</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">services</span><span class="p">:</span> <span class="n"><a href="../model.html#Services">lcc.model.Services</a></span>,</span><span class="param">	<span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span>,</span><span class="param">	<span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">run_server</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">services</span><span class="p">:</span> <span class="n"><a href="../model.html#Services">lcc.model.Services</a></span>,</span><span class="param">	<span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span>,</span><span class="param">	<span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>,</span><span class="param">	<span class="n">open_browser</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
         
     </div>

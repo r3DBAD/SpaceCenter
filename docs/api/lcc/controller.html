@@ -31,34 +31,106 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
-                    <a class="class" href="#AppController">AppController</a>
+                    <a class="class" href="#WebApi">WebApi</a>
                             <ul class="memberlist">
                         <li>
-                                <a class="function" href="#AppController.__init__">AppController</a>
+                                <a class="function" href="#WebApi.__init__">WebApi</a>
                         </li>
                         <li>
-                                <a class="variable" href="#AppController.MAX_LOGIN_ATTEMPTS">MAX_LOGIN_ATTEMPTS</a>
+                                <a class="variable" href="#WebApi.s">s</a>
                         </li>
                         <li>
-                                <a class="variable" href="#AppController.view">view</a>
+                                <a class="function" href="#WebApi.handle">handle</a>
                         </li>
                         <li>
-                                <a class="variable" href="#AppController.services">services</a>
+                                <a class="function" href="#WebApi.login">login</a>
                         </li>
                         <li>
-                                <a class="variable" href="#AppController.exporter">exporter</a>
+                                <a class="function" href="#WebApi.logout">logout</a>
                         </li>
                         <li>
-                                <a class="function" href="#AppController.login">login</a>
+                                <a class="function" href="#WebApi.me">me</a>
                         </li>
                         <li>
-                                <a class="function" href="#AppController.build_menu">build_menu</a>
+                                <a class="function" href="#WebApi.reference">reference</a>
                         </li>
                         <li>
-                                <a class="function" href="#AppController.run">run</a>
+                                <a class="function" href="#WebApi.launches">launches</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.card">card</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.register">register</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.advance">advance</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.postpone">postpone</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.cancel">cancel</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.result">result</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.fuel">fuel</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.receive_batch">receive_batch</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.refuel">refuel</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.weather">weather</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.incident">incident</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.staff">staff</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_staff">add_staff</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.deactivate_staff">deactivate_staff</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_pad">add_pad</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.open_maintenance">open_maintenance</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.close_maintenance">close_maintenance</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.mark_faulty">mark_faulty</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_vehicle_type">add_vehicle_type</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_channel">add_channel</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.report_list">report_list</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.report">report</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.report_csv">report_csv</a>
                         </li>
                 </ul>
 
+            </li>
+            <li>
+                    <a class="function" href="#run_server">run_server</a>
             </li>
     </ul>
 
@@ -76,121 +148,442 @@
                     <h1 class="modulename">
 <a href="./../lcc.html">lcc</a><wbr>.controller    </h1>
 
-                        <div class="docstring"><p>Слой Controller: принимает действия пользователя из View, вызывает Model, передаёт результат во View.</p>
+                        <div class="docstring"><p>Слой Controller: JSON API — принимает запросы веб-интерфейса, вызывает Model, возвращает результат.</p>
 </div>
 
                 
                 
                 
             </section>
-                <section id="AppController">
+                <section id="WebApi">
                     <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">AppController</span>:
+    <span class="name">WebApi</span>:
 
         
     </div>
-    <a class="headerlink" href="#AppController"></a>
+    <a class="headerlink" href="#WebApi"></a>
     
-    
+            <div class="docstring"><p>Маршрутизация запросов API. Не зависит от HTTP-сервера — удобно тестировать напрямую.</p>
+</div>
 
-                            <div id="AppController.__init__" class="classattr">
+
+                            <div id="WebApi.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">AppController</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">view</span><span class="p">:</span> <span class="n"><a href="view.html#View">lcc.view.View</a></span>,</span><span class="param">	<span class="n">services</span><span class="p">:</span> <span class="n"><a href="model.html#Services">lcc.model.Services</a></span>,</span><span class="param">	<span class="n">exporter</span><span class="p">:</span> <span class="n"><a href="view.html#CsvExporter">lcc.view.CsvExporter</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+        <span class="name">WebApi</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">services</span><span class="p">:</span> <span class="n"><a href="model.html#Services">lcc.model.Services</a></span></span>)</span>
 
         
     </div>
-    <a class="headerlink" href="#AppController.__init__"></a>
+    <a class="headerlink" href="#WebApi.__init__"></a>
     
     
 
                             </div>
-                            <div id="AppController.MAX_LOGIN_ATTEMPTS" class="classattr">
+                            <div id="WebApi.s" class="classattr">
                                 <div class="attr variable">
-            <span class="name">MAX_LOGIN_ATTEMPTS</span>        =
-<span class="default_value">3</span>
+            <span class="name">s</span>
 
         
     </div>
-    <a class="headerlink" href="#AppController.MAX_LOGIN_ATTEMPTS"></a>
+    <a class="headerlink" href="#WebApi.s"></a>
     
     
 
                             </div>
-                            <div id="AppController.view" class="classattr">
-                                <div class="attr variable">
-            <span class="name">view</span>
-
-        
-    </div>
-    <a class="headerlink" href="#AppController.view"></a>
-    
-    
-
-                            </div>
-                            <div id="AppController.services" class="classattr">
-                                <div class="attr variable">
-            <span class="name">services</span>
-
-        
-    </div>
-    <a class="headerlink" href="#AppController.services"></a>
-    
-    
-
-                            </div>
-                            <div id="AppController.exporter" class="classattr">
-                                <div class="attr variable">
-            <span class="name">exporter</span>
-
-        
-    </div>
-    <a class="headerlink" href="#AppController.exporter"></a>
-    
-    
-
-                            </div>
-                            <div id="AppController.login" class="classattr">
+                            <div id="WebApi.handle" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">login</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">):</span></span>
+        <span class="name">handle</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">method</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">url</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">headers</span><span class="p">:</span> <span class="nb">dict</span>,</span><span class="param">	<span class="n">body</span><span class="p">:</span> <span class="nb">bytes</span></span><span class="return-annotation">) -> <span class="n"><a href="controller/web.html#Response">lcc.controller.web.Response</a></span>:</span></span>
 
         
     </div>
-    <a class="headerlink" href="#AppController.login"></a>
+    <a class="headerlink" href="#WebApi.handle"></a>
     
     
 
                             </div>
-                            <div id="AppController.build_menu" class="classattr">
+                            <div id="WebApi.login" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">build_menu</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="controller/app.html#MenuItem">lcc.controller.app.MenuItem</a></span><span class="p">]</span>:</span></span>
+        <span class="name">login</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">_session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
-    <a class="headerlink" href="#AppController.build_menu"></a>
+    <a class="headerlink" href="#WebApi.login"></a>
     
     
 
                             </div>
-                            <div id="AppController.run" class="classattr">
+                            <div id="WebApi.logout" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">run</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">logout</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">_session</span>, </span><span class="param"><span class="n">headers</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
-    <a class="headerlink" href="#AppController.run"></a>
+    <a class="headerlink" href="#WebApi.logout"></a>
     
     
 
                             </div>
+                            <div id="WebApi.me" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">me</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.me"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.reference" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">reference</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.reference"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.launches" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">launches</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.launches"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.card" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">card</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.card"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.register" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">register</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.register"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.advance" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">advance</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.advance"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.postpone" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">postpone</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.postpone"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.cancel" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">cancel</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.cancel"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.result" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">result</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.result"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.fuel" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">fuel</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.fuel"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.receive_batch" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">receive_batch</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.receive_batch"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.refuel" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">refuel</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.refuel"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.weather" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">weather</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.weather"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.incident" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">incident</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.incident"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.staff" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">staff</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.staff"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_staff" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_staff</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_staff"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.deactivate_staff" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">deactivate_staff</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">staff_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.deactivate_staff"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_pad" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_pad</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_pad"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.open_maintenance" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">open_maintenance</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">pad_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.open_maintenance"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.close_maintenance" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">close_maintenance</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">pad_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.close_maintenance"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.mark_faulty" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">mark_faulty</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">pad_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.mark_faulty"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_vehicle_type" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_vehicle_type</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_vehicle_type"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_channel" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_channel</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_channel"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.report_list" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">report_list</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.report_list"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.report" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">report</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">key</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.report"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.report_csv" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">report_csv</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">key</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.report_csv"></a>
+    
+    
+
+                            </div>
+                </section>
+                <section id="run_server">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">run_server</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">services</span><span class="p">:</span> <span class="n"><a href="model.html#Services">lcc.model.Services</a></span>,</span><span class="param">	<span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span>,</span><span class="param">	<span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>,</span><span class="param">	<span class="n">open_browser</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#run_server"></a>
+    
+            <div class="docstring"><p>Однопоточный сервер: соединение SQLite используется в одном потоке.</p>
+</div>
+
+
                 </section>
     </main>
 <script>

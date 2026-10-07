@@ -7,8 +7,8 @@ skinparam shadowing false
 autonumber
 
 actor "Метеоролог" as U
-boundary ":ConsoleView" as V <<View>>
-control ":WeatherController" as C <<Controller>>
+boundary ":Vue (app.js)" as V <<View>>
+control ":WebApi" as C <<Controller>>
 participant ":WeatherService" as S <<Model>>
 participant ":WeatherLimits" as Lim <<Model>>
 entity "obs:WeatherObservation" as O <<Model>>
@@ -18,11 +18,8 @@ database ":WeatherRepository" as WR <<Model/DAO>>
 database ":LaunchRepository" as LR <<Model/DAO>>
 database ":JournalRepository" as JR <<Model/DAO>>
 
-U -> V : выбрать «Ввести метеоданные»
-V -> C : record()
-C -> V : pick_launch(); ask_float() ×4;\nconfirm("гроза?")
-U -> V : № пуска, ветер у земли / на высотах,\nt°, нижняя граница облачности, гроза
-V --> C : значения полей
+U -> V : вкладка «Метео»: пуск, ветер у земли / на высотах,\nt°, нижняя граница облачности, гроза
+V -> C : POST /api/launches/{id}/weather (JSON)
 
 C -> S : record_observation(session, launch_id,\nground, altitude, t°, cloud, storm)
 activate S
@@ -38,12 +35,14 @@ S -> WR : add(obs)
 deactivate S
 alt нарушений нет
   S --> C : WeatherDecision(allowed=True)
-  C -> V : show_message("Метеоусловия в норме,\nдопуск к пуску разрешён")
+  C --> V : 200 {allowed: true}
+  V -> U : «Допуск разрешён»
 else есть нарушения
   S --> C : WeatherDecision(allowed=False, reasons)
-  C -> V : show_error(reasons);\nconfirm("перенести?"); ask_datetime() ×2
-  U -> V : новое стартовое окно
-  V --> C : (start, end)
+  C --> V : 200 {allowed: false, reasons}
+  V -> U : «Пуск по метео запрещён» + причины,\nформа переноса
+  U -> V : новое стартовое окно, «Перенести»
+  V -> C : POST /api/launches/{id}/postpone\n{reason: weather, new_start, new_end}
   C -> LS : postpone(session, launch_id, WEATHER,\nstart, end, reasons)
   activate LS
   LS -> LS : session.require(POSTPONE_LAUNCH)
@@ -56,6 +55,6 @@ else есть нарушения
   LS -> JR : add_postponement(postponement)
   LS --> C : postponement
   deactivate LS
-  C -> V : show_message("Пуск перенесён: " + причины)
+  C --> V : 200 {message: "Пуск перенесён: …"}
 end
 @enduml

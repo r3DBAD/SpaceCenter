@@ -8,28 +8,29 @@ skinparam sequenceMessageAlign center
 autonumber
 
 actor "Руководитель\nцентра" as U
-boundary ":ConsoleView" as V <<View>>
-control ":LaunchController" as C <<Controller>>
+boundary ":Vue (app.js)" as V <<View>>
+control ":WebApi" as C <<Controller>>
 participant ":LaunchService" as S <<Model>>
 participant ":Session" as Ses <<Model>>
 entity "launch:Launch" as L <<Model>>
 database ":LaunchPadRepository" as PR <<Model/DAO>>
 database ":LaunchRepository" as LR <<Model/DAO>>
 
-U -> V : выбрать «Зарегистрировать пуск»
-V -> C : register()
-C -> V : show_table(типы РН, площадки);\nask_int / ask_text / ask_datetime
+U -> V : вкладка «Новый пуск»
+V -> C : GET /api/reference
+C --> V : типы РН, площадки (JSON)
 V -> U : форма (тип РН, ПН, орбита,\nплощадка, начало/конец окна)
-U -> V : ввод данных
-V --> C : значения (int, str, datetime)
+U -> V : ввод данных, «Зарегистрировать»
+V -> C : POST /api/launches (JSON)
+C -> C : _session(token);\n_parse_dt(window_start / end)
 
-C -> S : register_launch(session, form)
+C -> S : register_launch(session, vehicle_type_id,\npad_id, payload, orbit, start, end)
 activate S
 S -> Ses : require(Permission.MANAGE_LAUNCHES)
 alt нет права
   Ses --> S : AccessDeniedError
   S --> C : AccessDeniedError
-  C -> V : show_error("Недостаточно прав")
+  C --> V : 403 {error: "Недостаточно прав…"}
 end
 
 S -> L ** : LaunchWindow(start, end);\nLaunch(vehicle_type_id, pad_id,\npayload, orbit, window)
@@ -38,7 +39,7 @@ L -> L : require_text / require_int\n(непустые поля, начало < 
 alt данные некорректны
   L --> S : ValidationError
   S --> C : ValidationError
-  C -> V : show_error(текст ошибки)
+  C --> V : 400 {error: текст ошибки}
 end
 deactivate L
 
@@ -49,7 +50,7 @@ PR --> S : usage:PadUsage
 S -> S : pad.ensure_can_accept(usage)
 alt площадка на ТО / лимит подготовок исчерпан
   S --> C : BusinessRuleError
-  C -> V : show_error("Площадка недоступна: …")
+  C --> V : 400 {error: "Площадка … недоступна"}
 end
 
 S -> LR : add(launch)\n(параметризованный INSERT)
@@ -57,6 +58,6 @@ LR --> S : launch_id
 S -> LR : log_status(launch_id, PLANNED,\nnow, staff_id)
 S --> C : launch
 deactivate S
-C -> V : show_message("Пуск №… зарегистрирован,\nстатус «Запланирован»")
-V -> U : подтверждение
+C --> V : 201 {id, message}
+V -> U : уведомление «Пуск №… зарегистрирован»,\nкарточка пуска
 @enduml

@@ -6,105 +6,60 @@ skinparam BackgroundColor white
 skinparam shadowing false
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
-skinparam linetype ortho
 hide empty members
 left to right direction
 
-package "View  (lcc.view)" as V #E3F2FD {
-  interface View <<interface>> {
-    +show_title(text)
-    +show_message(text)
-    +show_error(text)
-    +show_table(title, columns, rows, notes)
-    +choose(title, options): str
-    +ask_text / ask_int / ask_float
-    +ask_date / ask_datetime / ask_password
-    +confirm(question): bool
+package "View  (lcc/view)" as V #E3F2FD {
+  class "VueApp (app.js)" as VueApp <<Vue 3>> {
+    +token: string
+    +me, launches, card, report
+    +login() / logout()
+    +api(method, url, body)
+    +post(url, body)
+    +openCard(id) / register()
+    +refuel() / weather()
+    +buildReport() / downloadCsv()
   }
-  class ConsoleView {
-    -_input: Callable
-    -_print: Callable
-    +show_table(...)
-    -_ask(label, parse, default)
+  class "index.html" as Html <<template>> {
+    вкладки: Пуски, Новый пуск, Топливо,
+    Метео, Телеметрия, Площадки,
+    Персонал, Отчёты
   }
   class CsvExporter {
-    -_dir: Path
-    +export(report: ReportTable): Path
+    +file_name(report): str
+    +to_text(report): str
     -_safe_cell(value): str
   }
-  ConsoleView ..|> View
-  class "index.html + app.js" as WebUI <<Vue 3>> {
-    +login() / reload()
-    +post(url, body)
-    +openCard(id) / buildReport()
-  }
+  VueApp *-- Html
 }
 
-package "Controller  (lcc.controller)" as C #FFF8E1 {
-  class AppController {
-    +MAX_LOGIN_ATTEMPTS = 3
-    +login(): Session
-    +build_menu(session): list[MenuItem]
-    +run()
-  }
-  class MenuItem <<dataclass>> {
-    +title: str
-    +permission: Permission
-    +action: Callable
-  }
-  class BaseController {
-    #view: View
-    #services: Services
-    #session: Session
-    +safe(action): T | None
-    +pick_launch(statuses): int
-  }
-  class LaunchController {
-    +show_schedule() / show_card()
-    +register() / advance()
-    +postpone() / cancel()
-    +record_result()
-  }
-  class FuelController {
-    +receive_batch() / list_batches()
-    +refuel()
-  }
-  class WeatherController {
-    +record()
-  }
-  class TelemetryController {
-    +add_channel() / register_incident()
-  }
-  class PadController {
-    +add_pad() / open_maintenance()
-    +close_maintenance()
-  }
-  class StaffController {
-    +add_staff() / deactivate()
-  }
-  class ReportController {
-    -_exporter: CsvExporter
-    +run()
-  }
-  LaunchController --|> BaseController
-  FuelController --|> BaseController
-  WeatherController --|> BaseController
-  TelemetryController --|> BaseController
-  PadController --|> BaseController
-  StaffController --|> BaseController
-  ReportController --|> BaseController
-  AppController *-- "1..*" MenuItem
-  AppController ..> BaseController : создаёт
+package "Controller  (lcc/controller)" as C #FFF8E1 {
   class WebApi {
     -_sessions: dict[token, Session]
+    -_routes: list[(method, regex, action)]
     +handle(method, url, headers, body): Response
-    +login() / launches() / register()
-    +advance() / refuel() / weather()
+    -_session(headers): Session
+    -_static(name): Response
+    +login() / me() / reference()
+    +launches() / card() / register()
+    +advance() / postpone() / cancel() / result()
+    +refuel() / weather() / incident()
+    +staff() / add_pad() / open_maintenance()
     +report() / report_csv()
   }
+  class Response <<dataclass>> {
+    +status: int
+    +body: bytes
+    +content_type: str
+  }
+  class "_Handler" as Handler <<http.server>> {
+    +do_GET() / do_POST()
+  }
+  Handler --> WebApi : handle()
+  WebApi ..> Response : создаёт
 }
 
-package "Model  (lcc.model)" as M #E8F5E9 {
+package "Model  (lcc/model)" as M #E8F5E9 {
   class Services <<facade>> {
     +auth: AuthService
     +staff: StaffService
@@ -154,26 +109,10 @@ package "Model  (lcc.model)" as M #E8F5E9 {
   Repositories o-- Database
 }
 
-BaseController --> View : вывод / ввод
-BaseController --> Services : вызов сценариев
-BaseController --> Session
-AppController --> View
-AppController --> Services
-ReportController --> CsvExporter
-WebUI ..> WebApi : HTTP / JSON
-WebApi --> Services
-WebApi --> Session
+VueApp ..> Handler : HTTP: JSON API /api/*\n+ статические файлы
+WebApi --> Services : вызов сценариев
+WebApi --> Session : токен → сессия
 WebApi ..> CsvExporter : to_text()
 CsvExporter ..> ReportTable : читает
 
-note bottom of M
-  Model не импортирует View и Controller.
-  Проверка прав (Session.require), валидация
-  и бизнес-правила выполняются только здесь.
-end note
-note bottom of V
-  View не обращается к Model и БД:
-  получает готовые строки/таблицы
-  от Controller.
-end note
 @enduml
