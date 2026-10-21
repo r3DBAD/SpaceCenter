@@ -10,9 +10,10 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from .enums import (FINAL_STATUSES, PREPARATION_ORDER, FuelComponent, LaunchStatus, MaintenanceKind, PadState,
-                    PostponeReason, Role, VehicleClass)
+from .enums import (FINAL_STATUSES, GLOBAL_ROLES, PREPARATION_ORDER, FuelComponent, LaunchStatus, MaintenanceKind,
+                    PadState, PostponeReason, Role, VehicleClass)
 from .errors import BusinessRuleError, ValidationError
+from .units import Mass
 from .validation import (optional_text, require_date, require_datetime, require_enum, require_int,
                          require_number, require_text)
 
@@ -42,12 +43,34 @@ class Entity:
         return hash((type(self).__name__, self._id))
 
 
+# ---------------------------------------------------------------- космодром
+class Spaceport(Entity):
+    """Космодром (ЛР4, Т1.1): у него свои площадки, склады топлива и персонал."""
+
+    def __init__(self, code: str, name: str, region: str = "", spaceport_id: int | None = None):
+        super().__init__(spaceport_id)
+        code = require_text(code, "Код космодрома", 8).upper()
+        if not code.isascii() or not code.isalnum():
+            raise ValidationError("Код космодрома: только латинские буквы и цифры")
+        self._code = code
+        self._name = require_text(name, "Наименование космодрома", 80)
+        self._region = optional_text(region, "Регион", 80)
+
+    code = property(lambda self: self._code)
+    name = property(lambda self: self._name)
+    region = property(lambda self: self._region)
+
+
 # ---------------------------------------------------------------- персонал
 class Staff(Entity):
-    """Сотрудник ЦУП. Хранит только хеш и соль пароля."""
+    """Сотрудник ЦУП. Хранит только хеш и соль пароля.
+
+    Роли уровня центра (руководитель центра, инспектор) не привязаны к космодрому,
+    остальные роли привязаны обязательно (ЛР4, П1, П2).
+    """
 
     def __init__(self, login: str, full_name: str, role: Role, password_hash: str, password_salt: str,
-                 is_active: bool = True, staff_id: int | None = None):
+                 is_active: bool = True, staff_id: int | None = None, spaceport_id: int | None = None):
         super().__init__(staff_id)
         login = require_text(login, "Логин", 32).lower()
         if not login.replace("_", "").replace(".", "").isalnum() or not login.isascii():
@@ -58,6 +81,14 @@ class Staff(Entity):
         self._password_hash = require_text(password_hash, "Хеш пароля")
         self._password_salt = require_text(password_salt, "Соль")
         self._is_active = bool(is_active)
+        if self._role in GLOBAL_ROLES:
+            if spaceport_id is not None:
+                raise ValidationError(f"Роль «{self._role.title}» работает на уровне центра, космодром не указывается")
+            self._spaceport_id = None
+        else:
+            if spaceport_id is None:
+                raise ValidationError(f"Для роли «{self._role.title}» нужно указать космодром")
+            self._spaceport_id = require_int(spaceport_id, "Космодром", min_value=1)
 
     login = property(lambda self: self._login)
     full_name = property(lambda self: self._full_name)
@@ -65,6 +96,7 @@ class Staff(Entity):
     password_hash = property(lambda self: self._password_hash)
     password_salt = property(lambda self: self._password_salt)
     is_active = property(lambda self: self._is_active)
+    spaceport_id = property(lambda self: self._spaceport_id)
 
     def deactivate(self) -> None:
         self._is_active = False
@@ -102,8 +134,11 @@ class LaunchPad(Entity):
     """Стартовая площадка: лимит одновременных подготовок и нормативы межпускового ТО."""
 
     def __init__(self, code: str, name: str, max_concurrent: int, cycle_limit: int, hours_limit: float,
-                 is_faulty: bool = False, pad_id: int | None = None):
+                 is_faulty: bool = False, pad_id: int | None = None, spaceport_id: int | None = None):
         super().__init__(pad_id)
+        if spaceport_id is None:
+            raise ValidationError("Не указан космодром площадки")
+        self._spaceport_id = require_int(spaceport_id, "Космодром", min_value=1)
         self._code = require_text(code, "Код площадки", 16).upper()
         self._name = require_text(name, "Наименование площадки", 80)
         self._max_concurrent = require_int(max_concurrent, "Макс. одновременных подготовок", min_value=1, max_value=10)
@@ -117,6 +152,7 @@ class LaunchPad(Entity):
     cycle_limit = property(lambda self: self._cycle_limit)
     hours_limit = property(lambda self: self._hours_limit)
     is_faulty = property(lambda self: self._is_faulty)
+    spaceport_id = property(lambda self: self._spaceport_id)
 
     def mark_faulty(self, faulty: bool = True) -> None:
         self._is_faulty = bool(faulty)
@@ -257,46 +293,66 @@ class Launch(Entity):
 
 # ---------------------------------------------------------------- топливо
 class FuelBatch(Entity):
-    """Партия компонента топлива. Остаток не хранится: он передаётся как `used` из хранилища."""
+    """Партия компонента топлива на складе космодрома. Остаток не хранится: он считается от `used`."""
 
-    def __init__(self, batch_no: str, component: FuelComponent, grade: str, initial_volume: float,
-                 produced_on: date, expires_on: date, batch_id: int | None = None):
+    MAX_MASS = Mass.from_kg(5_000_000)
+
+    def __init__(self, batch_no: str, component: FuelComponent, grade: str, initial_mass: Mass,
+                 produced_on: date, expires_on: date, batch_id: int | None = None, spaceport_id: int | None = None):
         super().__init__(batch_id)
         self._batch_no = require_text(batch_no, "Номер партии", 32).upper()
         self._component = require_enum(component, FuelComponent, "Компонент")
         self._grade = require_text(grade, "Марка топлива", 40)
-        self._initial_volume = require_number(initial_volume, "Объём партии, т", min_value=0, strict_min=True,
-                                              max_value=5000)
+        if not isinstance(initial_mass, Mass):
+            initial_mass = Mass.from_kg(initial_mass, "Масса партии, кг")
+        if not (0 < initial_mass.hg <= self.MAX_MASS.hg):
+            raise ValidationError(f"Масса партии должна быть больше 0 и не больше {self.MAX_MASS}")
+        self._initial_mass = initial_mass
         self._produced_on = require_date(produced_on, "Дата изготовления")
         self._expires_on = require_date(expires_on, "Срок годности")
         if self._expires_on <= self._produced_on:
             raise ValidationError("Срок годности должен быть позже даты изготовления")
+        if spaceport_id is None:
+            raise ValidationError("Не указан склад (космодром) партии")
+        self._spaceport_id = require_int(spaceport_id, "Космодром", min_value=1)
 
     batch_no = property(lambda self: self._batch_no)
     component = property(lambda self: self._component)
     grade = property(lambda self: self._grade)
-    initial_volume = property(lambda self: self._initial_volume)
+    initial_mass = property(lambda self: self._initial_mass)
     produced_on = property(lambda self: self._produced_on)
     expires_on = property(lambda self: self._expires_on)
+    spaceport_id = property(lambda self: self._spaceport_id)
 
     def is_expired(self, on: date) -> bool:
         return on > self._expires_on
 
-    def remaining(self, used: float) -> float:
-        return round(self._initial_volume - used, 3)
+    def remaining(self, used: Mass) -> Mass:
+        return self._initial_mass - used
 
-    def ensure_can_withdraw(self, volume: float, used: float, on: date, component: FuelComponent) -> float:
-        """Проверить списание `volume` т при уже израсходованных `used` т; вернуть объём."""
-        volume = require_number(volume, "Объём заправки, т", min_value=0, strict_min=True)
+    def ensure_can_withdraw(self, mass: Mass, used: Mass, on: date, component: FuelComponent,
+                            valid_until: date | None = None) -> Mass:
+        """Проверить списание `mass` при уже израсходованной `used`.
+
+        `valid_until` — последний день, когда топливо еще должно быть годным (конец
+        стартового окна). Так топливо не истечет в баке до пуска (ЛР4, П8).
+        """
+        if not isinstance(mass, Mass):
+            mass = Mass.from_kg(mass, "Масса заправки, кг")
+        if mass.hg <= 0:
+            raise ValidationError("Масса заправки должна быть больше 0")
         if component is not self._component:
             raise BusinessRuleError(f"Партия {self._batch_no} — {self._component.title.lower()}, "
                                     f"а требуется {component.title.lower()}")
         if self.is_expired(on):
             raise BusinessRuleError(f"Партия {self._batch_no} просрочена (срок годности {self._expires_on:%d.%m.%Y})")
-        if volume > self.remaining(used) + 1e-9:
+        if valid_until is not None and self.is_expired(valid_until):
+            raise BusinessRuleError(f"Партия {self._batch_no} годна до {self._expires_on:%d.%m.%Y}, "
+                                    f"а стартовое окно заканчивается {valid_until:%d.%m.%Y}")
+        if mass > self.remaining(used):
             raise BusinessRuleError(f"В партии {self._batch_no} недостаточно топлива: "
-                                    f"остаток {self.remaining(used):g} т, требуется {volume:g} т")
-        return volume
+                                    f"остаток {self.remaining(used)}, требуется {mass}")
+        return mass
 
 
 @dataclass(frozen=True)
@@ -304,7 +360,7 @@ class FuelConsumption:
     """Факт расхода топлива на пуск (неизменяемая запись)."""
     launch_id: int
     batch_id: int
-    volume: float
+    mass: Mass
     consumed_at: datetime
     staff_id: int
 

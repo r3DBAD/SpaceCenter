@@ -3,6 +3,9 @@
 Все отчёты реализуют общий интерфейс :class:`Report` и возвращают
 :class:`ReportTable` — независимую от способа отображения структуру.
 Отображение (страница, CSV) — задача слоя View.
+
+ЛР4: отчет строится по одному космодрому или по всем (сводка руководителя центра),
+у каждого отчета свое право доступа (инспектору доступны отчеты по инцидентам).
 """
 from __future__ import annotations
 
@@ -11,12 +14,14 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
 
+from .audit import AuditLogger
 from .database import date_from_db
 from .enums import FuelComponent, LaunchStatus, Permission, PostponeReason, VehicleClass
 from .errors import ValidationError
 from .repositories import Repositories
 from .security import Session
-from .validation import require_date
+from .units import Mass
+from .validation import require_date, require_enum
 
 
 @dataclass(frozen=True)
@@ -61,14 +66,25 @@ class ReportTable:
 
 
 class Report(ABC):
-    """Базовый отчёт. Подклассы определяют ключ, название и способ построения."""
+    """Базовый отчёт. Подклассы определяют ключ, название, права и способ построения."""
 
     key: str
     title: str
+    permissions: tuple[Permission, ...] = (Permission.VIEW_REPORTS,)
 
-    def __init__(self, repos: Repositories, now: datetime):
+    def __init__(self, repos: Repositories, now: datetime, spaceport_id: int | None = None,
+                 reason: PostponeReason | None = None):
         self._repos = repos
         self._now = now
+        self._spaceport = spaceport_id          # None — сводка по всем космодромам
+        self._reason = reason
+
+    def _scope_note(self, table: ReportTable) -> None:
+        if self._spaceport is None:
+            table.notes.append("Сводка по всем космодромам")
+        else:
+            sp = self._repos.spaceports.get(self._spaceport)
+            table.notes.append(f"Космодром {sp.name} ({sp.code})")
 
     @abstractmethod
     def build(self, period: Period) -> ReportTable:
@@ -81,9 +97,9 @@ class LaunchesByVehicleReport(Report):
 
     def build(self, period: Period) -> ReportTable:
         per_type: dict[tuple[str, str], Counter] = defaultdict(Counter)
-        for r in self._repos.launches.stats_by_vehicle(period.start, period.end):
+        for r in self._repos.launches.stats_by_vehicle(period.start, period.end, self._spaceport):
             per_type[(r["name"], r["vehicle_class"])][LaunchStatus(r["status"])] += r["n"]
-        postponed = Counter(self._repos.journal.postponements_by_vehicle(period.start, period.end))
+        postponed = Counter(self._repos.journal.postponements_by_vehicle(period.start, period.end, self._spaceport))
         table = ReportTable(self.title, period, ["Тип РН", "Класс", "Всего", "Выполнено", "Авария",
                                                  "Отменено", "В подготовке", "Переносов"])
         total = Counter()
@@ -100,6 +116,7 @@ class LaunchesByVehicleReport(Report):
                 table.notes.append(f"Доля успешных пусков: {total['Выполнено'] / done:.0%}")
         else:
             table.notes.append("За период пусков нет")
+        self._scope_note(table)
         return table
 
 
@@ -108,22 +125,24 @@ class FuelUsageReport(Report):
     title = "Расход топлива по партиям"
 
     def build(self, period: Period) -> ReportTable:
-        table = ReportTable(self.title, period, ["Партия", "Компонент", "Марка", "Объём, т", "Расход за период, т",
-                                                 "Пусков", "Остаток, т", "Использовано, %", "Годна до"])
-        by_component = Counter()
+        table = ReportTable(self.title, period, ["Космодром", "Партия", "Компонент", "Марка", "Масса", "Расход за период",
+                                                 "Пусков", "Остаток", "Использовано, %", "Годна до"])
+        by_component: Counter = Counter()
         today = self._now.date()
-        for r in self._repos.fuel.batch_usage(period.start, period.end):
-            remaining = round(r["initial_volume"] - r["used_total"], 3)    # остаток вычисляется, не хранится
+        for r in self._repos.fuel.batch_usage(period.start, period.end, self._spaceport):
+            remaining = Mass(r["initial_mass_hg"] - r["used_total"])    # остаток вычисляется, не хранится
             expires = date_from_db(r["expires_on"])
             mark = " (просрочена)" if expires < today else ""
-            table.rows.append([r["batch_no"], FuelComponent(r["component"]).title, r["grade"],
-                               f"{r['initial_volume']:g}", f"{r['used_period']:g}", r["launches"], f"{remaining:g}",
-                               f"{100 * r['used_total'] / r['initial_volume']:.1f}", f"{expires:%d.%m.%Y}{mark}"])
+            table.rows.append([r["spaceport"], r["batch_no"], FuelComponent(r["component"]).title, r["grade"],
+                               Mass(r["initial_mass_hg"]), Mass(r["used_period"]), r["launches"], remaining,
+                               f"{100 * r['used_total'] / r['initial_mass_hg']:.1f}", f"{expires:%d.%m.%Y}{mark}"])
             by_component[FuelComponent(r["component"]).title] += r["used_period"]
-        for comp, v in by_component.items():
-            table.notes.append(f"{comp}: израсходовано за период {v:g} т")
+        for comp, hg in by_component.items():
+            table.notes.append(f"{comp}: израсходовано за период {Mass(hg)}")
         if not table.rows:
             table.notes.append("Партии топлива не зарегистрированы")
+        table.notes.append("Масса учитывается с точностью 0,1 кг")
+        self._scope_note(table)
         return table
 
 
@@ -132,10 +151,11 @@ class PadLoadReport(Report):
     title = "Загрузка стартовых площадок"
 
     def build(self, period: Period) -> ReportTable:
-        table = ReportTable(self.title, period, ["Площадка", "Лимит подготовок", "Подготовок за период",
+        codes = {sp.id: sp.code for sp in self._repos.spaceports.list_all()}
+        table = ReportTable(self.title, period, ["Космодром", "Площадка", "Лимит подготовок", "Подготовок за период",
                                                  "Пусков за период", "Занятость, сут", "Загрузка, %",
                                                  "Циклов до ТО", "Моточасов до ТО", "Состояние"])
-        for pad in self._repos.pads.list_all():
+        for pad in self._repos.pads.list_all(self._spaceport):
             usage = self._repos.pads.usage(pad.id)
             prepared = launched = 0
             busy = timedelta()
@@ -152,49 +172,90 @@ class PadLoadReport(Report):
                     launched += 1
             busy_days = busy.total_seconds() / 86400
             load = 100 * busy_days / (period.days * pad.max_concurrent)
-            table.rows.append([pad.code, pad.max_concurrent, prepared, launched, f"{busy_days:.1f}", f"{load:.1f}",
+            table.rows.append([codes.get(pad.spaceport_id, "?"), pad.code, pad.max_concurrent, prepared, launched, f"{busy_days:.1f}", f"{load:.1f}",
                                max(pad.cycle_limit - usage.cycles_since_maintenance, 0),
                                f"{max(pad.hours_limit - usage.hours_since_maintenance, 0):g}",
                                pad.state(usage).title])
         table.notes.append("Загрузка = суммарная занятость / (дней в периоде × лимит одновременных подготовок)")
+        self._scope_note(table)
         return table
 
 
 class IncidentsReport(Report):
     key = "incidents"
     title = "Нештатные ситуации и переносы"
+    permissions = (Permission.VIEW_REPORTS, Permission.VIEW_INCIDENT_REPORTS)
 
     def build(self, period: Period) -> ReportTable:
         table = ReportTable(self.title, period, ["Категория", "Детализация", "Количество"])
-        incidents = self._repos.journal.incidents_by_system(period.start, period.end)
+        incidents = self._repos.journal.incidents_by_system(period.start, period.end, self._spaceport)
         for system, n in incidents:
             table.rows.append(["НС (потеря сигнала)", system, n])
-        reasons = Counter(p.reason for p in self._repos.journal.postponements(date_from=period.start,
-                                                                              date_to=period.end))
+        reasons = Counter(p.reason for p in self._repos.journal.postponements(
+            date_from=period.start, date_to=period.end, spaceport_id=self._spaceport))
         for reason in PostponeReason:
             if reasons[reason]:
                 table.rows.append(["Перенос пуска", reason.title, reasons[reason]])
         n_inc, n_post = sum(n for _, n in incidents), sum(reasons.values())
         table.notes.append(f"Всего НС: {n_inc}; всего переносов: {n_post}")
+        self._scope_note(table)
+        return table
+
+
+class PostponementStatsReport(Report):
+    """Статистика переносов по месяцам и причинам (ЛР4, Т6.3)."""
+    key = "postponements"
+    title = "Статистика переносов пусков"
+    permissions = (Permission.VIEW_REPORTS, Permission.VIEW_INCIDENT_REPORTS)
+
+    def build(self, period: Period) -> ReportTable:
+        table = ReportTable(self.title, period, ["Месяц", "Причина", "Переносов", "Пусков", "Средний сдвиг окна, ч",
+                                                 "Наибольший сдвиг, ч"])
+        groups: dict[tuple[str, PostponeReason], list] = defaultdict(list)
+        for p in self._repos.journal.postponements(date_from=period.start, date_to=period.end,
+                                                   spaceport_id=self._spaceport, reason=self._reason):
+            groups[(f"{p.recorded_at:%Y-%m}", p.reason)].append(p)
+        order = list(PostponeReason)
+        for (month, reason), items in sorted(groups.items(), key=lambda kv: (kv[0][0], order.index(kv[0][1]))):
+            shifts = [(p.new_window.start - p.old_window.start).total_seconds() / 3600 for p in items]
+            table.rows.append([month, reason.title, len(items), len({p.launch_id for p in items}),
+                               f"{sum(shifts) / len(shifts):.1f}", f"{max(shifts):.1f}"])
+        total = Counter(reason for (_, reason), items in groups.items() for _ in items)
+        if total:
+            table.notes.append("Всего: " + ", ".join(f"{r.title.lower()} {total[r]}" for r in order if total[r]))
+        else:
+            table.notes.append("За период переносов нет")
+        if self._reason:
+            table.notes.append(f"Фильтр по причине: {self._reason.title}")
+        self._scope_note(table)
         return table
 
 
 #: Реестр отчётов: ключ → класс (полиморфный выбор без условных операторов).
 REPORTS: dict[str, type[Report]] = {cls.key: cls for cls in
-                                    (LaunchesByVehicleReport, FuelUsageReport, PadLoadReport, IncidentsReport)}
+                                    (LaunchesByVehicleReport, FuelUsageReport, PadLoadReport, IncidentsReport,
+                                     PostponementStatsReport)}
 
 
 class ReportService:
-    def __init__(self, repos: Repositories, clock):
+    def __init__(self, repos: Repositories, clock, audit: AuditLogger | None = None):
         self._repos = repos
         self._clock = clock
+        self._audit = audit or AuditLogger(repos, clock)
 
     @staticmethod
-    def available() -> list[tuple[str, str]]:
-        return [(key, cls.title) for key, cls in REPORTS.items()]
+    def available(session: Session) -> list[tuple[str, str]]:
+        """Отчеты, доступные роли сотрудника."""
+        return [(key, cls.title) for key, cls in REPORTS.items() if any(session.can(p) for p in cls.permissions)]
 
-    def build(self, session: Session, key: str, period: Period) -> ReportTable:
-        session.require(Permission.VIEW_REPORTS)
+    def build(self, session: Session, key: str, period: Period, spaceport_id: int | None = None,
+              reason: PostponeReason | str | None = None) -> ReportTable:
         if key not in REPORTS:
             raise ValidationError(f"Неизвестный отчёт «{key}»")
-        return REPORTS[key](self._repos, self._clock()).build(period)
+        cls = REPORTS[key]
+        session.require(*cls.permissions)
+        scope = session.scope(spaceport_id)
+        reason = None if reason in (None, "") else require_enum(reason, PostponeReason, "Причина переноса")
+        table = cls(self._repos, self._clock(), scope, reason).build(period)
+        self._audit.record(session, "Формирование отчета", "отчет", key, f"«{cls.title}» за {period}")
+        return table

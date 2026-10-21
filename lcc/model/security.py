@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
+from typing import Callable
 
 from .enums import ROLE_PERMISSIONS, Permission
 from .errors import AccessDeniedError, ValidationError
@@ -36,10 +37,16 @@ class PasswordHasher:
 
 
 class Session:
-    """Аутентифицированный пользователь. Все сервисы Model проверяют права через :meth:`require`."""
+    """Аутентифицированный пользователь. Все сервисы Model проверяют права через :meth:`require`.
 
-    def __init__(self, staff):
+    ЛР4: у сессии есть область видимости. Сотрудник космодрома видит только его данные
+    (:meth:`ensure_spaceport`), роли уровня центра видят все. Отказы передаются в
+    `on_denied`, чтобы аудит записал попытку (Т3.3, П12).
+    """
+
+    def __init__(self, staff, on_denied: Callable[["Session", str], None] | None = None):
         self._staff = staff
+        self._on_denied = on_denied
 
     @property
     def staff(self):
@@ -49,11 +56,37 @@ class Session:
     def staff_id(self) -> int:
         return self._staff.id
 
+    @property
+    def spaceport_id(self) -> int | None:
+        """Космодром сотрудника; None — роль уровня центра."""
+        return self._staff.spaceport_id
+
+    @property
+    def is_global(self) -> bool:
+        return self._staff.spaceport_id is None
+
+    def scope(self, requested: int | None = None) -> int | None:
+        """Фильтр по космодрому для выборок: свой космодром или выбранный руководителем центра."""
+        if self.is_global:
+            return requested
+        if requested is not None:
+            self.ensure_spaceport(requested)
+        return self._staff.spaceport_id
+
     def can(self, permission: Permission) -> bool:
         return permission in ROLE_PERMISSIONS[self._staff.role]
 
     def require(self, *permissions: Permission) -> None:
         """Требуется хотя бы одно из перечисленных прав."""
         if not any(self.can(p) for p in permissions):
-            raise AccessDeniedError(
-                f"Недостаточно прав: роль «{self._staff.role.title}» не может выполнить эту операцию")
+            self._deny(f"Недостаточно прав: роль «{self._staff.role.title}» не может выполнить эту операцию")
+
+    def ensure_spaceport(self, spaceport_id: int) -> None:
+        """Объект должен относиться к космодрому сотрудника (роли центра проходят всегда)."""
+        if not self.is_global and spaceport_id != self._staff.spaceport_id:
+            self._deny("Нет доступа к данным другого космодрома")
+
+    def _deny(self, message: str) -> None:
+        if self._on_denied is not None:
+            self._on_denied(self, message)
+        raise AccessDeniedError(message)

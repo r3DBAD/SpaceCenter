@@ -7,13 +7,17 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from .audit import AuditRecord
 from .database import Database, date_from_db, date_to_db, dt_from_db, dt_to_db
 from .entities import (FuelBatch, FuelConsumption, Launch, LaunchPad, LaunchWindow, MaintenanceRecord,
-                       PadUsage, Staff, TelemetryChannel, VehicleType)
-from .enums import (ACTIVE_STATUSES, FuelComponent, LaunchStatus, MaintenanceKind, PostponeReason, Role,
-                    VehicleClass)
+                       PadUsage, Spaceport, Staff, TelemetryChannel, VehicleType)
+from .enums import (ACTIVE_STATUSES, ForecastSource, ForecastStatus, FuelComponent, LaunchStatus, MaintenanceKind,
+                    PostponeReason, Role, VehicleClass)
 from .errors import BusinessRuleError, NotFoundError
+from .forecast import ForecastRecord
 from .journal import Incident, Postponement
+from .meteo_client import Forecast
+from .units import Mass
 from .weather import WeatherObservation
 
 _ACTIVE = tuple(s.value for s in ACTIVE_STATUSES)
@@ -28,7 +32,8 @@ class Repository:
     #: Допустимые (таблица, колонка номера, колонка родителя) для составных ключей зависимых сущностей.
     _SEQ_KEYS = frozenset({("pad_maintenance", "maint_no", "pad_id"), ("stage_log", "seq_no", "launch_id"),
                            ("weather_observation", "obs_no", "launch_id"),
-                           ("postponement", "postpone_no", "launch_id")})
+                           ("postponement", "postpone_no", "launch_id"),
+                           ("weather_forecast", "forecast_no", "launch_id")})
 
     def _next_no(self, table_col: tuple[str, str, str], parent_id: int) -> int:
         """Следующий порядковый номер зависимой сущности (часть составного PK)."""
@@ -40,14 +45,45 @@ class Repository:
         return int(value)
 
 
+#: Условие «пуск относится к космодрому ?» (пусто — все). Пуск связан с космодромом через площадку.
+_LAUNCH_SPACEPORT = "(? IS NULL OR l.pad_id IN (SELECT pad_id FROM launch_pad WHERE spaceport_id = ?))"
+#: То же для записей журналов (НС, переносы), у которых есть только launch_id.
+_RECORD_SPACEPORT = ("(? IS NULL OR launch_id IN (SELECT l.launch_id FROM launch l "
+                     "JOIN launch_pad p ON p.pad_id = l.pad_id WHERE p.spaceport_id = ?))")
+
+
+# ---------------------------------------------------------------- космодромы
+class SpaceportRepository(Repository):
+    def add(self, sp: Spaceport) -> Spaceport:
+        if self._db.scalar("SELECT 1 FROM spaceport WHERE code = ?", (sp.code,)):
+            raise BusinessRuleError(f"Космодром с кодом {sp.code} уже существует")
+        cur = self._db.execute("INSERT INTO spaceport(code, name, region) VALUES (?,?,?)", (sp.code, sp.name, sp.region))
+        sp.assign_id(cur.lastrowid)
+        return sp
+
+    def get(self, spaceport_id: int) -> Spaceport:
+        row = self._db.query_one("SELECT * FROM spaceport WHERE spaceport_id = ?", (spaceport_id,))
+        if not row:
+            raise NotFoundError(f"Космодром №{spaceport_id} не найден")
+        return self._row(row)
+
+    def list_all(self) -> list[Spaceport]:
+        return [self._row(r) for r in self._db.query("SELECT * FROM spaceport ORDER BY code")]
+
+    @staticmethod
+    def _row(r) -> Spaceport:
+        return Spaceport(r["code"], r["name"], r["region"], r["spaceport_id"])
+
+
 # ---------------------------------------------------------------- персонал
 class StaffRepository(Repository):
     def add(self, s: Staff) -> Staff:
         if self.find_by_login(s.login):
             raise BusinessRuleError(f"Логин «{s.login}» уже занят")
         cur = self._db.execute(
-            "INSERT INTO staff(login, full_name, role, password_hash, password_salt, is_active) VALUES (?,?,?,?,?,?)",
-            (s.login, s.full_name, s.role.value, s.password_hash, s.password_salt, int(s.is_active)))
+            "INSERT INTO staff(login, full_name, role, password_hash, password_salt, is_active, spaceport_id) "
+            "VALUES (?,?,?,?,?,?,?)",
+            (s.login, s.full_name, s.role.value, s.password_hash, s.password_salt, int(s.is_active), s.spaceport_id))
         s.assign_id(cur.lastrowid)
         return s
 
@@ -74,7 +110,7 @@ class StaffRepository(Repository):
     @staticmethod
     def _row(r) -> Staff:
         return Staff(r["login"], r["full_name"], Role(r["role"]), r["password_hash"], r["password_salt"],
-                     bool(r["is_active"]), r["staff_id"])
+                     bool(r["is_active"]), r["staff_id"], r["spaceport_id"])
 
 
 # ---------------------------------------------------------------- типы РН
@@ -107,9 +143,9 @@ class LaunchPadRepository(Repository):
         if self._db.scalar("SELECT 1 FROM launch_pad WHERE code = ?", (p.code,)):
             raise BusinessRuleError(f"Площадка с кодом {p.code} уже существует")
         cur = self._db.execute(
-            "INSERT INTO launch_pad(code, name, max_concurrent, cycle_limit, hours_limit, is_faulty) "
-            "VALUES (?,?,?,?,?,?)",
-            (p.code, p.name, p.max_concurrent, p.cycle_limit, p.hours_limit, int(p.is_faulty)))
+            "INSERT INTO launch_pad(spaceport_id, code, name, max_concurrent, cycle_limit, hours_limit, is_faulty) "
+            "VALUES (?,?,?,?,?,?,?)",
+            (p.spaceport_id, p.code, p.name, p.max_concurrent, p.cycle_limit, p.hours_limit, int(p.is_faulty)))
         p.assign_id(cur.lastrowid)
         return p
 
@@ -122,8 +158,9 @@ class LaunchPadRepository(Repository):
             raise NotFoundError(f"Площадка №{pad_id} не найдена")
         return self._row(row)
 
-    def list_all(self) -> list[LaunchPad]:
-        return [self._row(r) for r in self._db.query("SELECT * FROM launch_pad ORDER BY code")]
+    def list_all(self, spaceport_id: int | None = None) -> list[LaunchPad]:
+        return [self._row(r) for r in self._db.query(
+            "SELECT * FROM launch_pad WHERE (? IS NULL OR spaceport_id = ?) ORDER BY code", (spaceport_id, spaceport_id))]
 
     def usage(self, pad_id: int) -> PadUsage:
         """Вычислить циклы и моточасы с последнего закрытого ТО, открытое ТО, активные подготовки."""
@@ -168,7 +205,7 @@ class LaunchPadRepository(Repository):
     @staticmethod
     def _row(r) -> LaunchPad:
         return LaunchPad(r["code"], r["name"], r["max_concurrent"], r["cycle_limit"], r["hours_limit"],
-                         bool(r["is_faulty"]), r["pad_id"])
+                         bool(r["is_faulty"]), r["pad_id"], r["spaceport_id"])
 
 
 # ---------------------------------------------------------------- пуски
@@ -194,14 +231,20 @@ class LaunchRepository(Repository):
             raise NotFoundError(f"Пуск №{launch_id} не найден")
         return self._row(row)
 
-    def list_all(self, statuses: tuple[LaunchStatus, ...] | None = None) -> list[Launch]:
-        if not statuses:
-            rows = self._db.query("SELECT * FROM launch ORDER BY window_start")
-        else:
-            marks = ",".join("?" * len(statuses))
-            rows = self._db.query(f"SELECT * FROM launch WHERE status IN ({marks}) ORDER BY window_start",
-                                  tuple(s.value for s in statuses))
-        return [self._row(r) for r in rows]
+    def list_all(self, statuses: tuple[LaunchStatus, ...] | None = None,
+                 spaceport_id: int | None = None) -> list[Launch]:
+        sql, params = f"SELECT * FROM launch l WHERE {_LAUNCH_SPACEPORT}", [spaceport_id, spaceport_id]
+        if statuses:
+            sql += f" AND l.status IN ({','.join('?' * len(statuses))})"
+            params += [s.value for s in statuses]
+        return [self._row(r) for r in self._db.query(sql + " ORDER BY l.window_start", tuple(params))]
+
+    def labels(self) -> dict[int, tuple[str, str]]:
+        """Номер пуска → (тип РН, код космодрома). Минимум сведений для журналов инспектора (П11)."""
+        rows = self._db.query("SELECT l.launch_id, v.name, sp.code FROM launch l "
+                              "JOIN vehicle_type v ON v.vehicle_type_id = l.vehicle_type_id "
+                              "JOIN launch_pad p ON p.pad_id = l.pad_id JOIN spaceport sp ON sp.spaceport_id = p.spaceport_id")
+        return {r["launch_id"]: (r["name"], r["code"]) for r in rows}
 
     def count_active_on_pad(self, pad_id: int) -> int:
         return self._db.scalar(f"SELECT COUNT(*) FROM launch WHERE pad_id = ? AND status IN ({_ACTIVE_SQL})",
@@ -220,13 +263,14 @@ class LaunchRepository(Repository):
         return [(r["seq_no"], LaunchStatus(r["status"]), dt_from_db(r["changed_at"]), r["full_name"]) for r in rows]
 
     # --- выборки для отчётов
-    def stats_by_vehicle(self, date_from: datetime, date_to: datetime) -> list[dict]:
+    def stats_by_vehicle(self, date_from: datetime, date_to: datetime, spaceport_id: int | None = None) -> list[dict]:
         """Количество пусков по типам РН и статусам (по началу стартового окна)."""
         rows = self._db.query(
             "SELECT v.name, v.vehicle_class, l.status, COUNT(*) AS n FROM launch l "
             "JOIN vehicle_type v ON v.vehicle_type_id = l.vehicle_type_id "
-            "WHERE l.window_start BETWEEN ? AND ? GROUP BY v.name, v.vehicle_class, l.status ORDER BY v.name",
-            (dt_to_db(date_from), dt_to_db(date_to)))
+            f"WHERE l.window_start BETWEEN ? AND ? AND {_LAUNCH_SPACEPORT} "
+            "GROUP BY v.name, v.vehicle_class, l.status ORDER BY v.name",
+            (dt_to_db(date_from), dt_to_db(date_to), spaceport_id, spaceport_id))
         return [dict(r) for r in rows]
 
     def occupancy(self, pad_id: int) -> list[dict]:
@@ -250,13 +294,15 @@ class LaunchRepository(Repository):
 
 # ---------------------------------------------------------------- топливо
 class FuelRepository(Repository):
+    """Масса хранится целым числом гектограммов (ЛР4, Т5.1), наружу отдается :class:`Mass`."""
+
     def add_batch(self, b: FuelBatch) -> FuelBatch:
         if self._db.scalar("SELECT 1 FROM fuel_batch WHERE batch_no = ?", (b.batch_no,)):
             raise BusinessRuleError(f"Партия {b.batch_no} уже зарегистрирована")
         cur = self._db.execute(
-            "INSERT INTO fuel_batch(batch_no, component, grade, initial_volume, produced_on, expires_on) "
-            "VALUES (?,?,?,?,?,?)", (b.batch_no, b.component.value, b.grade, b.initial_volume,
-                                     date_to_db(b.produced_on), date_to_db(b.expires_on)))
+            "INSERT INTO fuel_batch(spaceport_id, batch_no, component, grade, initial_mass_hg, produced_on, expires_on) "
+            "VALUES (?,?,?,?,?,?,?)", (b.spaceport_id, b.batch_no, b.component.value, b.grade, b.initial_mass.hg,
+                                       date_to_db(b.produced_on), date_to_db(b.expires_on)))
         b.assign_id(cur.lastrowid)
         return b
 
@@ -266,40 +312,51 @@ class FuelRepository(Repository):
             raise NotFoundError(f"Партия №{batch_id} не найдена")
         return self._batch(row)
 
-    def list_batches(self) -> list[FuelBatch]:
-        return [self._batch(r) for r in self._db.query("SELECT * FROM fuel_batch ORDER BY expires_on")]
+    def list_batches(self, spaceport_id: int | None = None) -> list[FuelBatch]:
+        return [self._batch(r) for r in self._db.query(
+            "SELECT * FROM fuel_batch WHERE (? IS NULL OR spaceport_id = ?) ORDER BY expires_on",
+            (spaceport_id, spaceport_id))]
 
-    def used_volume(self, batch_id: int) -> float:
-        return float(self._db.scalar("SELECT COALESCE(SUM(volume), 0) FROM fuel_consumption WHERE batch_id = ?",
-                                     (batch_id,)))
+    def used_mass(self, batch_id: int) -> Mass:
+        return Mass(int(self._db.scalar("SELECT COALESCE(SUM(mass_hg), 0) FROM fuel_consumption WHERE batch_id = ?",
+                                        (batch_id,))))
 
     def add_consumption(self, c: FuelConsumption) -> None:
-        self._db.execute("INSERT INTO fuel_consumption(launch_id, batch_id, volume, consumed_at, staff_id) "
+        self._db.execute("INSERT INTO fuel_consumption(launch_id, batch_id, mass_hg, consumed_at, staff_id) "
                          "VALUES (?,?,?,?,?)",
-                         (c.launch_id, c.batch_id, c.volume, dt_to_db(c.consumed_at), c.staff_id))
+                         (c.launch_id, c.batch_id, c.mass.hg, dt_to_db(c.consumed_at), c.staff_id))
 
-    def loaded_by_component(self, launch_id: int) -> dict[FuelComponent, float]:
+    def loaded_by_component(self, launch_id: int) -> dict[FuelComponent, Mass]:
         rows = self._db.query(
-            "SELECT b.component, SUM(c.volume) AS v FROM fuel_consumption c JOIN fuel_batch b "
+            "SELECT b.component, SUM(c.mass_hg) AS m FROM fuel_consumption c JOIN fuel_batch b "
             "ON b.batch_id = c.batch_id WHERE c.launch_id = ? GROUP BY b.component", (launch_id,))
-        return {FuelComponent(r["component"]): float(r["v"]) for r in rows}
+        return {FuelComponent(r["component"]): Mass(int(r["m"])) for r in rows}
 
-    def batch_usage(self, date_from: datetime, date_to: datetime) -> list[dict]:
-        """Для отчёта: расход по каждой партии за период и всего."""
+    def loaded_batches(self, launch_id: int) -> list[FuelBatch]:
+        """Партии, из которых заправлен пуск: нужны для проверки срока годности в баке (П8)."""
+        return [self._batch(r) for r in self._db.query(
+            "SELECT DISTINCT b.* FROM fuel_batch b JOIN fuel_consumption c ON c.batch_id = b.batch_id "
+            "WHERE c.launch_id = ? ORDER BY b.batch_no", (launch_id,))]
+
+    def batch_usage(self, date_from: datetime, date_to: datetime, spaceport_id: int | None = None) -> list[dict]:
+        """Для отчета: расход по каждой партии за период и всего (в гектограммах)."""
         rows = self._db.query(
-            "SELECT b.batch_id, b.batch_no, b.component, b.grade, b.initial_volume, b.expires_on, "
-            "COALESCE(SUM(CASE WHEN c.consumed_at BETWEEN ? AND ? THEN c.volume END), 0) AS used_period, "
-            "COALESCE(SUM(c.volume), 0) AS used_total, "
+            "SELECT b.batch_id, b.batch_no, b.component, b.grade, b.initial_mass_hg, b.expires_on, sp.code AS spaceport, "
+            "COALESCE(SUM(CASE WHEN c.consumed_at BETWEEN ? AND ? THEN c.mass_hg END), 0) AS used_period, "
+            "COALESCE(SUM(c.mass_hg), 0) AS used_total, "
             "COUNT(DISTINCT CASE WHEN c.consumed_at BETWEEN ? AND ? THEN c.launch_id END) AS launches "
-            "FROM fuel_batch b LEFT JOIN fuel_consumption c ON c.batch_id = b.batch_id "
-            "GROUP BY b.batch_id ORDER BY b.component, b.batch_no",
-            (dt_to_db(date_from), dt_to_db(date_to), dt_to_db(date_from), dt_to_db(date_to)))
+            "FROM fuel_batch b JOIN spaceport sp ON sp.spaceport_id = b.spaceport_id "
+            "LEFT JOIN fuel_consumption c ON c.batch_id = b.batch_id "
+            "WHERE (? IS NULL OR b.spaceport_id = ?) "
+            "GROUP BY b.batch_id ORDER BY sp.code, b.component, b.batch_no",
+            (dt_to_db(date_from), dt_to_db(date_to), dt_to_db(date_from), dt_to_db(date_to), spaceport_id, spaceport_id))
         return [dict(r) for r in rows]
 
     @staticmethod
     def _batch(r) -> FuelBatch:
-        return FuelBatch(r["batch_no"], FuelComponent(r["component"]), r["grade"], r["initial_volume"],
-                         date_from_db(r["produced_on"]), date_from_db(r["expires_on"]), r["batch_id"])
+        return FuelBatch(r["batch_no"], FuelComponent(r["component"]), r["grade"], Mass(r["initial_mass_hg"]),
+                         date_from_db(r["produced_on"]), date_from_db(r["expires_on"]), r["batch_id"],
+                         r["spaceport_id"])
 
 
 # ---------------------------------------------------------------- метео
@@ -371,39 +428,100 @@ class JournalRepository(Repository):
                       key=lambda rec: rec.recorded_at)
 
     def incidents(self, launch_id: int | None = None, date_from: datetime | None = None,
-                  date_to: datetime | None = None) -> list[Incident]:
+                  date_to: datetime | None = None, spaceport_id: int | None = None) -> list[Incident]:
         rows = self._db.query(
             "SELECT * FROM incident WHERE (? IS NULL OR launch_id = ?) AND (? IS NULL OR occurred_at >= ?) "
-            "AND (? IS NULL OR occurred_at <= ?) ORDER BY occurred_at",
-            (launch_id, launch_id, dt_to_db(date_from), dt_to_db(date_from), dt_to_db(date_to), dt_to_db(date_to)))
+            f"AND (? IS NULL OR occurred_at <= ?) AND {_RECORD_SPACEPORT} "
+            "ORDER BY occurred_at",
+            (launch_id, launch_id, dt_to_db(date_from), dt_to_db(date_from), dt_to_db(date_to), dt_to_db(date_to),
+             spaceport_id, spaceport_id))
         return [Incident(r["launch_id"], r["channel_id"], dt_from_db(r["occurred_at"]), r["description"],
                          r["measures"], r["staff_id"]) for r in rows]
 
     def postponements(self, launch_id: int | None = None, date_from: datetime | None = None,
-                      date_to: datetime | None = None) -> list[Postponement]:
+                      date_to: datetime | None = None, spaceport_id: int | None = None,
+                      reason: PostponeReason | None = None) -> list[Postponement]:
+        """Журнал переносов с фильтром по причине и космодрому (ЛР4, Т6.2). Индекс ix_postponement_reason."""
         rows = self._db.query(
-            "SELECT * FROM postponement WHERE (? IS NULL OR launch_id = ?) AND (? IS NULL OR recorded_at >= ?) "
-            "AND (? IS NULL OR recorded_at <= ?) ORDER BY recorded_at",
-            (launch_id, launch_id, dt_to_db(date_from), dt_to_db(date_from), dt_to_db(date_to), dt_to_db(date_to)))
+            "SELECT * FROM postponement WHERE (? IS NULL OR launch_id = ?) AND (? IS NULL OR reason = ?) "
+            "AND (? IS NULL OR recorded_at >= ?) AND (? IS NULL OR recorded_at <= ?) "
+            f"AND {_RECORD_SPACEPORT} "
+            "ORDER BY recorded_at",
+            (launch_id, launch_id, reason and reason.value, reason and reason.value, dt_to_db(date_from),
+             dt_to_db(date_from), dt_to_db(date_to), dt_to_db(date_to), spaceport_id, spaceport_id))
         return [Postponement(r["launch_id"], PostponeReason(r["reason"]),
                              LaunchWindow(dt_from_db(r["old_start"]), dt_from_db(r["old_end"])),
                              LaunchWindow(dt_from_db(r["new_start"]), dt_from_db(r["new_end"])),
                              r["comment"], r["staff_id"], dt_from_db(r["recorded_at"])) for r in rows]
 
-    def postponements_by_vehicle(self, date_from: datetime, date_to: datetime) -> dict[str, int]:
+    def postponements_by_vehicle(self, date_from: datetime, date_to: datetime,
+                                 spaceport_id: int | None = None) -> dict[str, int]:
         rows = self._db.query(
             "SELECT v.name, COUNT(*) AS n FROM postponement p JOIN launch l ON l.launch_id = p.launch_id "
             "JOIN vehicle_type v ON v.vehicle_type_id = l.vehicle_type_id "
-            "WHERE p.recorded_at BETWEEN ? AND ? GROUP BY v.name", (dt_to_db(date_from), dt_to_db(date_to)))
+            f"WHERE p.recorded_at BETWEEN ? AND ? AND {_LAUNCH_SPACEPORT} GROUP BY v.name",
+            (dt_to_db(date_from), dt_to_db(date_to), spaceport_id, spaceport_id))
         return {r["name"]: r["n"] for r in rows}
 
-    def incidents_by_system(self, date_from: datetime, date_to: datetime) -> list[tuple[str, int]]:
+    def incidents_by_system(self, date_from: datetime, date_to: datetime,
+                            spaceport_id: int | None = None) -> list[tuple[str, int]]:
         rows = self._db.query(
             "SELECT COALESCE(ch.vehicle_system, 'не определена') AS sys, COUNT(*) AS n FROM incident i "
+            "JOIN launch l ON l.launch_id = i.launch_id "
             "LEFT JOIN telemetry_channel ch ON ch.channel_id = i.channel_id "
-            "WHERE i.occurred_at BETWEEN ? AND ? GROUP BY sys ORDER BY n DESC, sys",
-            (dt_to_db(date_from), dt_to_db(date_to)))
+            f"WHERE i.occurred_at BETWEEN ? AND ? AND {_LAUNCH_SPACEPORT} GROUP BY sys ORDER BY n DESC, sys",
+            (dt_to_db(date_from), dt_to_db(date_to), spaceport_id, spaceport_id))
         return [(r["sys"], r["n"]) for r in rows]
+
+
+# ---------------------------------------------------------------- прогнозы (ЛР4)
+class ForecastRepository(Repository):
+    def add(self, rec: ForecastRecord) -> ForecastRecord:
+        no = self._next_no(("weather_forecast", "forecast_no", "launch_id"), rec.launch_id)
+        f = rec.forecast
+        self._db.execute(
+            "INSERT INTO weather_forecast(launch_id, forecast_no, window_start, requested_at, source, status, valid_at, "
+            "ground_wind, altitude_wind, temperature, cloud_base, thunderstorm, details, staff_id) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (rec.launch_id, no, dt_to_db(rec.window_start), dt_to_db(rec.requested_at), rec.source.value,
+             rec.status.value, dt_to_db(f.valid_at) if f else None, f and f.ground_wind, f and f.altitude_wind,
+             f and f.temperature, f and f.cloud_base, None if f is None else int(f.thunderstorm), rec.details,
+             rec.staff_id))
+        return self.latest(rec.launch_id, rec.window_start)
+
+    def latest(self, launch_id: int, window_start: datetime) -> ForecastRecord | None:
+        r = self._db.query_one("SELECT * FROM weather_forecast WHERE launch_id = ? AND window_start = ? "
+                               "ORDER BY forecast_no DESC LIMIT 1", (launch_id, dt_to_db(window_start)))
+        return self._row(r) if r else None
+
+    @staticmethod
+    def _row(r) -> ForecastRecord:
+        f = None
+        if r["ground_wind"] is not None:
+            f = Forecast(dt_from_db(r["valid_at"]), r["ground_wind"], r["altitude_wind"], r["temperature"],
+                         bool(r["thunderstorm"]), r["cloud_base"])
+        return ForecastRecord(r["launch_id"], dt_from_db(r["window_start"]), dt_from_db(r["requested_at"]),
+                              ForecastSource(r["source"]), ForecastStatus(r["status"]), f, r["details"],
+                              r["staff_id"], r["forecast_no"])
+
+
+# ---------------------------------------------------------------- аудит (ЛР4)
+class AuditRepository(Repository):
+    """Только добавление и чтение: методов изменения и удаления нет."""
+
+    def add(self, a: AuditRecord) -> None:
+        self._db.execute("INSERT INTO audit_log(recorded_at, staff_id, role, action, object_type, object_ref, outcome, "
+                         "details) VALUES (?,?,?,?,?,?,?,?)",
+                         (dt_to_db(a.recorded_at), a.staff_id, a.role.value, a.action, a.object_type, a.object_ref,
+                          a.outcome, a.details))
+
+    def list(self, date_from: datetime, date_to: datetime, login: str | None = None) -> list[AuditRecord]:
+        rows = self._db.query(
+            "SELECT a.*, s.login FROM audit_log a JOIN staff s ON s.staff_id = a.staff_id "
+            "WHERE a.recorded_at BETWEEN ? AND ? AND (? IS NULL OR s.login = ?) ORDER BY a.recorded_at, a.audit_id",
+            (dt_to_db(date_from), dt_to_db(date_to), login, login))
+        return [AuditRecord(dt_from_db(r["recorded_at"]), r["staff_id"], r["login"], Role(r["role"]), r["action"],
+                            r["object_type"], r["object_ref"], r["outcome"], r["details"]) for r in rows]
 
 
 class Repositories:
@@ -411,6 +529,9 @@ class Repositories:
 
     def __init__(self, db: Database):
         self.db = db
+        self.spaceports = SpaceportRepository(db)
+        self.forecasts = ForecastRepository(db)
+        self.audit = AuditRepository(db)
         self.staff = StaffRepository(db)
         self.vehicle_types = VehicleTypeRepository(db)
         self.pads = LaunchPadRepository(db)

@@ -8,11 +8,12 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
-from .entities import Launch, LaunchPad, PadUsage
+from .entities import FuelBatch, Launch, LaunchPad, PadUsage
 from .enums import FuelComponent, LaunchStatus, Permission
 from .errors import BusinessRuleError
+from .units import Mass
 from .weather import WeatherLimits, WeatherObservation
 
 
@@ -23,9 +24,18 @@ class StageContext:
     pad: LaunchPad
     pad_usage: PadUsage
     now: datetime
-    fuel_loaded: dict[FuelComponent, float] = field(default_factory=dict)
+    fuel_loaded: dict[FuelComponent, Mass] = field(default_factory=dict)
     last_weather: WeatherObservation | None = None
     weather_limits: WeatherLimits = field(default_factory=WeatherLimits)
+    loaded_batches: list[FuelBatch] = field(default_factory=list)
+
+
+def ensure_fuel_not_expired(batches: list[FuelBatch], on: date) -> None:
+    """Топливо в баке не должно быть из просроченной партии (ЛР4, П8)."""
+    expired = [f"{b.batch_no} (годна до {b.expires_on:%d.%m.%Y})" for b in batches if b.is_expired(on)]
+    if expired:
+        raise BusinessRuleError("РН заправлена топливом из просроченной партии: " + ", ".join(expired)
+                                + ". Нужен слив и повторная заправка или отмена пуска")
 
 
 class PreparationStage(ABC):
@@ -76,7 +86,7 @@ class FuelingStage(PreparationStage):
     title = "Заправка завершена — начать предстартовый контроль"
 
     def check_completion(self, ctx: StageContext) -> None:
-        missing = [c.title.lower() for c in FuelComponent if ctx.fuel_loaded.get(c, 0) <= 0]
+        missing = [c.title.lower() for c in FuelComponent if ctx.fuel_loaded.get(c, Mass.zero()).hg <= 0]
         if missing:
             raise BusinessRuleError("Заправка не завершена: не заправлено — " + ", ".join(missing))
 
@@ -90,6 +100,7 @@ class PrelaunchCheckStage(PreparationStage):
 
     def check_completion(self, ctx: StageContext) -> None:
         ctx.pad.ensure_operational(ctx.pad_usage)
+        ensure_fuel_not_expired(ctx.loaded_batches, ctx.now.date())
         obs = ctx.last_weather
         if obs is None or ctx.now - obs.observed_at > self.WEATHER_MAX_AGE:
             raise BusinessRuleError("Нет актуальных метеоданных (не старше 3 ч) — обратитесь к метеорологу")

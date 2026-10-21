@@ -22,8 +22,12 @@ class WeatherLimits:
         if self.min_temperature >= self.max_temperature:
             raise ValidationError("Минимальная температура должна быть ниже максимальной")
 
-    def violations(self, obs: "WeatherObservation") -> list[str]:
-        """Список нарушений; пустой список — метеоусловия допускают пуск."""
+    def violations(self, obs) -> list[str]:
+        """Список нарушений; пустой список — метеоусловия допускают пуск.
+
+        Принимает и фактическое наблюдение, и прогноз (ЛР4, П5: один критерий для
+        автоматического и ручного источника). В прогнозе облачности может не быть.
+        """
         result = []
         if obs.ground_wind > self.max_ground_wind:
             result.append(f"ветер у земли {obs.ground_wind:g} м/с > {self.max_ground_wind:g} м/с")
@@ -32,7 +36,7 @@ class WeatherLimits:
         if not (self.min_temperature <= obs.temperature <= self.max_temperature):
             result.append(f"температура {obs.temperature:g} °C вне диапазона "
                           f"[{self.min_temperature:g}; {self.max_temperature:g}] °C")
-        if obs.cloud_base < self.min_cloud_base:
+        if obs.cloud_base is not None and obs.cloud_base < self.min_cloud_base:
             result.append(f"нижняя граница облачности {obs.cloud_base:g} м < {self.min_cloud_base:g} м")
         if obs.thunderstorm and not self.thunderstorm_allowed:
             result.append("грозовая активность в районе старта")
