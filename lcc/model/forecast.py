@@ -85,9 +85,8 @@ class ForecastService:
     def due(self) -> list[Launch]:
         """Пуски, которым пора запросить прогноз."""
         now, result = self._now(), []
-        for launch in self._repos.launches.list_all():
-            if launch.status in FINAL_STATUSES or not self.in_lead_time(launch, now):
-                continue
+        # ЛР5: отбор по окну и статусу делает SQL (индекс ix_launch_window), а не перебор всех пусков в Python
+        for launch in self._repos.launches.starting_between(now, now + self.LEAD_TIME):
             last = self._repos.forecasts.latest(launch.id, launch.window.start)
             if last is None or (last.status is ForecastStatus.UNAVAILABLE and last.source is ForecastSource.AUTO
                                 and now - last.requested_at >= self.RETRY_AFTER):
@@ -142,7 +141,7 @@ class ForecastService:
     def upcoming(self, session: Session, spaceport_id: int | None = None) -> list[tuple[Launch, ForecastRecord | None]]:
         """Пуски с окном в ближайшие 48 часов и последний прогноз по каждому (вкладка «Метео»)."""
         session.require(Permission.REQUEST_FORECAST, Permission.RECORD_WEATHER)
-        now = self._now()
-        launches = self._repos.launches.list_all(spaceport_id=session.scope(spaceport_id))
-        return [(l, self.latest(l)) for l in launches
-                if l.status not in FINAL_STATUSES and now < l.window.start <= now + 2 * self.LEAD_TIME]
+        now, scope = self._now(), session.scope(spaceport_id)
+        launches = self._repos.launches.starting_between(now, now + 2 * self.LEAD_TIME)
+        pads = {p.id: p.spaceport_id for p in self._repos.pads.list_all(scope)}
+        return [(l, self.latest(l)) for l in launches if l.pad_id in pads]

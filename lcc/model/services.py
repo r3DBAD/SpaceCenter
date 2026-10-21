@@ -149,6 +149,11 @@ class ReferenceService(Service):
         self._repos.spaceports.get(pad.spaceport_id)
         return self._repos.pads.add(pad)
 
+    def list_pads_brief(self, session: Session, spaceport_id: int | None = None) -> list[LaunchPad]:
+        """Площадки без показателей загрузки — для подписей в списках (ЛР5: usage не нужен, это 3 запроса на площадку)."""
+        session.require(Permission.VIEW_SCHEDULE)
+        return self._repos.pads.list_all(session.scope(spaceport_id))
+
     def list_pads(self, session: Session, spaceport_id: int | None = None) -> list[tuple[LaunchPad, PadUsage]]:
         session.require(Permission.VIEW_SCHEDULE)
         return [(p, self._repos.pads.usage(p.id)) for p in self._repos.pads.list_all(session.scope(spaceport_id))]
@@ -240,9 +245,14 @@ class LaunchService(Service):
         return launch
 
     def list_launches(self, session: Session, statuses: tuple[LaunchStatus, ...] | None = None,
-                      spaceport_id: int | None = None) -> list[Launch]:
+                      spaceport_id: int | None = None, vehicle_type_id: int | None = None) -> list[Launch]:
+        """Расписание и поиск пусков: фильтры по космодрому, типу носителя и статусу выполняет SQL."""
         session.require(Permission.VIEW_SCHEDULE)
-        return self._repos.launches.list_all(statuses, session.scope(spaceport_id))
+        if vehicle_type_id is not None:
+            vehicle_type_id = require_int(vehicle_type_id, "Тип РН", min_value=1)
+        if statuses:
+            statuses = tuple(require_enum(s, LaunchStatus, "Статус") for s in statuses)
+        return self._repos.launches.list_all(statuses, session.scope(spaceport_id), vehicle_type_id)
 
     def launch_card(self, session: Session, launch_id: int) -> LaunchCard:
         session.require(Permission.VIEW_SCHEDULE)
@@ -345,7 +355,8 @@ class FuelService(Service):
     def list_batches(self, session: Session, spaceport_id: int | None = None) -> list[tuple[FuelBatch, Mass]]:
         """Партии с вычисленным остатком."""
         session.require(Permission.MANAGE_FUEL, Permission.VIEW_REPORTS)
-        return [(b, b.remaining(self._repos.fuel.used_mass(b.id)))
+        used = self._repos.fuel.used_by_batch()            # один запрос вместо запроса на каждую партию
+        return [(b, b.remaining(used.get(b.id, Mass.zero())))
                 for b in self._repos.fuel.list_batches(session.scope(spaceport_id))]
 
     def refuel(self, session: Session, launch_id: int, batch_id: int, mass_kg) -> Mass:

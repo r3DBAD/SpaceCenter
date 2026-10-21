@@ -13,6 +13,7 @@ from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
+from functools import cached_property
 
 from .audit import AuditLogger
 from .database import date_from_db
@@ -40,11 +41,12 @@ class Period:
         if self.days > self.MAX_DAYS:
             raise ValidationError("Период отчёта не может превышать 10 лет")
 
-    @property
+    # ЛР5: границы периода вычисляются один раз (в отчете по площадкам их читали ~92 тыс. раз)
+    @cached_property
     def start(self) -> datetime:
         return datetime.combine(self.date_from, time.min)
 
-    @property
+    @cached_property
     def end(self) -> datetime:
         return datetime.combine(self.date_to, time(23, 59))
 
@@ -152,24 +154,23 @@ class PadLoadReport(Report):
 
     def build(self, period: Period) -> ReportTable:
         codes = {sp.id: sp.code for sp in self._repos.spaceports.list_all()}
+        # занятость считается потоком по строкам курсора: [занятость, подготовок, пусков] на площадку
+        acc: dict[int, list] = {}
+        p_start, p_end, finals = period.start, period.end, (LaunchStatus.LAUNCHED.value, LaunchStatus.FAILED.value)
+        for pad_id, status, started, finished in self._repos.launches.iter_occupancy(p_start, p_end, self._spaceport):
+            a = acc.setdefault(pad_id, [timedelta(), 0, 0])
+            start, end = max(started, p_start), min(finished or self._now, p_end)
+            if end > start:
+                a[0] += end - start
+                a[1] += 1
+            if finished and status in finals and p_start <= finished <= p_end:
+                a[2] += 1
         table = ReportTable(self.title, period, ["Космодром", "Площадка", "Лимит подготовок", "Подготовок за период",
                                                  "Пусков за период", "Занятость, сут", "Загрузка, %",
                                                  "Циклов до ТО", "Моточасов до ТО", "Состояние"])
         for pad in self._repos.pads.list_all(self._spaceport):
             usage = self._repos.pads.usage(pad.id)
-            prepared = launched = 0
-            busy = timedelta()
-            for occ in self._repos.launches.occupancy(pad.id):
-                if occ["started"] is None:
-                    continue
-                start = max(occ["started"], period.start)
-                end = min(occ["finished"] or self._now, period.end)
-                if end > start:
-                    busy += end - start
-                    prepared += 1
-                if occ["finished"] and occ["status"] in (LaunchStatus.LAUNCHED, LaunchStatus.FAILED) \
-                        and period.start <= occ["finished"] <= period.end:
-                    launched += 1
+            busy, prepared, launched = acc.get(pad.id, (timedelta(), 0, 0))
             busy_days = busy.total_seconds() / 86400
             load = 100 * busy_days / (period.days * pad.max_concurrent)
             table.rows.append([codes.get(pad.spaceport_id, "?"), pad.code, pad.max_concurrent, prepared, launched, f"{busy_days:.1f}", f"{load:.1f}",

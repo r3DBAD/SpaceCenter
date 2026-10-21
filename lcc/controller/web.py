@@ -186,12 +186,12 @@ class WebApi:
 
     def _names(self, session):
         vts = {v.id: v.name for v in self.s.reference.list_vehicle_types(session)}
-        pads = {p.id: p.code for p, _ in self.s.reference.list_pads(session)}
+        pads = {p.id: p.code for p in self.s.reference.list_pads_brief(session)}
         return vts, pads
 
     def _pad_spaceports(self, session) -> dict[int, str]:
         codes = {sp.id: sp.code for sp in self.s.reference.list_spaceports(session)}
-        return {p.id: codes.get(p.spaceport_id, "") for p, _ in self.s.reference.list_pads(session)}
+        return {p.id: codes.get(p.spaceport_id, "") for p in self.s.reference.list_pads_brief(session)}
 
     @staticmethod
     def _forecast(rec) -> dict | None:
@@ -258,7 +258,10 @@ class WebApi:
     def launches(self, session, query, **_):
         vts, pads = self._names(session)
         sps = self._pad_spaceports(session)
-        launches = self.s.launches.list_launches(session, spaceport_id=_opt_id(query.get("spaceport")))
+        status = query.get("status")
+        launches = self.s.launches.list_launches(session, (status,) if status else None,
+                                                 _opt_id(query.get("spaceport")),
+                                                 _opt_id(query.get("vehicle_type"), "Тип РН"))
         return _json(200, [self._launch(l, vts, pads, sps) for l in launches])
 
     def card(self, session, launch_id, **_):

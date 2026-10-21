@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS launch (
 CREATE INDEX IF NOT EXISTS ix_pad_spaceport ON launch_pad(spaceport_id);
 
 CREATE INDEX IF NOT EXISTS ix_launch_pad_status ON launch(pad_id, status);
+CREATE INDEX IF NOT EXISTS ix_launch_vehicle_status ON launch(vehicle_type_id, status);   -- ЛР5: поиск пусков
+CREATE INDEX IF NOT EXISTS ix_launch_window ON launch(window_start);                       -- ЛР5: таймер прогнозов
 
 CREATE TABLE IF NOT EXISTS stage_log (
     launch_id   INTEGER NOT NULL REFERENCES launch(launch_id),
@@ -100,6 +102,9 @@ CREATE TABLE IF NOT EXISTS fuel_consumption (
     consumed_at     TEXT NOT NULL,
     staff_id        INTEGER NOT NULL REFERENCES staff(staff_id)
 );
+-- ЛР5: без этих индексов каждое обращение по партии или пуску читало всю таблицу расхода
+CREATE INDEX IF NOT EXISTS ix_consumption_batch ON fuel_consumption(batch_id);
+CREATE INDEX IF NOT EXISTS ix_consumption_launch ON fuel_consumption(launch_id);
 
 CREATE TABLE IF NOT EXISTS weather_observation (
     launch_id      INTEGER NOT NULL REFERENCES launch(launch_id),

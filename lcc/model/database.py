@@ -20,7 +20,9 @@ def dt_to_db(value: datetime | None) -> str | None:
 
 
 def dt_from_db(value: str | None) -> datetime | None:
-    return None if value is None else datetime.strptime(value, DT_FORMAT)
+    """ЛР5, оптимизация №2: fromisoformat написан на C, замер timeit: 0,10 мкс против 3,41 мкс
+    у strptime (в 35 раз), который разбирает строку формата на Python. DT_FORMAT — это ISO 8601."""
+    return None if value is None else datetime.fromisoformat(value)
 
 
 def date_to_db(value: date) -> str:
@@ -71,6 +73,10 @@ class Database:
 
     def query(self, sql: str, params: tuple = ()) -> list[sqlite3.Row]:
         return self._conn.execute(sql, params).fetchall()
+
+    def iterate(self, sql: str, params: tuple = ()):
+        """Строки по одной, без fetchall: для больших выборок, которые обрабатываются потоком (ЛР5)."""
+        yield from self._conn.execute(sql, params)
 
     def query_one(self, sql: str, params: tuple = ()) -> sqlite3.Row | None:
         return self._conn.execute(sql, params).fetchone()

@@ -1,0 +1,28 @@
+         929342 function calls in 0.224 seconds
+
+   Ordered by: internal time
+   List reduced from 50 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   150268    0.021    0.000    0.030    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:23(<genexpr>)
+    10000    0.020    0.000    0.198    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:288(_row)
+    10000    0.020    0.000    0.142    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:223(__init__)
+    38818    0.020    0.000    0.032    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:35(require_number)
+    21162    0.015    0.000    0.044    0.000 {built-in method builtins.any}
+   208800    0.014    0.000    0.014    0.000 {built-in method builtins.isinstance}
+    21162    0.014    0.000    0.064    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:14(require_text)
+    30000    0.013    0.000    0.042    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:52(require_int)
+        1    0.012    0.012    0.012    0.012 {method 'fetchall' of 'sqlite3.Cursor' objects}
+   129106    0.008    0.000    0.008    0.000 {built-in method builtins.ord}
+    10000    0.008    0.000    0.019    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:198(__post_init__)
+    20000    0.006    0.000    0.012    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:59(require_datetime)
+    10000    0.005    0.000    0.024    0.000 <string>:2(__init__)
+    20000    0.004    0.000    0.007    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/database.py:22(dt_from_db)
+    20001    0.004    0.000    0.004    0.000 {method 'replace' of 'datetime.datetime' objects}
+        2    0.004    0.002    0.004    0.002 {method 'execute' of 'sqlite3.Connection' objects}
+    38818    0.004    0.000    0.004    0.000 {built-in method math.isnan}
+    10000    0.003    0.000    0.014    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:28(optional_text)
+        1    0.003    0.003    0.223    0.223 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/forecast.py:85(due)
+    31162    0.003    0.000    0.003    0.000 {method 'strip' of 'str' objects}
+
+

@@ -232,12 +232,22 @@ class LaunchRepository(Repository):
         return self._row(row)
 
     def list_all(self, statuses: tuple[LaunchStatus, ...] | None = None,
-                 spaceport_id: int | None = None) -> list[Launch]:
+                 spaceport_id: int | None = None, vehicle_type_id: int | None = None) -> list[Launch]:
         sql, params = f"SELECT * FROM launch l WHERE {_LAUNCH_SPACEPORT}", [spaceport_id, spaceport_id]
+        if vehicle_type_id is not None:                   # ЛР5: фильтр в SQL по индексу ix_launch_vehicle_status
+            sql += " AND l.vehicle_type_id = ?"
+            params.append(vehicle_type_id)
         if statuses:
             sql += f" AND l.status IN ({','.join('?' * len(statuses))})"
             params += [s.value for s in statuses]
         return [self._row(r) for r in self._db.query(sql + " ORDER BY l.window_start", tuple(params))]
+
+    def starting_between(self, after: datetime, until: datetime) -> list[Launch]:
+        """Незавершенные пуски с началом окна в (after; until] — для таймера прогнозов (ЛР5, оптимизация №5)."""
+        finals = tuple(s.value for s in (LaunchStatus.LAUNCHED, LaunchStatus.FAILED, LaunchStatus.CANCELLED))
+        return [self._row(r) for r in self._db.query(
+            "SELECT * FROM launch WHERE window_start > ? AND window_start <= ? AND status NOT IN (?,?,?) "
+            "ORDER BY window_start", (dt_to_db(after), dt_to_db(until), *finals))]
 
     def labels(self) -> dict[int, tuple[str, str]]:
         """Номер пуска → (тип РН, код космодрома). Минимум сведений для журналов инспектора (П11)."""
@@ -273,17 +283,20 @@ class LaunchRepository(Repository):
             (dt_to_db(date_from), dt_to_db(date_to), spaceport_id, spaceport_id))
         return [dict(r) for r in rows]
 
-    def occupancy(self, pad_id: int) -> list[dict]:
-        """Интервалы занятости площадки: от начала сборки до финального статуса (или по сей день)."""
-        rows = self._db.query(
-            "SELECT l.launch_id, l.status, "
-            "(SELECT MIN(s.changed_at) FROM stage_log s WHERE s.launch_id = l.launch_id AND s.status = ?) AS started, "
-            "(SELECT MAX(s.changed_at) FROM stage_log s WHERE s.launch_id = l.launch_id AND s.status IN (?,?,?)) "
-            "AS finished FROM launch l WHERE l.pad_id = ?",
+    def iter_occupancy(self, date_from: datetime, date_to: datetime, spaceport_id: int | None = None):
+        """ЛР5, оптимизация №4: интервалы занятости всех площадок одним запросом, строки — генератором.
+
+        Было: запрос occupancy() на каждую площадку, в нем два коррелированных подзапроса на каждый пуск,
+        результат — список словарей. Стало: один проход по stage_log с GROUP BY; пуски вне периода
+        отбрасывает HAVING; строки отдаются по одной (pad_id, status, started, finished), список не строится."""
+        return ((r[0], r[1], dt_from_db(r[2]), dt_from_db(r[3])) for r in self._db.iterate(
+            "SELECT l.pad_id, l.status, "
+            "MIN(CASE WHEN s.status = ? THEN s.changed_at END) AS started, "
+            "MAX(CASE WHEN s.status IN (?,?,?) THEN s.changed_at END) AS finished "
+            f"FROM launch l JOIN stage_log s ON s.launch_id = l.launch_id WHERE {_LAUNCH_SPACEPORT} "
+            "GROUP BY l.launch_id HAVING started IS NOT NULL AND started <= ? AND (finished IS NULL OR finished >= ?)",
             (LaunchStatus.ASSEMBLY.value, LaunchStatus.LAUNCHED.value, LaunchStatus.FAILED.value,
-             LaunchStatus.CANCELLED.value, pad_id))
-        return [{"launch_id": r["launch_id"], "status": LaunchStatus(r["status"]),
-                 "started": dt_from_db(r["started"]), "finished": dt_from_db(r["finished"])} for r in rows]
+             LaunchStatus.CANCELLED.value, spaceport_id, spaceport_id, dt_to_db(date_to), dt_to_db(date_from))))
 
     @staticmethod
     def _row(r) -> Launch:
@@ -316,6 +329,11 @@ class FuelRepository(Repository):
         return [self._batch(r) for r in self._db.query(
             "SELECT * FROM fuel_batch WHERE (? IS NULL OR spaceport_id = ?) ORDER BY expires_on",
             (spaceport_id, spaceport_id))]
+
+    def used_by_batch(self) -> dict[int, Mass]:
+        """Израсходовано по каждой партии одним запросом (ЛР5, оптимизация №1: вместо N запросов used_mass)."""
+        return {r[0]: Mass(int(r[1])) for r in self._db.query(
+            "SELECT batch_id, SUM(mass_hg) FROM fuel_consumption GROUP BY batch_id")}
 
     def used_mass(self, batch_id: int) -> Mass:
         return Mass(int(self._db.scalar("SELECT COALESCE(SUM(mass_hg), 0) FROM fuel_consumption WHERE batch_id = ?",
