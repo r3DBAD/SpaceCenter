@@ -5,6 +5,9 @@
 Model возвращаются клиенту текстом с кодом 4xx.
 
 Запуск: ``python -m lcc --db demo.db`` → http://127.0.0.1:8000
+
+ЛР4: маршруты космодромов, журналов, аудита и прогнозов. Сервер раз в минуту
+запускает автоматический запрос прогноза (:meth:`Services.forecasts.run_auto`).
 """
 from __future__ import annotations
 
@@ -12,6 +15,7 @@ import json
 import mimetypes
 import re
 import secrets
+import time
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from http import HTTPStatus
@@ -20,7 +24,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, quote, urlparse
 
 from ..model.enums import (FINAL_STATUSES, ROLE_PERMISSIONS, FuelComponent, LaunchStatus, MaintenanceKind,
-                           PadState, PostponeReason, Role, VehicleClass)
+                           PadState, Permission, PostponeReason, Role, VehicleClass)
 from ..model.errors import (AccessDeniedError, AuthenticationError, DomainError, NotFoundError,
                             ValidationError)
 from ..model.reports import Period
@@ -62,6 +66,21 @@ def _parse_date(value, field_name: str) -> date:
         raise ValidationError(f"Поле «{field_name}»: ожидается дата") from None
 
 
+def _opt_id(value, field_name: str = "Космодром") -> int | None:
+    """Необязательный номер из запроса: пусто — не задан."""
+    if value in (None, "", "all"):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        raise ValidationError(f"Поле «{field_name}»: ожидается номер") from None
+
+
+def _period(query) -> tuple[datetime, datetime]:
+    p = Period(_parse_date(query.get("from"), "Начало периода"), _parse_date(query.get("to"), "Конец периода"))
+    return p.start, p.end
+
+
 class WebApi:
     """Маршрутизация запросов API. Не зависит от HTTP-сервера — удобно тестировать напрямую."""
 
@@ -94,6 +113,14 @@ class WebApi:
             ("POST", r"/api/pads/(\d+)/faulty", self.mark_faulty, True),
             ("POST", r"/api/vehicle-types", self.add_vehicle_type, True),
             ("POST", r"/api/channels", self.add_channel, True),
+            ("GET", r"/api/spaceports", self.spaceports, True),
+            ("POST", r"/api/spaceports", self.add_spaceport, True),
+            ("GET", r"/api/journal/incidents", self.journal_incidents, True),
+            ("GET", r"/api/journal/postponements", self.journal_postponements, True),
+            ("GET", r"/api/audit", self.audit, True),
+            ("GET", r"/api/forecasts", self.forecasts, True),
+            ("POST", r"/api/launches/(\d+)/forecast", self.request_forecast, True),
+            ("POST", r"/api/launches/(\d+)/forecast/manual", self.manual_forecast, True),
             ("GET", r"/api/reports", self.report_list, True),
             ("GET", r"/api/reports/(\w+)", self.report, True),
             ("GET", r"/api/reports/(\w+)\.csv", self.report_csv, True),
@@ -148,9 +175,10 @@ class WebApi:
 
     # ------------------------------------------------------------------ сериализация
     @staticmethod
-    def _launch(l, vt_names, pad_codes) -> dict:
+    def _launch(l, vt_names, pad_codes, pad_spaceports=None) -> dict:
         return {"id": l.id, "vehicle": vt_names.get(l.vehicle_type_id, "?"), "vehicle_type_id": l.vehicle_type_id,
                 "payload": l.payload, "orbit": l.target_orbit, "pad": pad_codes.get(l.pad_id, "?"),
+                "spaceport": (pad_spaceports or {}).get(l.pad_id, ""),
                 "window": f"{l.window.start:{DT}} – {l.window.end:%H:%M}",
                 "window_start": l.window.start.isoformat(timespec="minutes"),
                 "window_end": l.window.end.isoformat(timespec="minutes"),
@@ -160,6 +188,20 @@ class WebApi:
         vts = {v.id: v.name for v in self.s.reference.list_vehicle_types(session)}
         pads = {p.id: p.code for p, _ in self.s.reference.list_pads(session)}
         return vts, pads
+
+    def _pad_spaceports(self, session) -> dict[int, str]:
+        codes = {sp.id: sp.code for sp in self.s.reference.list_spaceports(session)}
+        return {p.id: codes.get(p.spaceport_id, "") for p, _ in self.s.reference.list_pads(session)}
+
+    @staticmethod
+    def _forecast(rec) -> dict | None:
+        if rec is None:
+            return None
+        f = rec.forecast
+        return {"status": rec.status.value, "status_title": rec.status.title, "source": rec.source.title,
+                "at": f"{rec.requested_at:{DT}}", "details": rec.details, "summary": rec.summary(),
+                "values": None if f is None else (f"ветер у земли {f.ground_wind:g} м/с, на высотах {f.altitude_wind:g} м/с, "
+                                                  f"t° {f.temperature:g} °C, гроза: {'да' if f.thunderstorm else 'нет'}")}
 
     # ------------------------------------------------------------------ вход
     def login(self, _session, data, **_):
@@ -174,30 +216,38 @@ class WebApi:
 
     def me(self, session, **_):
         st = session.staff
+        sp = None if session.is_global else self.s.reference.list_spaceports(session)[0]
         return _json(200, {"login": st.login, "full_name": st.full_name, "role": st.role.value,
-                           "role_title": st.role.title,
+                           "role_title": st.role.title, "global": session.is_global,
+                           "spaceport": None if sp is None else {"id": sp.id, "code": sp.code, "name": sp.name},
                            "permissions": sorted(p.value for p in ROLE_PERMISSIONS[st.role])})
 
     def reference(self, session, **_):
-        data = {"vehicle_types": [{"id": v.id, "name": v.name, "class": v.vehicle_class.title}
-                                  for v in self.s.reference.list_vehicle_types(session)],
-                "pads": [{"id": p.id, "code": p.code, "name": p.name,
+        """Справочники для страницы. Инспектору расписание и площадки не отдаются (П11)."""
+        data = {"spaceports": [{"id": sp.id, "code": sp.code, "name": sp.name, "region": sp.region}
+                               for sp in self.s.reference.list_spaceports(session)],
+                "postpone_reasons": [{"value": r.value, "title": r.title} for r in PostponeReason],
+                "vehicle_types": [], "pads": [], "channels": []}
+        if not session.can(Permission.VIEW_SCHEDULE):
+            return _json(200, data)
+        sp_codes = {sp["id"]: sp["code"] for sp in data["spaceports"]}
+        data |= {"vehicle_types": [{"id": v.id, "name": v.name, "class": v.vehicle_class.title}
+                                   for v in self.s.reference.list_vehicle_types(session)],
+                "pads": [{"id": p.id, "code": p.code, "name": p.name, "spaceport": sp_codes.get(p.spaceport_id, ""),
+                          "spaceport_id": p.spaceport_id,
                           "preparations": f"{u.active_preparations}/{p.max_concurrent}",
                           "cycles": f"{u.cycles_since_maintenance}/{p.cycle_limit}",
                           "hours": f"{u.hours_since_maintenance:g}/{p.hours_limit:g}",
                           "state": p.state(u).title, "state_key": p.state(u).value,
                           "in_maintenance": p.state(u) is PadState.IN_MAINTENANCE}
                          for p, u in self.s.reference.list_pads(session)],
-                "postpone_reasons": [{"value": r.value, "title": r.title} for r in PostponeReason],
                 "maintenance_kinds": [{"value": k.value, "title": k.title} for k in MaintenanceKind],
                 "vehicle_classes": [{"value": c.value, "title": c.title} for c in VehicleClass],
                 "roles": [{"value": r.value, "title": r.title} for r in Role],
                 "fuel_components": [{"value": c.value, "title": c.title} for c in FuelComponent]}
-        try:
+        if session.can(Permission.MANAGE_CHANNELS) or session.can(Permission.RECORD_INCIDENT):
             data["channels"] = [{"id": c.id, "no": c.channel_no, "system": c.vehicle_system,
                                  "parameter": c.parameter} for c in self.s.reference.list_channels(session)]
-        except AccessDeniedError:
-            data["channels"] = []
         lim = self.s.weather.limits
         data["weather_limits"] = (f"ветер у земли ≤ {lim.max_ground_wind:g} м/с, на высотах ≤ {lim.max_altitude_wind:g} м/с, "
                                   f"t° {lim.min_temperature:g}…{lim.max_temperature:g} °C, "
@@ -205,9 +255,11 @@ class WebApi:
         return _json(200, data)
 
     # ------------------------------------------------------------------ пуски
-    def launches(self, session, **_):
+    def launches(self, session, query, **_):
         vts, pads = self._names(session)
-        return _json(200, [self._launch(l, vts, pads) for l in self.s.launches.list_launches(session)])
+        sps = self._pad_spaceports(session)
+        launches = self.s.launches.list_launches(session, spaceport_id=_opt_id(query.get("spaceport")))
+        return _json(200, [self._launch(l, vts, pads, sps) for l in launches])
 
     def card(self, session, launch_id, **_):
         c = self.s.launches.launch_card(session, int(launch_id))
@@ -217,10 +269,12 @@ class WebApi:
         if l.status not in FINAL_STATUSES and l.status is not LaunchStatus.READY:
             next_stage = self.s.launches.next_stage_title(l)
         return _json(200, {
-            **self._launch(l, vts, pads),
+            **self._launch(l, vts, pads, {c.pad.id: c.spaceport.code}),
+            "spaceport_name": c.spaceport.name,
             "vehicle_class": c.vehicle.vehicle_class.title, "pad_name": c.pad.name,
             "cancel_reason": l.cancel_reason, "next_stage": next_stage,
-            "fuel": [{"component": k.title, "volume": v} for k, v in c.fuel_loaded.items()],
+            "fuel": [{"component": k.title, "mass": str(v)} for k, v in c.fuel_loaded.items()],
+            "fuel_warnings": list(c.fuel_warnings), "forecast": self._forecast(c.forecast),
             "last_weather": f"{c.last_weather.observed_at:{DT}}" if c.last_weather else None,
             "stage_log": [{"no": n, "status": s.title, "at": f"{t:{DT}}", "who": who} for n, s, t, who in c.stage_log],
             "journal": [{"at": f"{r.recorded_at:{DT}}", "category": r.category, "text": r.summary()}
@@ -241,7 +295,11 @@ class WebApi:
         rec = self.s.launches.postpone(session, int(launch_id), data.get("reason", ""),
                                        _parse_dt(data.get("new_start"), "Новое начало окна"),
                                        _parse_dt(data.get("new_end"), "Новый конец окна"), data.get("comment", ""))
-        return _json(200, {"message": f"Пуск перенесён: {rec.summary()}"})
+        warnings = self.s.launches.fuel_warnings(session, int(launch_id))
+        text = f"Пуск перенесён: {rec.summary()}"
+        if warnings:
+            text += ". Внимание: " + "; ".join(warnings) + ". К пуску такую РН не допустят"
+        return _json(200, {"message": text, "warnings": warnings})
 
     def cancel(self, session, launch_id, data, **_):
         self.s.launches.cancel(session, int(launch_id), data.get("reason", ""))
@@ -253,21 +311,25 @@ class WebApi:
         return _json(200, {"message": f"Статус «{status.title}», цикл площадки учтён"})
 
     # ------------------------------------------------------------------ топливо, метео, телеметрия
-    def fuel(self, session, **_):
+    def fuel(self, session, query, **_):
+        codes = {sp.id: sp.code for sp in self.s.reference.list_spaceports(session)}
         return _json(200, [{"id": b.id, "batch_no": b.batch_no, "component": b.component.title, "grade": b.grade,
-                            "volume": b.initial_volume, "remaining": rest,
-                            "expires_on": f"{b.expires_on:%d.%m.%Y}"} for b, rest in self.s.fuel.list_batches(session)])
+                            "spaceport": codes.get(b.spaceport_id, ""), "spaceport_id": b.spaceport_id,
+                            "mass": str(b.initial_mass), "remaining": str(rest), "remaining_kg": rest.kg,
+                            "expires_on": f"{b.expires_on:%d.%m.%Y}"}
+                           for b, rest in self.s.fuel.list_batches(session, _opt_id(query.get("spaceport")))])
 
     def receive_batch(self, session, data, **_):
         b = self.s.fuel.receive_batch(session, data.get("batch_no", ""), data.get("component", ""),
-                                      data.get("grade", ""), data.get("volume"),
+                                      data.get("grade", ""), data.get("mass_kg"),
                                       _parse_date(data.get("produced_on"), "Дата изготовления"),
-                                      _parse_date(data.get("expires_on"), "Срок годности"))
-        return _json(201, {"message": f"Партия {b.batch_no} принята"})
+                                      _parse_date(data.get("expires_on"), "Срок годности"),
+                                      _opt_id(data.get("spaceport_id")))
+        return _json(201, {"message": f"Партия {b.batch_no} принята, {b.initial_mass}"})
 
     def refuel(self, session, launch_id, data, **_):
-        rest = self.s.fuel.refuel(session, int(launch_id), int(data["batch_id"]), data.get("volume"))
-        return _json(200, {"message": f"Расход списан, остаток партии {rest:g} т"})
+        rest = self.s.fuel.refuel(session, int(launch_id), int(data["batch_id"]), data.get("mass_kg"))
+        return _json(200, {"message": f"Расход списан, остаток партии {rest}"})
 
     def weather(self, session, launch_id, data, **_):
         d = self.s.weather.record_observation(session, int(launch_id), data.get("ground_wind"),
@@ -283,12 +345,15 @@ class WebApi:
 
     # ------------------------------------------------------------------ персонал и справочники
     def staff(self, session, **_):
+        codes = {sp.id: sp.code for sp in self.s.reference.list_spaceports(session)}
         return _json(200, [{"id": st.id, "login": st.login, "full_name": st.full_name, "role": st.role.title,
+                            "spaceport": codes.get(st.spaceport_id, "центр"),
                             "active": st.is_active} for st in self.s.staff.list_staff(session)])
 
     def add_staff(self, session, data, **_):
         st = self.s.staff.create_staff(session, data.get("login", ""), data.get("full_name", ""),
-                                       data.get("role", ""), data.get("password", ""))
+                                       data.get("role", ""), data.get("password", ""),
+                                       _opt_id(data.get("spaceport_id")))
         return _json(201, {"message": f"Сотрудник {st.login} ({st.role.title}) добавлен"})
 
     def deactivate_staff(self, session, staff_id, **_):
@@ -297,7 +362,7 @@ class WebApi:
 
     def add_pad(self, session, data, **_):
         p = self.s.reference.add_pad(session, data.get("code", ""), data.get("name", ""), data.get("max_concurrent"),
-                                     data.get("cycle_limit"), data.get("hours_limit"))
+                                     data.get("cycle_limit"), data.get("hours_limit"), _opt_id(data.get("spaceport_id")))
         return _json(201, {"message": f"Площадка {p.code} добавлена"})
 
     def open_maintenance(self, session, pad_id, data, **_):
@@ -322,13 +387,62 @@ class WebApi:
                                           data.get("parameter", ""), data.get("frequency_hz"))
         return _json(201, {"message": f"Канал {ch.channel_no} добавлен"})
 
+    # ------------------------------------------------------------------ космодромы, журналы, аудит (ЛР4)
+    def spaceports(self, session, **_):
+        return _json(200, [{"id": sp.id, "code": sp.code, "name": sp.name, "region": sp.region}
+                           for sp in self.s.reference.list_spaceports(session)])
+
+    def add_spaceport(self, session, data, **_):
+        sp = self.s.reference.add_spaceport(session, data.get("code", ""), data.get("name", ""), data.get("region", ""))
+        return _json(201, {"message": f"Космодром {sp.name} ({sp.code}) добавлен"})
+
+    @staticmethod
+    def _journal_row(row) -> dict:
+        r = row.record
+        return {"launch_id": row.launch_id, "vehicle": row.vehicle, "spaceport": row.spaceport,
+                "at": f"{r.recorded_at:{DT}}", "category": r.category, "text": r.summary(),
+                "reason": getattr(getattr(r, "reason", None), "title", "")}
+
+    def journal_incidents(self, session, query, **_):
+        rows = self.s.journal.incidents(session, *_period(query), _opt_id(query.get("spaceport")))
+        return _json(200, [self._journal_row(r) for r in rows])
+
+    def journal_postponements(self, session, query, **_):
+        rows = self.s.journal.postponements(session, *_period(query), query.get("reason") or None,
+                                            _opt_id(query.get("spaceport")))
+        return _json(200, [self._journal_row(r) for r in rows])
+
+    def audit(self, session, query, **_):
+        records = self.s.audit.list_records(session, *_period(query), query.get("login", ""))
+        return _json(200, [{"at": f"{a.recorded_at:{DT}}", "login": a.login, "role": a.role.title, "action": a.action,
+                            "object": a.object_type + (f" {a.object_ref}" if a.object_ref else ""),
+                            "outcome": "выполнено" if a.outcome == "ok" else "отказ", "details": a.details}
+                           for a in records])
+
+    # ------------------------------------------------------------------ прогнозы (ЛР4)
+    def forecasts(self, session, query, **_):
+        vts, pads = self._names(session)
+        sps = self._pad_spaceports(session)
+        items = self.s.forecasts.upcoming(session, _opt_id(query.get("spaceport")))
+        return _json(200, [{**self._launch(l, vts, pads, sps), "forecast": self._forecast(rec)} for l, rec in items])
+
+    def request_forecast(self, session, launch_id, **_):
+        rec = self.s.forecasts.request(session, int(launch_id))
+        return _json(200, {"message": f"Прогноз: {rec.summary()}", "forecast": self._forecast(rec)})
+
+    def manual_forecast(self, session, launch_id, data, **_):
+        rec = self.s.forecasts.enter_manual(session, int(launch_id), data.get("ground_wind"), data.get("altitude_wind"),
+                                            data.get("temperature"), data.get("cloud_base"),
+                                            bool(data.get("thunderstorm")))
+        return _json(200, {"message": f"Ручной прогноз сохранен: {rec.status.title}", "forecast": self._forecast(rec)})
+
     # ------------------------------------------------------------------ отчёты
     def report_list(self, session, **_):
-        return _json(200, [{"key": k, "title": t} for k, t in self.s.reports.available()])
+        return _json(200, [{"key": k, "title": t} for k, t in self.s.reports.available(session)])
 
     def _build(self, session, key, query):
         period = Period(_parse_date(query.get("from"), "Начало периода"), _parse_date(query.get("to"), "Конец периода"))
-        return self.s.reports.build(session, key, period)
+        return self.s.reports.build(session, key, period, _opt_id(query.get("spaceport")), query.get("reason") or None)
 
     def report(self, session, key, query, **_):
         r = self._build(session, key, query)
@@ -374,10 +488,34 @@ class _Handler(BaseHTTPRequestHandler):
         print(f"{self.address_string()} {self.command} {urlparse(self.path).path} → {args[1] if len(args) > 1 else ''}")
 
 
-def run_server(services: Services, host: str = "127.0.0.1", port: int = 8000, open_browser: bool = False) -> None:
+class _Server(HTTPServer):
+    """HTTP-сервер с таймером: раз в `forecast_interval` секунд запрашивает прогнозы (Т4.1).
+
+    `service_actions` вызывается из цикла `serve_forever` в том же потоке, поэтому
+    одно соединение SQLite не используется из двух потоков одновременно.
+    """
+
+    def __init__(self, address, handler, services: Services, forecast_interval: float = 60.0):
+        super().__init__(address, handler)
+        self._services = services
+        self._interval = forecast_interval
+        self._last = 0.0
+
+    def service_actions(self):
+        if self._interval and time.monotonic() - self._last >= self._interval:
+            self._last = time.monotonic()
+            try:
+                for rec in self._services.forecasts.run_auto():
+                    print(f"Прогноз для пуска №{rec.launch_id}: {rec.summary()}")
+            except Exception as e:          # таймер не должен останавливать сервер
+                print(f"Ошибка автоматического запроса прогноза: {e}")
+
+
+def run_server(services: Services, host: str = "127.0.0.1", port: int = 8000, open_browser: bool = False,
+               forecast_interval: float = 60.0) -> None:
     """Однопоточный сервер: соединение SQLite используется в одном потоке."""
     _Handler.api = WebApi(services)
-    server = HTTPServer((host, port), _Handler)
+    server = _Server((host, port), _Handler, services, forecast_interval)
     url = f"http://{'127.0.0.1' if host in ('0.0.0.0', '') else host}:{port}"
     print(f"Веб-интерфейс: {url}  (Ctrl+C — остановить)")
     if open_browser:
