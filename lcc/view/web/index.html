@@ -16,7 +16,7 @@
       <label>Логин <input v-model="auth.login" autocomplete="username" autofocus></label>
       <label>Пароль <input v-model="auth.password" type="password" autocomplete="current-password"></label>
       <button class="primary">Войти</button>
-      <p class="hint">Демо: head, engineer, fuel, meteo, telemetry — пароль demo2026</p>
+      <p class="hint">Демо: head, director (Восточный), director2 (Плесецк), inspector, engineer, fuel, meteo, telemetry — пароль demo2026</p>
     </form>
   </main>
 
@@ -26,7 +26,11 @@
       <nav>
         <button v-for="t in tabs" :key="t.id" :class="{active: tab === t.id}" @click="tab = t.id">{{ t.title }}</button>
       </nav>
-      <span class="user">{{ me.full_name }} · {{ me.role_title }}</span>
+      <select v-if="me.global && can('view_schedule')" v-model="spaceportFilter" @change="card = null; reload()" title="Космодром">
+        <option value="">Все космодромы</option>
+        <option v-for="sp in ref.spaceports" :value="sp.id">{{ sp.name }}</option>
+      </select>
+      <span class="user">{{ me.full_name }} · {{ me.role_title }}<template v-if="me.spaceport"> · {{ me.spaceport.name }}</template><template v-else> · центр</template></span>
       <button @click="logout">Выйти</button>
     </header>
 
@@ -36,10 +40,10 @@
         <div>
           <h2>Расписание и статусы пусков</h2>
           <table>
-            <thead><tr><th>№</th><th>Тип РН</th><th>Полезная нагрузка</th><th>Орбита</th><th>Площадка</th><th>Окно</th><th>Статус</th></tr></thead>
+            <thead><tr><th>№</th><th>Космодром</th><th>Тип РН</th><th>Полезная нагрузка</th><th>Орбита</th><th>Площадка</th><th>Окно</th><th>Статус</th></tr></thead>
             <tbody>
               <tr v-for="l in launches" :key="l.id" @click="openCard(l.id)" :class="{selected: card && card.id === l.id}">
-                <td>{{ l.id }}</td><td>{{ l.vehicle }}</td><td>{{ l.payload }}</td><td>{{ l.orbit }}</td>
+                <td>{{ l.id }}</td><td>{{ l.spaceport }}</td><td>{{ l.vehicle }}</td><td>{{ l.payload }}</td><td>{{ l.orbit }}</td>
                 <td>{{ l.pad }}</td><td>{{ l.window }}</td>
                 <td><span class="badge" :class="l.status">{{ l.status_title }}</span></td>
               </tr>
@@ -51,13 +55,19 @@
           <h3>Пуск №{{ card.id }}: {{ card.vehicle }} / {{ card.payload }}</h3>
           <dl>
             <dt>Орбита</dt><dd>{{ card.orbit }}</dd>
+            <dt>Космодром</dt><dd>{{ card.spaceport_name }}</dd>
             <dt>Площадка</dt><dd>{{ card.pad }} — {{ card.pad_name }}</dd>
             <dt>Окно</dt><dd>{{ card.window }}</dd>
             <dt>Статус</dt><dd><span class="badge" :class="card.status">{{ card.status_title }}</span></dd>
-            <dt>Заправлено</dt><dd>{{ card.fuel.map(f => f.component + ': ' + f.volume + ' т').join(', ') || '—' }}</dd>
+            <dt>Заправлено</dt><dd>{{ card.fuel.map(f => f.component + ': ' + f.mass).join(', ') || '—' }}</dd>
             <dt>Метео</dt><dd>{{ card.last_weather || '—' }}</dd>
+            <dt>Прогноз</dt><dd><span v-if="card.forecast" class="badge" :class="'fc-' + card.forecast.status">{{ card.forecast.status_title }}</span>
+              <small v-if="card.forecast"> {{ card.forecast.source }}, {{ card.forecast.at }}</small><template v-else>—</template></dd>
             <dt v-if="card.cancel_reason">Отмена</dt><dd v-if="card.cancel_reason">{{ card.cancel_reason }}</dd>
           </dl>
+
+          <p v-if="card.forecast && card.forecast.details" class="warn-box">{{ card.forecast.details }}</p>
+          <p v-for="w in card.fuel_warnings" class="warn-box">⚠ {{ w }}</p>
 
           <div class="actions" v-if="!card.final">
             <button v-if="card.next_stage" class="primary" @click="post(`/api/launches/${card.id}/advance`)">{{ card.next_stage }}</button>
@@ -117,8 +127,8 @@
       <section v-if="tab === 'fuel'">
         <h2>Партии топлива</h2>
         <table>
-          <thead><tr><th>№</th><th>Партия</th><th>Компонент</th><th>Марка</th><th>Объём, т</th><th>Остаток, т</th><th>Годна до</th></tr></thead>
-          <tbody><tr v-for="b in batches"><td>{{ b.id }}</td><td>{{ b.batch_no }}</td><td>{{ b.component }}</td><td>{{ b.grade }}</td><td>{{ b.volume }}</td><td>{{ b.remaining }}</td><td>{{ b.expires_on }}</td></tr></tbody>
+          <thead><tr><th>№</th><th>Склад</th><th>Партия</th><th>Компонент</th><th>Марка</th><th>Масса</th><th>Остаток</th><th>Годна до</th></tr></thead>
+          <tbody><tr v-for="b in batches"><td>{{ b.id }}</td><td>{{ b.spaceport }}</td><td>{{ b.batch_no }}</td><td>{{ b.component }}</td><td>{{ b.grade }}</td><td class="num">{{ b.mass }}</td><td class="num">{{ b.remaining }}</td><td>{{ b.expires_on }}</td></tr></tbody>
         </table>
         <div class="row">
           <form class="card form" @submit.prevent="refuel">
@@ -126,8 +136,8 @@
             <label>Пуск (этап «Заправка»)
               <select v-model="refuelForm.launch_id"><option v-for="l in launchesIn('fueling')" :value="l.id">№{{ l.id }} {{ l.vehicle }} / {{ l.payload }}</option></select>
             </label>
-            <label>Партия <select v-model="refuelForm.batch_id"><option v-for="b in batches" :value="b.id">{{ b.batch_no }} ({{ b.component }}, остаток {{ b.remaining }} т)</option></select></label>
-            <label>Объём, т <input type="number" step="0.1" v-model.number="refuelForm.volume"></label>
+            <label>Партия <select v-model="refuelForm.batch_id"><option v-for="b in batches" :value="b.id">{{ b.spaceport }} · {{ b.batch_no }} ({{ b.component }}, остаток {{ b.remaining }})</option></select></label>
+            <label>Масса, кг (точность 0,1 кг) <input type="number" step="0.1" v-model.number="refuelForm.mass_kg"></label>
             <button class="primary">Списать расход</button>
           </form>
           <form class="card form" @submit.prevent="post('/api/fuel', batchForm)">
@@ -135,7 +145,8 @@
             <label>Номер <input v-model="batchForm.batch_no"></label>
             <label>Компонент <select v-model="batchForm.component"><option v-for="c in ref.fuel_components" :value="c.value">{{ c.title }}</option></select></label>
             <label>Марка <input v-model="batchForm.grade"></label>
-            <label>Объём, т <input type="number" step="0.1" v-model.number="batchForm.volume"></label>
+            <label>Масса, кг <input type="number" step="0.1" v-model.number="batchForm.mass_kg"></label>
+            <label v-if="me.global">Склад космодрома <select v-model="batchForm.spaceport_id"><option v-for="sp in ref.spaceports" :value="sp.id">{{ sp.name }}</option></select></label>
             <label>Изготовлена <input type="date" v-model="batchForm.produced_on"></label>
             <label>Годна до <input type="date" v-model="batchForm.expires_on"></label>
             <button>Принять</button>
@@ -145,8 +156,34 @@
 
       <!-- ============ Метео ============ -->
       <section v-if="tab === 'weather'">
-        <h2>Метеоконтроль</h2>
-        <p class="hint">Пределы: {{ ref.weather_limits }}</p>
+        <h2>Прогноз за 24 часа до стартового окна</h2>
+        <p class="hint">Прогноз запрашивается у внешней метеослужбы автоматически. Если служба недоступна, метеоролог вводит прогноз вручную. Пределы одни для обоих источников: {{ ref.weather_limits }}</p>
+        <table>
+          <thead><tr><th>№</th><th>Космодром</th><th>Тип РН</th><th>Окно</th><th>Прогноз</th><th>Подробности</th><th></th></tr></thead>
+          <tbody>
+            <tr v-for="f in forecasts">
+              <td>{{ f.id }}</td><td>{{ f.spaceport }}</td><td>{{ f.vehicle }}</td><td>{{ f.window }}</td>
+              <td><span v-if="f.forecast" class="badge" :class="'fc-' + f.forecast.status">{{ f.forecast.status_title }}</span><span v-else class="hint">не запрашивался</span></td>
+              <td><small v-if="f.forecast">{{ f.forecast.source }}, {{ f.forecast.at }}<br>{{ f.forecast.values || f.forecast.details }}<template v-if="f.forecast.values && f.forecast.details"><br>{{ f.forecast.details }}</template></small></td>
+              <td><button v-if="can('request_forecast')" @click="requestForecast(f.id)">Запросить</button></td>
+            </tr>
+            <tr v-if="!forecasts.length"><td colspan="7" class="hint">Пусков с окном в ближайшие 48 часов нет</td></tr>
+          </tbody>
+        </table>
+        <form v-if="can('record_weather') && unavailableForecasts.length" class="card form" style="margin-top:12px" @submit.prevent="manualForecast">
+          <h3>Ручной ввод прогноза (служба недоступна)</h3>
+          <label>Пуск <select v-model="fc.launch_id"><option v-for="f in unavailableForecasts" :value="f.id">№{{ f.id }} {{ f.vehicle }} — {{ f.window }}</option></select></label>
+          <label>Ветер у земли, м/с <input type="number" step="0.1" v-model.number="fc.ground_wind"></label>
+          <label>Ветер на высотах, м/с <input type="number" step="0.1" v-model.number="fc.altitude_wind"></label>
+          <label>Температура, °C <input type="number" step="0.1" v-model.number="fc.temperature"></label>
+          <label>Нижняя граница облачности, м <input type="number" v-model.number="fc.cloud_base"></label>
+          <label class="check"><input type="checkbox" v-model="fc.thunderstorm"> Ожидается гроза</label>
+          <button class="primary">Сохранить прогноз</button>
+        </form>
+
+        <template v-if="can('record_weather')">
+        <h2>Метеоконтроль перед пуском</h2>
+        <p class="hint">Допуск к пуску дает только фактическое наблюдение не старше 3 часов.</p>
         <div class="row">
           <form class="card form" @submit.prevent="weather">
             <label>Пуск <select v-model="wx.launch_id"><option v-for="l in activeLaunches" :value="l.id">№{{ l.id }} {{ l.vehicle }} — {{ l.status_title }}</option></select></label>
@@ -168,6 +205,7 @@
             </form>
           </div>
         </div>
+        </template>
       </section>
 
       <!-- ============ Телеметрия ============ -->
@@ -201,9 +239,9 @@
       <section v-if="tab === 'pads'">
         <h2>Стартовые площадки</h2>
         <table>
-          <thead><tr><th>Код</th><th>Наименование</th><th>Подготовок</th><th>Циклов с ТО</th><th>Моточасов с ТО</th><th>Состояние</th><th v-if="can('maintain_pads')">Обслуживание</th></tr></thead>
+          <thead><tr><th>Космодром</th><th>Код</th><th>Наименование</th><th>Подготовок</th><th>Циклов с ТО</th><th>Моточасов с ТО</th><th>Состояние</th><th v-if="can('maintain_pads')">Обслуживание</th></tr></thead>
           <tbody><tr v-for="p in ref.pads">
-            <td>{{ p.code }}</td><td>{{ p.name }}</td><td>{{ p.preparations }}</td><td>{{ p.cycles }}</td><td>{{ p.hours }}</td>
+            <td>{{ p.spaceport }}</td><td>{{ p.code }}</td><td>{{ p.name }}</td><td>{{ p.preparations }}</td><td>{{ p.cycles }}</td><td>{{ p.hours }}</td>
             <td><span class="badge" :class="'pad-' + p.state_key">{{ p.state }}</span></td>
             <td v-if="can('maintain_pads')" class="nowrap">
               <template v-if="p.in_maintenance">
@@ -225,7 +263,16 @@
             <label>Макс. одновременных подготовок <input type="number" v-model.number="padForm.max_concurrent"></label>
             <label>Норматив циклов до ТО <input type="number" v-model.number="padForm.cycle_limit"></label>
             <label>Норматив моточасов до ТО <input type="number" v-model.number="padForm.hours_limit"></label>
+            <label>Космодром <select v-model="padForm.spaceport_id"><option v-for="sp in ref.spaceports" :value="sp.id">{{ sp.name }}</option></select></label>
             <button>Добавить</button>
+          </form>
+          <form v-if="can('manage_spaceports')" class="card form" @submit.prevent="post('/api/spaceports', spForm)">
+            <h3>Добавить космодром</h3>
+            <label>Код (латиница) <input v-model="spForm.code"></label>
+            <label>Наименование <input v-model="spForm.name"></label>
+            <label>Регион <input v-model="spForm.region"></label>
+            <button>Добавить</button>
+            <p class="hint">Уже есть: {{ ref.spaceports.map(sp => sp.name).join(', ') }}</p>
           </form>
           <form class="card form" @submit.prevent="post('/api/vehicle-types', vtForm)">
             <h3>Добавить тип РН</h3>
@@ -242,18 +289,20 @@
       <section v-if="tab === 'staff'">
         <h2>Персонал</h2>
         <table>
-          <thead><tr><th>Логин</th><th>ФИО</th><th>Роль</th><th>Статус</th><th></th></tr></thead>
+          <thead><tr><th>Логин</th><th>ФИО</th><th>Роль</th><th>Космодром</th><th>Статус</th><th></th></tr></thead>
           <tbody><tr v-for="st in staff">
-            <td>{{ st.login }}</td><td>{{ st.full_name }}</td><td>{{ st.role }}</td>
+            <td>{{ st.login }}</td><td>{{ st.full_name }}</td><td>{{ st.role }}</td><td>{{ st.spaceport }}</td>
             <td>{{ st.active ? 'активен' : 'заблокирован' }}</td>
             <td><button v-if="st.active && st.login !== me.login" @click="post(`/api/staff/${st.id}/deactivate`)">Заблокировать</button></td>
           </tr></tbody>
         </table>
-        <form class="card form" style="margin-top:16px" @submit.prevent="post('/api/staff', staffForm)">
+        <form class="card form" style="margin-top:16px" @submit.prevent="addStaff">
           <h3>Добавить сотрудника</h3>
           <label>Логин (латиница) <input v-model="staffForm.login"></label>
           <label>ФИО <input v-model="staffForm.full_name"></label>
           <label>Роль <select v-model="staffForm.role"><option v-for="r in ref.roles" :value="r.value">{{ r.title }}</option></select></label>
+          <label v-if="staffNeedsSpaceport">Космодром <select v-model="staffForm.spaceport_id"><option v-for="sp in ref.spaceports" :value="sp.id">{{ sp.name }}</option></select></label>
+          <p v-else class="hint">Роль уровня центра: работает со всеми космодромами</p>
           <label>Пароль (≥ 8 символов, буквы и цифры) <input type="password" v-model="staffForm.password" autocomplete="new-password"></label>
           <button class="primary">Добавить</button>
         </form>
@@ -264,6 +313,8 @@
         <h2>Отчёты</h2>
         <form class="card inline" @submit.prevent="buildReport">
           <select v-model="rep.key"><option v-for="r in reportList" :value="r.key">{{ r.title }}</option></select>
+          <select v-if="me.global" v-model="rep.spaceport"><option value="">все космодромы</option><option v-for="sp in ref.spaceports" :value="sp.id">{{ sp.name }}</option></select>
+          <select v-if="rep.key === 'postponements'" v-model="rep.reason"><option value="">все причины</option><option v-for="r in ref.postpone_reasons" :value="r.value">{{ r.title }}</option></select>
           с <input type="date" v-model="rep.from"> по <input type="date" v-model="rep.to">
           <button class="primary">Сформировать</button>
           <button type="button" @click="downloadCsv" :disabled="!report">CSV</button>
@@ -276,6 +327,44 @@
           </table>
           <ul class="notes"><li v-for="n in report.notes">{{ n }}</li></ul>
         </template>
+      </section>
+
+      <!-- ============ Журналы (ЛР4) ============ -->
+      <section v-if="tab === 'journals'">
+        <h2>Журналы нештатных ситуаций и переносов</h2>
+        <form class="card inline" @submit.prevent="loadJournal">
+          <select v-model="jr.kind" @change="jr.rows = null"><option value="incidents">Журнал НС</option><option value="postponements">Журнал переносов</option></select>
+          <select v-if="jr.kind === 'postponements'" v-model="jr.reason"><option value="">все причины</option><option v-for="r in ref.postpone_reasons" :value="r.value">{{ r.title }}</option></select>
+          <select v-if="me.global" v-model="jr.spaceport"><option value="">все космодромы</option><option v-for="sp in ref.spaceports" :value="sp.id">{{ sp.name }}</option></select>
+          с <input type="date" v-model="jr.from"> по <input type="date" v-model="jr.to">
+          <button class="primary">Показать</button>
+        </form>
+        <p v-if="me.role === 'safety_inspector'" class="hint">Все ваши действия записываются в журнал аудита.</p>
+        <table v-if="jr.rows">
+          <thead><tr><th>Время</th><th>Пуск</th><th>Тип РН</th><th>Космодром</th><th v-if="jr.kind === 'postponements'">Причина</th><th>Запись</th></tr></thead>
+          <tbody>
+            <tr v-for="r in jr.rows"><td class="nowrap">{{ r.at }}</td><td>№{{ r.launch_id }}</td><td>{{ r.vehicle }}</td><td>{{ r.spaceport }}</td><td v-if="jr.kind === 'postponements'">{{ r.reason }}</td><td>{{ r.text }}</td></tr>
+            <tr v-if="!jr.rows.length"><td colspan="6" class="hint">Записей нет</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============ Аудит (ЛР4) ============ -->
+      <section v-if="tab === 'audit'">
+        <h2>Журнал аудита</h2>
+        <p class="hint">Записываются все действия инспектора безопасности, в том числе попытки без прав.</p>
+        <form class="card inline" @submit.prevent="loadAudit">
+          логин <input v-model="au.login" placeholder="все" class="short">
+          с <input type="date" v-model="au.from"> по <input type="date" v-model="au.to">
+          <button class="primary">Показать</button>
+        </form>
+        <table v-if="au.rows">
+          <thead><tr><th>Время</th><th>Логин</th><th>Роль</th><th>Действие</th><th>Объект</th><th>Итог</th><th>Подробности</th></tr></thead>
+          <tbody>
+            <tr v-for="a in au.rows" :class="{denied: a.outcome === 'отказ'}"><td class="nowrap">{{ a.at }}</td><td>{{ a.login }}</td><td>{{ a.role }}</td><td>{{ a.action }}</td><td>{{ a.object }}</td><td>{{ a.outcome }}</td><td>{{ a.details }}</td></tr>
+            <tr v-if="!au.rows.length"><td colspan="7" class="hint">Записей нет</td></tr>
+          </tbody>
+        </table>
       </section>
     </main>
   </template>

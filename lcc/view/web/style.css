@@ -65,3 +65,12 @@ tbody tr:has(button) { cursor: default; }
 .bad { color: var(--danger); }
 .toast { position: fixed; right: 20px; bottom: 20px; max-width: 520px; padding: 12px 16px; border-radius: 8px; color: #fff; background: var(--ok); box-shadow: 0 6px 20px rgba(0,0,0,.2); cursor: pointer; }
 .toast.error { background: var(--danger); }
+/* ЛР4: прогнозы, предупреждения, аудит */
+.badge.fc-ok { background: #d9f3e3; color: #16693a; }
+.badge.fc-warning { background: #fff1d6; color: #8a5a00; }
+.badge.fc-unavailable { background: #fbe0e0; color: #9c2b2b; }
+.warn-box { margin: 6px 0; padding: 8px 10px; border-radius: 6px; background: #fff6e0; color: #6d4700; font-size: 13px; }
+.toast.warn { background: #b07400; }
+tr.denied td { color: var(--danger); }
+td.num { text-align: right; white-space: nowrap; }
+header select { padding: 4px 8px; }

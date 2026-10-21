@@ -4,7 +4,7 @@ rem Запуск веб-интерфейса на Windows: двойной кли
 cd /d "%~dp0"
 where python >nul 2>nul && (set PY=python) || (set PY=py)
 echo.
-echo Логины: head, engineer, fuel, meteo, telemetry   Пароль: demo2026
+echo Логины: head, director, director2, inspector, engineer, fuel, meteo, telemetry   Пароль: demo2026
 echo Закройте это окно, чтобы остановить сервер.
 %PY% -m lcc --db demo.db
 pause
