@@ -27,6 +27,7 @@ createApp({
     token: sessionStorage.getItem("lcc_token"),
     auth: { login: "", password: "" },
     me: null, tab: "launches", toast: null, spaceportFilter: "",
+    search: { vehicle_type: "", status: "" },   // ЛР5: поиск пусков выполняет сервер (SQL)
     ref: { spaceports: [], vehicle_types: [], pads: [], channels: [], postpone_reasons: [], fuel_components: [] },
     launches: [], card: null, batches: [], reportList: [], report: null, staff: [], forecasts: [],
     maint: { kind: "inspection", notes: "" },
@@ -100,7 +101,7 @@ createApp({
     async reload() {
       this.ref = await this.api("GET", "/api/reference");
       const sp = this.qs({ spaceport: this.spaceportFilter });
-      if (this.can("view_schedule")) this.launches = await this.api("GET", `/api/launches?${sp}`);
+      if (this.can("view_schedule")) this.launches = await this.api("GET", `/api/launches?${this.qs({ spaceport: this.spaceportFilter, ...this.search })}`);
       if (this.can("manage_fuel")) this.batches = await this.api("GET", `/api/fuel?${sp}`);
       if (this.can(["view_reports", "view_incident_reports"])) this.reportList = await this.api("GET", "/api/reports");
       if (this.can("manage_staff")) this.staff = await this.api("GET", "/api/staff");

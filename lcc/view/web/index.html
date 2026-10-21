@@ -39,6 +39,12 @@
       <section v-if="tab === 'launches'" class="split">
         <div>
           <h2>Расписание и статусы пусков</h2>
+          <form class="inline" @submit.prevent="card = null; reload()">
+            <select v-model="search.vehicle_type"><option value="">все типы РН</option><option v-for="v in ref.vehicle_types" :value="v.id">{{ v.name }}</option></select>
+            <select v-model="search.status"><option value="">все статусы</option><option v-for="s in ref.launch_statuses" :value="s.value">{{ s.title }}</option></select>
+            <button>Найти</button>
+            <span class="hint">найдено: {{ launches.length }}</span>
+          </form>
           <table>
             <thead><tr><th>№</th><th>Космодром</th><th>Тип РН</th><th>Полезная нагрузка</th><th>Орбита</th><th>Площадка</th><th>Окно</th><th>Статус</th></tr></thead>
             <tbody>

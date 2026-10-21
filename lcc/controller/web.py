@@ -249,6 +249,7 @@ class WebApi:
         data = {"spaceports": [{"id": sp.id, "code": sp.code, "name": sp.name, "region": sp.region}
                                for sp in self.s.reference.list_spaceports(session)],
                 "postpone_reasons": [{"value": r.value, "title": r.title} for r in PostponeReason],
+                "launch_statuses": [{"value": s.value, "title": s.title} for s in LaunchStatus],
                 "vehicle_types": [], "pads": [], "channels": []}
         if not session.can(Permission.VIEW_SCHEDULE):
             return _json(200, data)
