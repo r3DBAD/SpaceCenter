@@ -142,6 +142,9 @@
                                 <a class="function" href="#LaunchRepository.list_all">list_all</a>
                         </li>
                         <li>
+                                <a class="function" href="#LaunchRepository.starting_between">starting_between</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#LaunchRepository.labels">labels</a>
                         </li>
                         <li>
@@ -157,7 +160,7 @@
                                 <a class="function" href="#LaunchRepository.stats_by_vehicle">stats_by_vehicle</a>
                         </li>
                         <li>
-                                <a class="function" href="#LaunchRepository.occupancy">occupancy</a>
+                                <a class="function" href="#LaunchRepository.iter_occupancy">iter_occupancy</a>
                         </li>
                 </ul>
 
@@ -173,6 +176,9 @@
                         </li>
                         <li>
                                 <a class="function" href="#FuelRepository.list_batches">list_batches</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#FuelRepository.used_by_batch">used_by_batch</a>
                         </li>
                         <li>
                                 <a class="function" href="#FuelRepository.used_mass">used_mass</a>
@@ -784,13 +790,28 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_all</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
+        <span class="name">list_all</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">vehicle_type_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#LaunchRepository.list_all"></a>
     
     
+
+                            </div>
+                            <div id="LaunchRepository.starting_between" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">starting_between</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">after</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">until</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#LaunchRepository.starting_between"></a>
+    
+            <div class="docstring"><p>Незавершенные пуски с началом окна в (after; until] — для таймера прогнозов (ЛР5, оптимизация №5).</p>
+</div>
+
 
                             </div>
                             <div id="LaunchRepository.labels" class="classattr">
@@ -862,17 +883,21 @@
 
 
                             </div>
-                            <div id="LaunchRepository.occupancy" class="classattr">
+                            <div id="LaunchRepository.iter_occupancy" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">occupancy</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">pad_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>:</span></span>
+        <span class="name">iter_occupancy</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
-    <a class="headerlink" href="#LaunchRepository.occupancy"></a>
+    <a class="headerlink" href="#LaunchRepository.iter_occupancy"></a>
     
-            <div class="docstring"><p>Интервалы занятости площадки: от начала сборки до финального статуса (или по сей день).</p>
+            <div class="docstring"><p>ЛР5, оптимизация №4: интервалы занятости всех площадок одним запросом, строки — генератором.</p>
+
+<p>Было: запрос occupancy() на каждую площадку, в нем два коррелированных подзапроса на каждый пуск,
+результат — список словарей. Стало: один проход по stage_log с GROUP BY; пуски вне периода
+отбрасывает HAVING; строки отдаются по одной (pad_id, status, started, finished), список не строится.</p>
 </div>
 
 
@@ -938,6 +963,21 @@
     <a class="headerlink" href="#FuelRepository.list_batches"></a>
     
     
+
+                            </div>
+                            <div id="FuelRepository.used_by_batch" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">used_by_batch</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#FuelRepository.used_by_batch"></a>
+    
+            <div class="docstring"><p>Израсходовано по каждой партии одним запросом (ЛР5, оптимизация №1: вместо N запросов used_mass).</p>
+</div>
+
 
                             </div>
                             <div id="FuelRepository.used_mass" class="classattr">

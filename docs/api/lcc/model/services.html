@@ -55,6 +55,9 @@
                                 <a class="variable" href="#AuthService.LOCK_TIME">LOCK_TIME</a>
                         </li>
                         <li>
+                                <a class="variable" href="#AuthService.PURGE_AT">PURGE_AT</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#AuthService.login">login</a>
                         </li>
                 </ul>
@@ -92,6 +95,9 @@
                         </li>
                         <li>
                                 <a class="function" href="#ReferenceService.add_pad">add_pad</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ReferenceService.list_pads_brief">list_pads_brief</a>
                         </li>
                         <li>
                                 <a class="function" href="#ReferenceService.list_pads">list_pads</a>
@@ -437,6 +443,18 @@
     
 
                             </div>
+                            <div id="AuthService.PURGE_AT" class="classattr">
+                                <div class="attr variable">
+            <span class="name">PURGE_AT</span>        =
+<span class="default_value">256</span>
+
+        
+    </div>
+    <a class="headerlink" href="#AuthService.PURGE_AT"></a>
+    
+    
+
+                            </div>
                             <div id="AuthService.login" class="classattr">
                                 <div class="attr function">
             
@@ -593,6 +611,21 @@
     <a class="headerlink" href="#ReferenceService.add_pad"></a>
     
     
+
+                            </div>
+                            <div id="ReferenceService.list_pads_brief" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">list_pads_brief</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#ReferenceService.list_pads_brief"></a>
+    
+            <div class="docstring"><p>Площадки без показателей загрузки — для подписей в списках (ЛР5: usage не нужен, это 3 запроса на площадку).</p>
+</div>
+
 
                             </div>
                             <div id="ReferenceService.list_pads" class="classattr">
@@ -893,13 +926,15 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_launches</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
+        <span class="name">list_launches</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">vehicle_type_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#LaunchService.list_launches"></a>
     
-    
+            <div class="docstring"><p>Расписание и поиск пусков: фильтры по космодрому, типу носителя и статусу выполняет SQL.</p>
+</div>
+
 
                             </div>
                             <div id="LaunchService.launch_card" class="classattr">

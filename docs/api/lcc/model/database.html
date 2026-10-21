@@ -67,6 +67,9 @@
                                 <a class="function" href="#Database.query">query</a>
                         </li>
                         <li>
+                                <a class="function" href="#Database.iterate">iterate</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Database.query_one">query_one</a>
                         </li>
                         <li>
@@ -111,7 +114,7 @@
                     <div class="attr variable">
             <span class="name">SCHEMA</span>        =
 <input id="SCHEMA-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="SCHEMA-view-value"></label><span class="default_value">PosixPath(&#39;/home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР4/spaceport-lcc/lcc/model/schema.sql&#39;)</span>
+            <label class="view-value-button pdoc-button" for="SCHEMA-view-value"></label><span class="default_value">PosixPath(&#39;/home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/schema.sql&#39;)</span>
 
         
     </div>
@@ -155,7 +158,10 @@
     </div>
     <a class="headerlink" href="#dt_from_db"></a>
     
-    
+            <div class="docstring"><p>ЛР5, оптимизация №2: fromisoformat написан на C, замер timeit: 0,10 мкс против 3,41 мкс
+у strptime (в 35 раз), который разбирает строку формата на Python. DT_FORMAT — это ISO 8601.</p>
+</div>
+
 
                 </section>
                 <section id="date_to_db">
@@ -268,6 +274,21 @@
     <a class="headerlink" href="#Database.query"></a>
     
     
+
+                            </div>
+                            <div id="Database.iterate" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">iterate</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">()</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Database.iterate"></a>
+    
+            <div class="docstring"><p>Строки по одной, без fetchall: для больших выборок, которые обрабатываются потоком (ЛР5).</p>
+</div>
+
 
                             </div>
                             <div id="Database.query_one" class="classattr">

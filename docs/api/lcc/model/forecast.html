@@ -82,6 +82,9 @@
                                 <a class="variable" href="#ForecastService.RETRY_AFTER">RETRY_AFTER</a>
                         </li>
                         <li>
+                                <a class="variable" href="#ForecastService.MAX_PARALLEL">MAX_PARALLEL</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#ForecastService.in_lead_time">in_lead_time</a>
                         </li>
                         <li>
@@ -328,6 +331,18 @@
     
 
                             </div>
+                            <div id="ForecastService.MAX_PARALLEL" class="classattr">
+                                <div class="attr variable">
+            <span class="name">MAX_PARALLEL</span>        =
+<span class="default_value">4</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastService.MAX_PARALLEL"></a>
+    
+    
+
+                            </div>
                             <div id="ForecastService.in_lead_time" class="classattr">
                                 <div class="attr function">
             
@@ -367,6 +382,11 @@
     <a class="headerlink" href="#ForecastService.run_auto"></a>
     
             <div class="docstring"><p>Вызывается таймером без пользователя (staff_id = NULL).</p>
+
+<p>ЛР5: запросы к службе идут параллельно в потоках. Задача ждет сеть, а на время ожидания
+сокета GIL отпущен, поэтому потоки дают выигрыш (замер: 4 пуска при ответе за 0,5 с —
+2005 мс последовательно, 503 мс в 4 потоках). База читается и пишется только в основном
+потоке: соединение SQLite нельзя использовать из нескольких потоков.</p>
 </div>
 
 

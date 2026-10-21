@@ -1,0 +1,43 @@
+@startuml seq_fuel_stock_lab5
+' ЛР5: вкладка «Топливо» — остатки по всем партиям, до и после оптимизации №1
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+title Остатки партий топлива: до и после оптимизации
+
+boundary ":Vue (app.js)" as V <<View>>
+control ":WebApi" as C <<Controller>>
+participant ":FuelService" as S <<Model>>
+participant ":FuelRepository" as R <<Model/DAO>>
+database "SQLite" as DB
+
+V -> C : GET /api/fuel
+C -> S : list_batches(session)
+S -> R : list_batches(scope)
+R -> DB : SELECT * FROM fuel_batch
+DB --> R : B партий (50 000 пусков → 2 000 партий)
+
+group #FFE0E0 ДО (ЛР4): N+1 запросов — узкое место
+  loop для каждой партии (2 000 раз)
+    S -> R : used_mass(batch_id)
+    R -> DB : SELECT SUM(mass_hg) FROM fuel_consumption\nWHERE batch_id = ?
+    note right of DB : индекса по batch_id нет:\nкаждый раз читаются все\n136 557 строк расхода
+    DB --> R : сумма
+  end
+  note over S, DB : 2 001 запрос, O(B × C); 10 365 мс
+end
+
+group #DFF0DF ПОСЛЕ (ЛР5): один пакетный запрос
+  S -> R : used_by_batch()
+  R -> DB : SELECT batch_id, SUM(mass_hg)\nFROM fuel_consumption GROUP BY batch_id
+  note right of DB : индекс ix_consumption_batch
+  DB --> R : {batch_id: сумма}
+  S -> S : remaining = initial − used.get(id)
+  note over S, DB : 2 запроса, O(B + C); 116 мс (вместе с отчетом)
+end
+
+S --> C : [(партия, остаток)]
+C --> V : 200 JSON
+@enduml

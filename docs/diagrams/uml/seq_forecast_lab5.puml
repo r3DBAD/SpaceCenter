@@ -1,0 +1,50 @@
+@startuml seq_forecast_lab5
+' ЛР5: автоматический запрос прогноза после оптимизации (№5 и распараллеливание)
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+title Запрос прогноза у внешней метеослужбы — после оптимизации
+
+participant "_Server\n(таймер, Controller)" as T
+participant "ForecastService\n<<Model>>" as FS
+participant "LaunchRepository\nForecastRepository" as R
+database "SQLite" as DB
+participant "ThreadPoolExecutor\n(до 4 потоков)" as TP
+participant "HttpMeteoProvider\n<<Model>>" as P
+participant "Внешняя\nметеослужба" as EXT
+
+== раз в минуту ==
+T -> FS : run_auto()
+FS -> R : starting_between(now, now + 24 ч)
+R -> DB : SELECT … WHERE window_start > ? AND window_start <= ?\nAND status NOT IN (…)   [индекс ix_launch_window]
+note right of DB #DFF0DF : было: list_all() — все 50 000 пусков\nи отбор в Python (688 мс);\nстало: только пуски в окне (< 0,1 мс)
+DB --> R : k пусков (обычно 0–5)
+loop k пусков
+  FS -> R : latest(launch, window_start)
+end
+FS -> FS : due(): прогноза еще нет\nили служба была недоступна ≥ 30 мин назад
+
+group #DFF0DF параллельно, сеть без базы (GIL отпущен на время ожидания сокета)
+  FS -> TP : map(_fetch, [(космодром, окно)])
+  par поток 1
+    TP -> P : fetch(VOS, …)
+    P -> EXT : GET /forecast (timeout 30 с)
+    EXT --> P : JSON / таймаут
+  else поток 2…4
+    TP -> P : fetch(PLS, …)
+    P -> EXT : GET /forecast (timeout 30 с)
+    EXT --> P : JSON / таймаут
+  end
+  TP --> FS : [Forecast | MeteoUnavailable]
+end
+note right of TP : было: по очереди, 4 × 0,5 с = 2 005 мс,\nв худшем случае 4 × 30 с = 120 с;\nстало: 503 мс, в худшем случае 30 с
+
+loop k результатов (только основной поток: одно соединение SQLite)
+  FS -> FS : _store(): violations() → ok / warning / unavailable
+  FS -> R : add(ForecastRecord)
+  R -> DB : INSERT INTO weather_forecast
+end
+FS --> T : [ForecastRecord]
+@enduml

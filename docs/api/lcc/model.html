@@ -49,6 +49,9 @@
                                 <a class="function" href="#Database.query">query</a>
                         </li>
                         <li>
+                                <a class="function" href="#Database.iterate">iterate</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Database.query_one">query_one</a>
                         </li>
                         <li>
@@ -155,9 +158,6 @@
                         </li>
                 </ul>
 
-            </li>
-            <li>
-                    <a class="function" href="#open_model">open_model</a>
             </li>
     </ul>
 
@@ -268,6 +268,21 @@
     <a class="headerlink" href="#Database.query"></a>
     
     
+
+                            </div>
+                            <div id="Database.iterate" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">iterate</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">sql</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">()</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Database.iterate"></a>
+    
+            <div class="docstring"><p>Строки по одной, без fetchall: для больших выборок, которые обрабатываются потоком (ЛР5).</p>
+</div>
+
 
                             </div>
                             <div id="Database.query_one" class="classattr">
@@ -656,21 +671,6 @@
     
 
                             </div>
-                </section>
-                <section id="open_model">
-                    <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">open_model</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">':memory:'</span>, </span><span class="param"><span class="n">clock</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#Services">Services</a></span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#open_model"></a>
-    
-            <div class="docstring"><p>Создать БД (при необходимости — схему) и вернуть фасад сервисов.</p>
-</div>
-
-
                 </section>
     </main>
 <script>
