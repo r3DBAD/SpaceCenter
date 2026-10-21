@@ -74,3 +74,5 @@ tbody tr:has(button) { cursor: default; }
 tr.denied td { color: var(--danger); }
 td.num { text-align: right; white-space: nowrap; }
 header select { padding: 4px 8px; }
+section > h2 ~ h2 { margin-top: 24px; }
+.hint + table, .hint + form { margin-top: 8px; }

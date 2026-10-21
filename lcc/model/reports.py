@@ -257,5 +257,5 @@ class ReportService:
         scope = session.scope(spaceport_id)
         reason = None if reason in (None, "") else require_enum(reason, PostponeReason, "Причина переноса")
         table = cls(self._repos, self._clock(), scope, reason).build(period)
-        self._audit.record(session, "Формирование отчета", "отчет", key, f"«{cls.title}» за {period}")
+        self._audit.record(session, "Формирование отчета", "отчет", f"«{cls.title}»", f"за {period}")
         return table

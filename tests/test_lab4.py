@@ -133,6 +133,7 @@ class InspectorAuditTest(unittest.TestCase):
         self.assertEqual(actions, [("Вход в систему", "ok"), ("Просмотр журнала", "ok"),
                                    ("Формирование отчета", "ok"), ("Отказ в доступе", "denied")])
         self.assertIn("причина «Техническая»", self.audit()[1].details)
+        self.assertEqual((self.audit()[3].object_type, self.audit()[3].object_ref), ("право", "view_schedule"))
 
     def test_denial_inside_transaction_is_kept(self):
         """Отказ внутри транзакции: действие откатывается, а запись аудита остается."""

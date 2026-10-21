@@ -44,7 +44,7 @@ class Session:
     `on_denied`, чтобы аудит записал попытку (Т3.3, П12).
     """
 
-    def __init__(self, staff, on_denied: Callable[["Session", str], None] | None = None):
+    def __init__(self, staff, on_denied: Callable[["Session", str, str, str], None] | None = None):
         self._staff = staff
         self._on_denied = on_denied
 
@@ -79,14 +79,15 @@ class Session:
     def require(self, *permissions: Permission) -> None:
         """Требуется хотя бы одно из перечисленных прав."""
         if not any(self.can(p) for p in permissions):
-            self._deny(f"Недостаточно прав: роль «{self._staff.role.title}» не может выполнить эту операцию")
+            self._deny(f"Недостаточно прав: роль «{self._staff.role.title}» не может выполнить эту операцию",
+                       "право", " или ".join(p.value for p in permissions))
 
     def ensure_spaceport(self, spaceport_id: int) -> None:
         """Объект должен относиться к космодрому сотрудника (роли центра проходят всегда)."""
         if not self.is_global and spaceport_id != self._staff.spaceport_id:
-            self._deny("Нет доступа к данным другого космодрома")
+            self._deny("Нет доступа к данным другого космодрома", "космодром", f"№{spaceport_id}")
 
-    def _deny(self, message: str) -> None:
+    def _deny(self, message: str, object_type: str, object_ref: str) -> None:
         if self._on_denied is not None:
-            self._on_denied(self, message)
+            self._on_denied(self, message, object_type, object_ref)
         raise AccessDeniedError(message)

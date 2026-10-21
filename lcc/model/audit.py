@@ -49,11 +49,11 @@ class AuditLogger:
         if self.is_audited(session):
             self._write(session, action, object_type, object_ref, "ok", details)
 
-    def denied(self, session: Session, message: str) -> None:
+    def denied(self, session: Session, message: str, object_type: str, object_ref: str) -> None:
         """Обработчик отказа для :class:`Session`: запись делается вне текущей транзакции."""
         if self.is_audited(session):
             self._repos.db.after_transaction(
-                lambda: self._write(session, "Отказ в доступе", "операция", "", "denied", message))
+                lambda: self._write(session, "Отказ в доступе", object_type, object_ref, "denied", message))
 
     def _write(self, session, action, object_type, object_ref, outcome, details) -> None:
         st = session.staff

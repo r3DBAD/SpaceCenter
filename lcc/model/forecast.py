@@ -60,7 +60,7 @@ class ForecastService:
     def _evaluate(self, forecast: Forecast) -> tuple[ForecastStatus, str]:
         problems = self._limits.violations(forecast)
         if problems:
-            return ForecastStatus.WARNING, "возможен перенос: " + "; ".join(problems)
+            return ForecastStatus.WARNING, "; ".join(problems)
         return ForecastStatus.OK, ""
 
     def _site(self, launch: Launch) -> str:
