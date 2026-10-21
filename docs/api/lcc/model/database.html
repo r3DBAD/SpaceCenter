@@ -58,6 +58,9 @@
                                 <a class="function" href="#Database.init_schema">init_schema</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Database.schema_version">schema_version</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Database.execute">execute</a>
                         </li>
                         <li>
@@ -71,6 +74,9 @@
                         </li>
                         <li>
                                 <a class="function" href="#Database.transaction">transaction</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Database.after_transaction">after_transaction</a>
                         </li>
                         <li>
                                 <a class="function" href="#Database.close">close</a>
@@ -104,7 +110,8 @@
                 <section id="SCHEMA">
                     <div class="attr variable">
             <span class="name">SCHEMA</span>        =
-<span class="default_value">PosixPath(&#39;/opt/routine/Лаба3/spaceport-lcc/lcc/model/schema.sql&#39;)</span>
+<input id="SCHEMA-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+            <label class="view-value-button pdoc-button" for="SCHEMA-view-value"></label><span class="default_value">PosixPath(&#39;/home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР4/spaceport-lcc/lcc/model/schema.sql&#39;)</span>
 
         
     </div>
@@ -192,7 +199,9 @@
 <ul>
 <li>внешние ключи включены (<code>PRAGMA foreign_keys</code>);</li>
 <li>все запросы репозиториев параметризованы (<code>?</code>), конкатенации SQL нет;</li>
-<li><code><a href="#Database.transaction">transaction()</a></code> — атомарная группа операций (откат при исключении).</li>
+<li><code><a href="#Database.transaction">transaction()</a></code> — атомарная группа операций (откат при исключении);</li>
+<li><code><a href="#Database.after_transaction">after_transaction()</a></code> — действие, которое выполнится после фиксации или
+отката (нужно для записи отказов в аудит, ЛР4).</li>
 </ul>
 </div>
 
@@ -218,6 +227,19 @@
         
     </div>
     <a class="headerlink" href="#Database.init_schema"></a>
+    
+            <div class="docstring"><p>Создать схему. База ЛР3 сначала переводится на текущую версию.</p>
+</div>
+
+
+                            </div>
+                            <div id="Database.schema_version" class="classattr">
+                                <div class="attr variable">
+            <span class="name">schema_version</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Database.schema_version"></a>
     
     
 
@@ -286,6 +308,21 @@
     <a class="headerlink" href="#Database.transaction"></a>
     
     
+
+                            </div>
+                            <div id="Database.after_transaction" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">after_transaction</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">action</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">NoneType</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Database.after_transaction"></a>
+    
+            <div class="docstring"><p>Выполнить действие вне текущей транзакции: сразу или после ее завершения.</p>
+</div>
+
 
                             </div>
                             <div id="Database.close" class="classattr">

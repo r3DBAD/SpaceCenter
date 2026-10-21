@@ -57,8 +57,14 @@
                         <li>
                                 <a class="variable" href="#StageContext.weather_limits">weather_limits</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#StageContext.loaded_batches">loaded_batches</a>
+                        </li>
                 </ul>
 
+            </li>
+            <li>
+                    <a class="function" href="#ensure_fuel_not_expired">ensure_fuel_not_expired</a>
             </li>
             <li>
                     <a class="class" href="#PreparationStage">PreparationStage</a>
@@ -222,7 +228,7 @@
                             <div id="StageContext.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">StageContext</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">launch</span><span class="p">:</span> <span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span>,</span><span class="param">	<span class="n">pad</span><span class="p">:</span> <span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span>,</span><span class="param">	<span class="n">pad_usage</span><span class="p">:</span> <span class="n"><a href="entities.html#PadUsage">lcc.model.entities.PadUsage</a></span>,</span><span class="param">	<span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">fuel_loaded</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">factory</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">last_weather</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherObservation">lcc.model.weather.WeatherObservation</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">weather_limits</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherLimits">lcc.model.weather.WeatherLimits</a></span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">factory</span><span class="o">&gt;</span></span>)</span>
+        <span class="name">StageContext</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">launch</span><span class="p">:</span> <span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span>,</span><span class="param">	<span class="n">pad</span><span class="p">:</span> <span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span>,</span><span class="param">	<span class="n">pad_usage</span><span class="p">:</span> <span class="n"><a href="entities.html#PadUsage">lcc.model.entities.PadUsage</a></span>,</span><span class="param">	<span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">fuel_loaded</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span><span class="p">,</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">factory</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">last_weather</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherObservation">lcc.model.weather.WeatherObservation</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">weather_limits</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherLimits">lcc.model.weather.WeatherLimits</a></span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">factory</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">loaded_batches</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">factory</span><span class="o">&gt;</span></span>)</span>
 
         
     </div>
@@ -277,7 +283,7 @@
                             </div>
                             <div id="StageContext.fuel_loaded" class="classattr">
                                 <div class="attr variable">
-            <span class="name">fuel_loaded</span><span class="annotation">: dict[<a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a>, float]</span>
+            <span class="name">fuel_loaded</span><span class="annotation">: dict[<a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a>, <a href="units.html#Mass">lcc.model.units.Mass</a>]</span>
 
         
     </div>
@@ -309,6 +315,32 @@
     
 
                             </div>
+                            <div id="StageContext.loaded_batches" class="classattr">
+                                <div class="attr variable">
+            <span class="name">loaded_batches</span><span class="annotation">: list[<a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a>]</span>
+
+        
+    </div>
+    <a class="headerlink" href="#StageContext.loaded_batches"></a>
+    
+    
+
+                            </div>
+                </section>
+                <section id="ensure_fuel_not_expired">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">ensure_fuel_not_expired</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">batches</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span><span class="p">]</span>, </span><span class="param"><span class="n">on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#ensure_fuel_not_expired"></a>
+    
+            <div class="docstring"><p>Топливо в баке не должно быть из просроченной партии (ЛР4, П8).</p>
+</div>
+
+
                 </section>
                 <section id="PreparationStage">
                     <div class="attr class">

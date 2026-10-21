@@ -151,6 +151,30 @@
                                 <a class="function" href="#WebApi.add_channel">add_channel</a>
                         </li>
                         <li>
+                                <a class="function" href="#WebApi.spaceports">spaceports</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.add_spaceport">add_spaceport</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.journal_incidents">journal_incidents</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.journal_postponements">journal_postponements</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.audit">audit</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.forecasts">forecasts</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.request_forecast">request_forecast</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#WebApi.manual_forecast">manual_forecast</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#WebApi.report_list">report_list</a>
                         </li>
                         <li>
@@ -188,6 +212,9 @@
 Model возвращаются клиенту текстом с кодом 4xx.</p>
 
 <p>Запуск: <code>python -m lcc --db demo.db</code> → <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a></p>
+
+<p>ЛР4: маршруты космодромов, журналов, аудита и прогнозов. Сервер раз в минуту
+запускает автоматический запрос прогноза (<code>Services.forecasts.run_auto()</code>).</p>
 </div>
 
                 
@@ -197,7 +224,8 @@ Model возвращаются клиенту текстом с кодом 4xx.<
                 <section id="STATIC_DIR">
                     <div class="attr variable">
             <span class="name">STATIC_DIR</span>        =
-<span class="default_value">PosixPath(&#39;/opt/routine/Лаба3/spaceport-lcc/lcc/view/web&#39;)</span>
+<input id="STATIC_DIR-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+            <label class="view-value-button pdoc-button" for="STATIC_DIR-view-value"></label><span class="default_value">PosixPath(&#39;/home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР4/spaceport-lcc/lcc/view/web&#39;)</span>
 
         
     </div>
@@ -413,14 +441,16 @@ Model возвращаются клиенту текстом с кодом 4xx.<
     </div>
     <a class="headerlink" href="#WebApi.reference"></a>
     
-    
+            <div class="docstring"><p>Справочники для страницы. Инспектору расписание и площадки не отдаются (П11).</p>
+</div>
+
 
                             </div>
                             <div id="WebApi.launches" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">launches</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+        <span class="name">launches</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
@@ -511,7 +541,7 @@ Model возвращаются клиенту текстом с кодом 4xx.<
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">fuel</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+        <span class="name">fuel</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
 
         
     </div>
@@ -689,6 +719,110 @@ Model возвращаются клиенту текстом с кодом 4xx.<
     
 
                             </div>
+                            <div id="WebApi.spaceports" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">spaceports</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.spaceports"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.add_spaceport" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_spaceport</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.add_spaceport"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.journal_incidents" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">journal_incidents</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.journal_incidents"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.journal_postponements" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">journal_postponements</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.journal_postponements"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.audit" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">audit</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.audit"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.forecasts" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">forecasts</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">query</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.forecasts"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.request_forecast" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">request_forecast</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.request_forecast"></a>
+    
+    
+
+                            </div>
+                            <div id="WebApi.manual_forecast" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">manual_forecast</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span>, </span><span class="param"><span class="n">launch_id</span>, </span><span class="param"><span class="n">data</span>, </span><span class="param"><span class="o">**</span><span class="n">_</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#WebApi.manual_forecast"></a>
+    
+    
+
+                            </div>
                             <div id="WebApi.report_list" class="classattr">
                                 <div class="attr function">
             
@@ -733,7 +867,7 @@ Model возвращаются клиенту текстом с кодом 4xx.<
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">run_server</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">services</span><span class="p">:</span> <span class="n"><a href="../model.html#Services">lcc.model.Services</a></span>,</span><span class="param">	<span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span>,</span><span class="param">	<span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>,</span><span class="param">	<span class="n">open_browser</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+        <span class="name">run_server</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">services</span><span class="p">:</span> <span class="n"><a href="../model.html#Services">lcc.model.Services</a></span>,</span><span class="param">	<span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span>,</span><span class="param">	<span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>,</span><span class="param">	<span class="n">open_browser</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">forecast_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
 
         
     </div>

@@ -91,6 +91,9 @@
                                 <a class="variable" href="#Report.title">title</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Report.permissions">permissions</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Report.build">build</a>
                         </li>
                 </ul>
@@ -151,7 +154,28 @@
                                 <a class="variable" href="#IncidentsReport.title">title</a>
                         </li>
                         <li>
+                                <a class="variable" href="#IncidentsReport.permissions">permissions</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#IncidentsReport.build">build</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#PostponementStatsReport">PostponementStatsReport</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#PostponementStatsReport.key">key</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#PostponementStatsReport.title">title</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#PostponementStatsReport.permissions">permissions</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#PostponementStatsReport.build">build</a>
                         </li>
                 </ul>
 
@@ -195,6 +219,9 @@
 <p>Все отчёты реализуют общий интерфейс <code><a href="#Report">Report</a></code> и возвращают
 <code><a href="#ReportTable">ReportTable</a></code> — независимую от способа отображения структуру.
 Отображение (страница, CSV) — задача слоя View.</p>
+
+<p>ЛР4: отчет строится по одному космодрому или по всем (сводка руководителя центра),
+у каждого отчета свое право доступа (инспектору доступны отчеты по инцидентам).</p>
 </div>
 
                 
@@ -387,7 +414,7 @@
     </div>
     <a class="headerlink" href="#Report"></a>
     
-            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название и способ построения.</p>
+            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название, права и способ построения.</p>
 </div>
 
 
@@ -409,6 +436,18 @@
         
     </div>
     <a class="headerlink" href="#Report.title"></a>
+    
+    
+
+                            </div>
+                            <div id="Report.permissions" class="classattr">
+                                <div class="attr variable">
+            <span class="name">permissions</span><span class="annotation">: tuple[<a href="enums.html#Permission">lcc.model.enums.Permission</a>, ...]</span>        =
+<span class="default_value">(&lt;Permission.VIEW_REPORTS: &#39;view_reports&#39;&gt;,)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Report.permissions"></a>
     
     
 
@@ -440,7 +479,7 @@
     </div>
     <a class="headerlink" href="#LaunchesByVehicleReport"></a>
     
-            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название и способ построения.</p>
+            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название, права и способ построения.</p>
 </div>
 
 
@@ -488,6 +527,7 @@
                                 <dl>
                                     <div><dt><a href="#Report">Report</a></dt>
                                 <dd id="LaunchesByVehicleReport.__init__" class="function"><a href="#Report.__init__">Report</a></dd>
+                <dd id="LaunchesByVehicleReport.permissions" class="variable"><a href="#Report.permissions">permissions</a></dd>
 
             </div>
                                 </dl>
@@ -503,7 +543,7 @@
     </div>
     <a class="headerlink" href="#FuelUsageReport"></a>
     
-            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название и способ построения.</p>
+            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название, права и способ построения.</p>
 </div>
 
 
@@ -551,6 +591,7 @@
                                 <dl>
                                     <div><dt><a href="#Report">Report</a></dt>
                                 <dd id="FuelUsageReport.__init__" class="function"><a href="#Report.__init__">Report</a></dd>
+                <dd id="FuelUsageReport.permissions" class="variable"><a href="#Report.permissions">permissions</a></dd>
 
             </div>
                                 </dl>
@@ -566,7 +607,7 @@
     </div>
     <a class="headerlink" href="#PadLoadReport"></a>
     
-            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название и способ построения.</p>
+            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название, права и способ построения.</p>
 </div>
 
 
@@ -614,6 +655,7 @@
                                 <dl>
                                     <div><dt><a href="#Report">Report</a></dt>
                                 <dd id="PadLoadReport.__init__" class="function"><a href="#Report.__init__">Report</a></dd>
+                <dd id="PadLoadReport.permissions" class="variable"><a href="#Report.permissions">permissions</a></dd>
 
             </div>
                                 </dl>
@@ -629,7 +671,7 @@
     </div>
     <a class="headerlink" href="#IncidentsReport"></a>
     
-            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название и способ построения.</p>
+            <div class="docstring"><p>Базовый отчёт. Подклассы определяют ключ, название, права и способ построения.</p>
 </div>
 
 
@@ -653,6 +695,19 @@
         
     </div>
     <a class="headerlink" href="#IncidentsReport.title"></a>
+    
+    
+
+                            </div>
+                            <div id="IncidentsReport.permissions" class="classattr">
+                                <div class="attr variable">
+            <span class="name">permissions</span>        =
+<input id="IncidentsReport.permissions-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+            <label class="view-value-button pdoc-button" for="IncidentsReport.permissions-view-value"></label><span class="default_value">(&lt;Permission.VIEW_REPORTS: &#39;view_reports&#39;&gt;, &lt;Permission.VIEW_INCIDENT_REPORTS: &#39;view_incident_reports&#39;&gt;)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#IncidentsReport.permissions"></a>
     
     
 
@@ -682,11 +737,87 @@
                                 </dl>
                             </div>
                 </section>
+                <section id="PostponementStatsReport">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">PostponementStatsReport</span><wbr>(<span class="base"><a href="#Report">Report</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#PostponementStatsReport"></a>
+    
+            <div class="docstring"><p>Статистика переносов по месяцам и причинам (ЛР4, Т6.3).</p>
+</div>
+
+
+                            <div id="PostponementStatsReport.key" class="classattr">
+                                <div class="attr variable">
+            <span class="name">key</span>        =
+<span class="default_value">&#39;postponements&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PostponementStatsReport.key"></a>
+    
+    
+
+                            </div>
+                            <div id="PostponementStatsReport.title" class="classattr">
+                                <div class="attr variable">
+            <span class="name">title</span>        =
+<span class="default_value">&#39;Статистика переносов пусков&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PostponementStatsReport.title"></a>
+    
+    
+
+                            </div>
+                            <div id="PostponementStatsReport.permissions" class="classattr">
+                                <div class="attr variable">
+            <span class="name">permissions</span>        =
+<input id="PostponementStatsReport.permissions-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+            <label class="view-value-button pdoc-button" for="PostponementStatsReport.permissions-view-value"></label><span class="default_value">(&lt;Permission.VIEW_REPORTS: &#39;view_reports&#39;&gt;, &lt;Permission.VIEW_INCIDENT_REPORTS: &#39;view_incident_reports&#39;&gt;)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PostponementStatsReport.permissions"></a>
+    
+    
+
+                            </div>
+                            <div id="PostponementStatsReport.build" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">build</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">period</span><span class="p">:</span> <span class="n"><a href="#Period">Period</a></span></span><span class="return-annotation">) -> <span class="n"><a href="#ReportTable">ReportTable</a></span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#PostponementStatsReport.build"></a>
+    
+            <div class="docstring"><p>Построить отчёт за период.</p>
+</div>
+
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#Report">Report</a></dt>
+                                <dd id="PostponementStatsReport.__init__" class="function"><a href="#Report.__init__">Report</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
                 <section id="REPORTS">
                     <div class="attr variable">
             <span class="name">REPORTS</span><span class="annotation">: dict[str, type[<a href="#Report">Report</a>]]</span>        =
 <input id="REPORTS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="REPORTS-view-value"></label><span class="default_value">{&#39;launches&#39;: &lt;class &#39;<a href="#LaunchesByVehicleReport">LaunchesByVehicleReport</a>&#39;&gt;, &#39;fuel&#39;: &lt;class &#39;<a href="#FuelUsageReport">FuelUsageReport</a>&#39;&gt;, &#39;pads&#39;: &lt;class &#39;<a href="#PadLoadReport">PadLoadReport</a>&#39;&gt;, &#39;incidents&#39;: &lt;class &#39;<a href="#IncidentsReport">IncidentsReport</a>&#39;&gt;}</span>
+            <label class="view-value-button pdoc-button" for="REPORTS-view-value"></label><span class="default_value">{&#39;launches&#39;: &lt;class &#39;<a href="#LaunchesByVehicleReport">LaunchesByVehicleReport</a>&#39;&gt;, &#39;fuel&#39;: &lt;class &#39;<a href="#FuelUsageReport">FuelUsageReport</a>&#39;&gt;, &#39;pads&#39;: &lt;class &#39;<a href="#PadLoadReport">PadLoadReport</a>&#39;&gt;, &#39;incidents&#39;: &lt;class &#39;<a href="#IncidentsReport">IncidentsReport</a>&#39;&gt;, &#39;postponements&#39;: &lt;class &#39;<a href="#PostponementStatsReport">PostponementStatsReport</a>&#39;&gt;}</span>
 
         
     </div>
@@ -710,7 +841,7 @@
                             <div id="ReportService.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">ReportService</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">repos</span><span class="p">:</span> <span class="n"><a href="../model.html#Repositories">lcc.model.Repositories</a></span>, </span><span class="param"><span class="n">clock</span></span>)</span>
+        <span class="name">ReportService</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="../model.html#Repositories">lcc.model.Repositories</a></span>,</span><span class="param">	<span class="n">clock</span>,</span><span class="param">	<span class="n">audit</span><span class="p">:</span> <span class="n"><a href="audit.html#AuditLogger">lcc.model.audit.AuditLogger</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
@@ -724,20 +855,22 @@
                     <div class="decorator decorator-staticmethod">@staticmethod</div>
 
         <span class="def">def</span>
-        <span class="name">available</span><span class="signature pdoc-code condensed">(<span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>:</span></span>
+        <span class="name">available</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#ReportService.available"></a>
     
-    
+            <div class="docstring"><p>Отчеты, доступные роли сотрудника.</p>
+</div>
+
 
                             </div>
                             <div id="ReportService.build" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">build</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">key</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">period</span><span class="p">:</span> <span class="n"><a href="#Period">Period</a></span></span><span class="return-annotation">) -> <span class="n"><a href="#ReportTable">ReportTable</a></span>:</span></span>
+        <span class="name">build</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">key</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">period</span><span class="p">:</span> <span class="n"><a href="#Period">Period</a></span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">reason</span><span class="p">:</span> <span class="n"><a href="enums.html#PostponeReason">lcc.model.enums.PostponeReason</a></span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#ReportTable">ReportTable</a></span>:</span></span>
 
         
     </div>

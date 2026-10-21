@@ -46,6 +46,24 @@
 
             </li>
             <li>
+                    <a class="class" href="#Spaceport">Spaceport</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#Spaceport.__init__">Spaceport</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spaceport.code">code</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spaceport.name">name</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Spaceport.region">region</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#Staff">Staff</a>
                             <ul class="memberlist">
                         <li>
@@ -68,6 +86,9 @@
                         </li>
                         <li>
                                 <a class="variable" href="#Staff.is_active">is_active</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Staff.spaceport_id">spaceport_id</a>
                         </li>
                         <li>
                                 <a class="function" href="#Staff.deactivate">deactivate</a>
@@ -137,6 +158,9 @@
                         </li>
                         <li>
                                 <a class="variable" href="#LaunchPad.is_faulty">is_faulty</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#LaunchPad.spaceport_id">spaceport_id</a>
                         </li>
                         <li>
                                 <a class="function" href="#LaunchPad.mark_faulty">mark_faulty</a>
@@ -235,6 +259,9 @@
                                 <a class="function" href="#FuelBatch.__init__">FuelBatch</a>
                         </li>
                         <li>
+                                <a class="variable" href="#FuelBatch.MAX_MASS">MAX_MASS</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#FuelBatch.batch_no">batch_no</a>
                         </li>
                         <li>
@@ -244,13 +271,16 @@
                                 <a class="variable" href="#FuelBatch.grade">grade</a>
                         </li>
                         <li>
-                                <a class="variable" href="#FuelBatch.initial_volume">initial_volume</a>
+                                <a class="variable" href="#FuelBatch.initial_mass">initial_mass</a>
                         </li>
                         <li>
                                 <a class="variable" href="#FuelBatch.produced_on">produced_on</a>
                         </li>
                         <li>
                                 <a class="variable" href="#FuelBatch.expires_on">expires_on</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#FuelBatch.spaceport_id">spaceport_id</a>
                         </li>
                         <li>
                                 <a class="function" href="#FuelBatch.is_expired">is_expired</a>
@@ -277,7 +307,7 @@
                                 <a class="variable" href="#FuelConsumption.batch_id">batch_id</a>
                         </li>
                         <li>
-                                <a class="variable" href="#FuelConsumption.volume">volume</a>
+                                <a class="variable" href="#FuelConsumption.mass">mass</a>
                         </li>
                         <li>
                                 <a class="variable" href="#FuelConsumption.consumed_at">consumed_at</a>
@@ -423,6 +453,76 @@
 
                             </div>
                 </section>
+                <section id="Spaceport">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">Spaceport</span><wbr>(<span class="base"><a href="#Entity">Entity</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#Spaceport"></a>
+    
+            <div class="docstring"><p>Космодром (ЛР4, Т1.1): у него свои площадки, склады топлива и персонал.</p>
+</div>
+
+
+                            <div id="Spaceport.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">Spaceport</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">code</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">''</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Spaceport.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="Spaceport.code" class="classattr">
+                                <div class="attr variable">
+            <span class="name">code</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Spaceport.code"></a>
+    
+    
+
+                            </div>
+                            <div id="Spaceport.name" class="classattr">
+                                <div class="attr variable">
+            <span class="name">name</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Spaceport.name"></a>
+    
+    
+
+                            </div>
+                            <div id="Spaceport.region" class="classattr">
+                                <div class="attr variable">
+            <span class="name">region</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Spaceport.region"></a>
+    
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#Entity">Entity</a></dt>
+                                <dd id="Spaceport.id" class="variable"><a href="#Entity.id">id</a></dd>
+                <dd id="Spaceport.assign_id" class="function"><a href="#Entity.assign_id">assign_id</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
                 <section id="Staff">
                     <div class="attr class">
             
@@ -434,13 +534,16 @@
     <a class="headerlink" href="#Staff"></a>
     
             <div class="docstring"><p>Сотрудник ЦУП. Хранит только хеш и соль пароля.</p>
+
+<p>Роли уровня центра (руководитель центра, инспектор) не привязаны к космодрому,
+остальные роли привязаны обязательно (ЛР4, П1, П2).</p>
 </div>
 
 
                             <div id="Staff.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">Staff</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">login</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">full_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">role</span><span class="p">:</span> <span class="n"><a href="enums.html#Role">lcc.model.enums.Role</a></span>,</span><span class="param">	<span class="n">password_hash</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">password_salt</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">is_active</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>,</span><span class="param">	<span class="n">staff_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+        <span class="name">Staff</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">login</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">full_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">role</span><span class="p">:</span> <span class="n"><a href="enums.html#Role">lcc.model.enums.Role</a></span>,</span><span class="param">	<span class="n">password_hash</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">password_salt</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">is_active</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>,</span><span class="param">	<span class="n">staff_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
@@ -511,6 +614,17 @@
         
     </div>
     <a class="headerlink" href="#Staff.is_active"></a>
+    
+    
+
+                            </div>
+                            <div id="Staff.spaceport_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceport_id</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Staff.spaceport_id"></a>
     
     
 
@@ -702,7 +816,7 @@
                             <div id="LaunchPad.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">LaunchPad</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">code</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">max_concurrent</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">cycle_limit</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">hours_limit</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">is_faulty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">pad_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+        <span class="name">LaunchPad</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">code</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">max_concurrent</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">cycle_limit</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">hours_limit</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">is_faulty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>,</span><span class="param">	<span class="n">pad_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
@@ -773,6 +887,17 @@
         
     </div>
     <a class="headerlink" href="#LaunchPad.is_faulty"></a>
+    
+    
+
+                            </div>
+                            <div id="LaunchPad.spaceport_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceport_id</span>
+
+        
+    </div>
+    <a class="headerlink" href="#LaunchPad.spaceport_id"></a>
     
     
 
@@ -1162,18 +1287,30 @@
     </div>
     <a class="headerlink" href="#FuelBatch"></a>
     
-            <div class="docstring"><p>Партия компонента топлива. Остаток не хранится: он передаётся как <code>used</code> из хранилища.</p>
+            <div class="docstring"><p>Партия компонента топлива на складе космодрома. Остаток не хранится: он считается от <code>used</code>.</p>
 </div>
 
 
                             <div id="FuelBatch.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">FuelBatch</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">batch_no</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">component</span><span class="p">:</span> <span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span>,</span><span class="param">	<span class="n">grade</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">initial_volume</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">produced_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">expires_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+        <span class="name">FuelBatch</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">batch_no</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">component</span><span class="p">:</span> <span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span>,</span><span class="param">	<span class="n">grade</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">initial_mass</span><span class="p">:</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>,</span><span class="param">	<span class="n">produced_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">expires_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
     <a class="headerlink" href="#FuelBatch.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="FuelBatch.MAX_MASS" class="classattr">
+                                <div class="attr variable">
+            <span class="name">MAX_MASS</span>        =
+<span class="default_value">Mass(hg=50000000)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#FuelBatch.MAX_MASS"></a>
     
     
 
@@ -1211,13 +1348,13 @@
     
 
                             </div>
-                            <div id="FuelBatch.initial_volume" class="classattr">
+                            <div id="FuelBatch.initial_mass" class="classattr">
                                 <div class="attr variable">
-            <span class="name">initial_volume</span>
+            <span class="name">initial_mass</span>
 
         
     </div>
-    <a class="headerlink" href="#FuelBatch.initial_volume"></a>
+    <a class="headerlink" href="#FuelBatch.initial_mass"></a>
     
     
 
@@ -1244,6 +1381,17 @@
     
 
                             </div>
+                            <div id="FuelBatch.spaceport_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceport_id</span>
+
+        
+    </div>
+    <a class="headerlink" href="#FuelBatch.spaceport_id"></a>
+    
+    
+
+                            </div>
                             <div id="FuelBatch.is_expired" class="classattr">
                                 <div class="attr function">
             
@@ -1261,7 +1409,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">remaining</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">used</span><span class="p">:</span> <span class="nb">float</span></span><span class="return-annotation">) -> <span class="nb">float</span>:</span></span>
+        <span class="name">remaining</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">used</span><span class="p">:</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span></span><span class="return-annotation">) -> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>:</span></span>
 
         
     </div>
@@ -1274,13 +1422,16 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">ensure_can_withdraw</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">volume</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">used</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">component</span><span class="p">:</span> <span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span></span><span class="return-annotation">) -> <span class="nb">float</span>:</span></span>
+        <span class="name">ensure_can_withdraw</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">mass</span><span class="p">:</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>,</span><span class="param">	<span class="n">used</span><span class="p">:</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>,</span><span class="param">	<span class="n">on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">component</span><span class="p">:</span> <span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span>,</span><span class="param">	<span class="n">valid_until</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#FuelBatch.ensure_can_withdraw"></a>
     
-            <div class="docstring"><p>Проверить списание <code>volume</code> т при уже израсходованных <code>used</code> т; вернуть объём.</p>
+            <div class="docstring"><p>Проверить списание <code>mass</code> при уже израсходованной <code>used</code>.</p>
+
+<p><code>valid_until</code> — последний день, когда топливо еще должно быть годным (конец
+стартового окна). Так топливо не истечет в баке до пуска (ЛР4, П8).</p>
 </div>
 
 
@@ -1314,7 +1465,7 @@
                             <div id="FuelConsumption.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">FuelConsumption</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">volume</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">consumed_at</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">staff_id</span><span class="p">:</span> <span class="nb">int</span></span>)</span>
+        <span class="name">FuelConsumption</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">mass</span><span class="p">:</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>,</span><span class="param">	<span class="n">consumed_at</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">staff_id</span><span class="p">:</span> <span class="nb">int</span></span>)</span>
 
         
     </div>
@@ -1345,13 +1496,13 @@
     
 
                             </div>
-                            <div id="FuelConsumption.volume" class="classattr">
+                            <div id="FuelConsumption.mass" class="classattr">
                                 <div class="attr variable">
-            <span class="name">volume</span><span class="annotation">: float</span>
+            <span class="name">mass</span><span class="annotation">: <a href="units.html#Mass">lcc.model.units.Mass</a></span>
 
         
     </div>
-    <a class="headerlink" href="#FuelConsumption.volume"></a>
+    <a class="headerlink" href="#FuelConsumption.mass"></a>
     
     
 

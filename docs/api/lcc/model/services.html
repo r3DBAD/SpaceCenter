@@ -79,6 +79,12 @@
                     <a class="class" href="#ReferenceService">ReferenceService</a>
                             <ul class="memberlist">
                         <li>
+                                <a class="function" href="#ReferenceService.add_spaceport">add_spaceport</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ReferenceService.list_spaceports">list_spaceports</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#ReferenceService.add_vehicle_type">add_vehicle_type</a>
                         </li>
                         <li>
@@ -141,6 +147,15 @@
                         <li>
                                 <a class="variable" href="#LaunchCard.last_weather">last_weather</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#LaunchCard.spaceport">spaceport</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#LaunchCard.forecast">forecast</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#LaunchCard.fuel_warnings">fuel_warnings</a>
+                        </li>
                 </ul>
 
             </li>
@@ -158,6 +173,9 @@
                         </li>
                         <li>
                                 <a class="function" href="#LaunchService.launch_card">launch_card</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#LaunchService.fuel_warnings">fuel_warnings</a>
                         </li>
                         <li>
                                 <a class="function" href="#LaunchService.next_stage_title">next_stage_title</a>
@@ -217,10 +235,49 @@
 
             </li>
             <li>
+                    <a class="class" href="#JournalRow">JournalRow</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#JournalRow.__init__">JournalRow</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#JournalRow.record">record</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#JournalRow.launch_id">launch_id</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#JournalRow.vehicle">vehicle</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#JournalRow.spaceport">spaceport</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#JournalService">JournalService</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#JournalService.__init__">JournalService</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#JournalService.incidents">incidents</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#JournalService.postponements">postponements</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#Services">Services</a>
                             <ul class="memberlist">
                         <li>
                                 <a class="function" href="#Services.__init__">Services</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Services.audit">audit</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Services.auth">auth</a>
@@ -244,7 +301,13 @@
                                 <a class="variable" href="#Services.weather">weather</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Services.forecasts">forecasts</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Services.telemetry">telemetry</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Services.journal">journal</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Services.reports">reports</a>
@@ -274,6 +337,7 @@
 
 <ol>
 <li>проверяет права текущей сессии (<code>Session.require()</code>);</li>
+<li>проверяет, что объект относится к космодрому сотрудника (<code>Session.ensure_spaceport()</code>, ЛР4);</li>
 <li>создаёт/загружает сущности (они сами валидируют данные);</li>
 <li>проверяет бизнес-правила и сохраняет изменения в одной транзакции.</li>
 </ol>
@@ -340,7 +404,7 @@
                             <div id="AuthService.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">AuthService</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="../model.html#Repositories">lcc.model.Repositories</a></span>,</span><span class="param">	<span class="n">clock</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_now_default</span><span class="o">&gt;</span></span>)</span>
+        <span class="name">AuthService</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="../model.html#Repositories">lcc.model.Repositories</a></span>,</span><span class="param">	<span class="n">clock</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_now_default</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">audit</span><span class="p">:</span> <span class="n"><a href="audit.html#AuditLogger">lcc.model.audit.AuditLogger</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
@@ -403,7 +467,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">create_staff</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">login</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">full_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">role</span><span class="p">:</span> <span class="n"><a href="enums.html#Role">lcc.model.enums.Role</a></span> <span class="o">|</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">password</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#Staff">lcc.model.entities.Staff</a></span>:</span></span>
+        <span class="name">create_staff</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">login</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">full_name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">role</span><span class="p">:</span> <span class="n"><a href="enums.html#Role">lcc.model.enums.Role</a></span> <span class="o">|</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">password</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#Staff">lcc.model.entities.Staff</a></span>:</span></span>
 
         
     </div>
@@ -460,10 +524,38 @@
     </div>
     <a class="headerlink" href="#ReferenceService"></a>
     
-            <div class="docstring"><p>Типы РН, стартовые площадки, каналы телеметрии.</p>
+            <div class="docstring"><p>Космодромы, типы РН, стартовые площадки, каналы телеметрии.</p>
 </div>
 
 
+                            <div id="ReferenceService.add_spaceport" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add_spaceport</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">code</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">region</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">''</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a></span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#ReferenceService.add_spaceport"></a>
+    
+    
+
+                            </div>
+                            <div id="ReferenceService.list_spaceports" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">list_spaceports</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#ReferenceService.list_spaceports"></a>
+    
+            <div class="docstring"><p>Сотрудник космодрома видит только свой космодром, роли центра — все.</p>
+</div>
+
+
+                            </div>
                             <div id="ReferenceService.add_vehicle_type" class="classattr">
                                 <div class="attr function">
             
@@ -494,7 +586,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">add_pad</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">code</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">max_concurrent</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">cycle_limit</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">hours_limit</span><span class="p">:</span> <span class="nb">float</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span>:</span></span>
+        <span class="name">add_pad</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">code</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">name</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">max_concurrent</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">cycle_limit</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">hours_limit</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span>:</span></span>
 
         
     </div>
@@ -507,7 +599,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_pads</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span><span class="p">,</span> <span class="n"><a href="entities.html#PadUsage">lcc.model.entities.PadUsage</a></span><span class="p">]]</span>:</span></span>
+        <span class="name">list_pads</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span><span class="p">,</span> <span class="n"><a href="entities.html#PadUsage">lcc.model.entities.PadUsage</a></span><span class="p">]]</span>:</span></span>
 
         
     </div>
@@ -635,7 +727,7 @@
                             <div id="LaunchCard.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">LaunchCard</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">launch</span><span class="p">:</span> <span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span>,</span><span class="param">	<span class="n">vehicle</span><span class="p">:</span> <span class="n"><a href="entities.html#VehicleType">lcc.model.entities.VehicleType</a></span>,</span><span class="param">	<span class="n">pad</span><span class="p">:</span> <span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span>,</span><span class="param">	<span class="n">stage_log</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">fuel_loaded</span><span class="p">:</span> <span class="nb">dict</span>,</span><span class="param">	<span class="n">journal</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">last_weather</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherObservation">lcc.model.weather.WeatherObservation</a></span> <span class="o">|</span> <span class="kc">None</span></span>)</span>
+        <span class="name">LaunchCard</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">launch</span><span class="p">:</span> <span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span>,</span><span class="param">	<span class="n">vehicle</span><span class="p">:</span> <span class="n"><a href="entities.html#VehicleType">lcc.model.entities.VehicleType</a></span>,</span><span class="param">	<span class="n">pad</span><span class="p">:</span> <span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span>,</span><span class="param">	<span class="n">stage_log</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">fuel_loaded</span><span class="p">:</span> <span class="nb">dict</span>,</span><span class="param">	<span class="n">journal</span><span class="p">:</span> <span class="nb">list</span>,</span><span class="param">	<span class="n">last_weather</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherObservation">lcc.model.weather.WeatherObservation</a></span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport</span><span class="p">:</span> <span class="n"><a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">forecast</span><span class="p">:</span> <span class="n"><a href="forecast.html#ForecastRecord">lcc.model.forecast.ForecastRecord</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">fuel_warnings</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span></span>)</span>
 
         
     </div>
@@ -721,6 +813,42 @@
     
 
                             </div>
+                            <div id="LaunchCard.spaceport" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceport</span><span class="annotation">: <a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a> | None</span>        =
+<span class="default_value">None</span>
+
+        
+    </div>
+    <a class="headerlink" href="#LaunchCard.spaceport"></a>
+    
+    
+
+                            </div>
+                            <div id="LaunchCard.forecast" class="classattr">
+                                <div class="attr variable">
+            <span class="name">forecast</span><span class="annotation">: <a href="forecast.html#ForecastRecord">lcc.model.forecast.ForecastRecord</a> | None</span>        =
+<span class="default_value">None</span>
+
+        
+    </div>
+    <a class="headerlink" href="#LaunchCard.forecast"></a>
+    
+    
+
+                            </div>
+                            <div id="LaunchCard.fuel_warnings" class="classattr">
+                                <div class="attr variable">
+            <span class="name">fuel_warnings</span><span class="annotation">: tuple[str, ...]</span>        =
+<span class="default_value">()</span>
+
+        
+    </div>
+    <a class="headerlink" href="#LaunchCard.fuel_warnings"></a>
+    
+    
+
+                            </div>
                 </section>
                 <section id="LaunchService">
                     <div class="attr class">
@@ -765,7 +893,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_launches</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
+        <span class="name">list_launches</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -783,6 +911,19 @@
         
     </div>
     <a class="headerlink" href="#LaunchService.launch_card"></a>
+    
+    
+
+                            </div>
+                            <div id="LaunchService.fuel_warnings" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">fuel_warnings</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>, </span><span class="param"><span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#LaunchService.fuel_warnings"></a>
     
     
 
@@ -867,13 +1008,15 @@
     </div>
     <a class="headerlink" href="#FuelService"></a>
     
-    
+            <div class="docstring"><p>Учет топлива на складах космодромов, масса с точностью 0,1 кг (ЛР4, Т5).</p>
+</div>
+
 
                             <div id="FuelService.receive_batch" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">receive_batch</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">batch_no</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">component</span><span class="p">:</span> <span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span> <span class="o">|</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">grade</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">volume</span><span class="p">:</span> <span class="nb">float</span>,</span><span class="param">	<span class="n">produced_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">expires_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span>:</span></span>
+        <span class="name">receive_batch</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">batch_no</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">component</span><span class="p">:</span> <span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span> <span class="o">|</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">grade</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">mass_kg</span>,</span><span class="param">	<span class="n">produced_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">expires_on</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span>:</span></span>
 
         
     </div>
@@ -886,7 +1029,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_batches</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>:</span></span>
+        <span class="name">list_batches</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span><span class="p">,</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span><span class="p">]]</span>:</span></span>
 
         
     </div>
@@ -901,7 +1044,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">refuel</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">volume</span><span class="p">:</span> <span class="nb">float</span></span><span class="return-annotation">) -> <span class="nb">float</span>:</span></span>
+        <span class="name">refuel</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">mass_kg</span></span><span class="return-annotation">) -> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>:</span></span>
 
         
     </div>
@@ -1008,6 +1151,131 @@
                                 </dl>
                             </div>
                 </section>
+                <section id="JournalRow">
+                    <div class="attr class">
+                    <div class="decorator decorator-dataclass">@dataclass(frozen=True)</div>
+
+    <span class="def">class</span>
+    <span class="name">JournalRow</span>:
+
+        
+    </div>
+    <a class="headerlink" href="#JournalRow"></a>
+    
+            <div class="docstring"><p>Запись журнала для просмотра: только номер пуска, тип РН и космодром (П11).</p>
+</div>
+
+
+                            <div id="JournalRow.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">JournalRow</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">record</span><span class="p">:</span> <span class="n"><a href="journal.html#Incident">lcc.model.journal.Incident</a></span> <span class="o">|</span> <span class="n"><a href="journal.html#Postponement">lcc.model.journal.Postponement</a></span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">vehicle</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">spaceport</span><span class="p">:</span> <span class="nb">str</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalRow.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="JournalRow.record" class="classattr">
+                                <div class="attr variable">
+            <span class="name">record</span><span class="annotation">: <a href="journal.html#Incident">lcc.model.journal.Incident</a> | <a href="journal.html#Postponement">lcc.model.journal.Postponement</a></span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalRow.record"></a>
+    
+    
+
+                            </div>
+                            <div id="JournalRow.launch_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">launch_id</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalRow.launch_id"></a>
+    
+    
+
+                            </div>
+                            <div id="JournalRow.vehicle" class="classattr">
+                                <div class="attr variable">
+            <span class="name">vehicle</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalRow.vehicle"></a>
+    
+    
+
+                            </div>
+                            <div id="JournalRow.spaceport" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceport</span><span class="annotation">: str</span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalRow.spaceport"></a>
+    
+    
+
+                            </div>
+                </section>
+                <section id="JournalService">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">JournalService</span><wbr>(<span class="base"><a href="#Service">Service</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#JournalService"></a>
+    
+            <div class="docstring"><p>Журналы НС и переносов: руководители и инспектор безопасности (Т3.1, Т6.2).</p>
+</div>
+
+
+                            <div id="JournalService.__init__" class="classattr">
+                                <div class="attr function">
+            
+        <span class="name">JournalService</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="../model.html#Repositories">lcc.model.Repositories</a></span>,</span><span class="param">	<span class="n">clock</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_now_default</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">audit</span><span class="p">:</span> <span class="n"><a href="audit.html#AuditLogger">lcc.model.audit.AuditLogger</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalService.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="JournalService.incidents" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">incidents</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="#JournalRow">JournalRow</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalService.incidents"></a>
+    
+    
+
+                            </div>
+                            <div id="JournalService.postponements" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">postponements</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">session</span><span class="p">:</span> <span class="n"><a href="security.html#Session">lcc.model.security.Session</a></span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">reason</span><span class="p">:</span> <span class="n"><a href="enums.html#PostponeReason">lcc.model.enums.PostponeReason</a></span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="#JournalRow">JournalRow</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#JournalService.postponements"></a>
+    
+    
+
+                            </div>
+                </section>
                 <section id="Services">
                     <div class="attr class">
             
@@ -1025,11 +1293,22 @@
                             <div id="Services.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">Services</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="../model.html#Repositories">lcc.model.Repositories</a></span>,</span><span class="param">	<span class="n">clock</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_now_default</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">weather_limits</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherLimits">lcc.model.weather.WeatherLimits</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+        <span class="name">Services</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="../model.html#Repositories">lcc.model.Repositories</a></span>,</span><span class="param">	<span class="n">clock</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_now_default</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">weather_limits</span><span class="p">:</span> <span class="n"><a href="weather.html#WeatherLimits">lcc.model.weather.WeatherLimits</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">meteo</span><span class="p">:</span> <span class="n"><a href="meteo_client.html#MeteoProvider">lcc.model.meteo_client.MeteoProvider</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
     <a class="headerlink" href="#Services.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="Services.audit" class="classattr">
+                                <div class="attr variable">
+            <span class="name">audit</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Services.audit"></a>
     
     
 
@@ -1111,6 +1390,17 @@
     
 
                             </div>
+                            <div id="Services.forecasts" class="classattr">
+                                <div class="attr variable">
+            <span class="name">forecasts</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Services.forecasts"></a>
+    
+    
+
+                            </div>
                             <div id="Services.telemetry" class="classattr">
                                 <div class="attr variable">
             <span class="name">telemetry</span>
@@ -1118,6 +1408,17 @@
         
     </div>
     <a class="headerlink" href="#Services.telemetry"></a>
+    
+    
+
+                            </div>
+                            <div id="Services.journal" class="classattr">
+                                <div class="attr variable">
+            <span class="name">journal</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Services.journal"></a>
     
     
 

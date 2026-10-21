@@ -40,6 +40,21 @@
 
             </li>
             <li>
+                    <a class="class" href="#SpaceportRepository">SpaceportRepository</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#SpaceportRepository.add">add</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#SpaceportRepository.get">get</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#SpaceportRepository.list_all">list_all</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#StaffRepository">StaffRepository</a>
                             <ul class="memberlist">
                         <li>
@@ -127,6 +142,9 @@
                                 <a class="function" href="#LaunchRepository.list_all">list_all</a>
                         </li>
                         <li>
+                                <a class="function" href="#LaunchRepository.labels">labels</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#LaunchRepository.count_active_on_pad">count_active_on_pad</a>
                         </li>
                         <li>
@@ -157,13 +175,16 @@
                                 <a class="function" href="#FuelRepository.list_batches">list_batches</a>
                         </li>
                         <li>
-                                <a class="function" href="#FuelRepository.used_volume">used_volume</a>
+                                <a class="function" href="#FuelRepository.used_mass">used_mass</a>
                         </li>
                         <li>
                                 <a class="function" href="#FuelRepository.add_consumption">add_consumption</a>
                         </li>
                         <li>
                                 <a class="function" href="#FuelRepository.loaded_by_component">loaded_by_component</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#FuelRepository.loaded_batches">loaded_batches</a>
                         </li>
                         <li>
                                 <a class="function" href="#FuelRepository.batch_usage">batch_usage</a>
@@ -226,6 +247,30 @@
 
             </li>
             <li>
+                    <a class="class" href="#ForecastRepository">ForecastRepository</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#ForecastRepository.add">add</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#ForecastRepository.latest">latest</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#AuditRepository">AuditRepository</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#AuditRepository.add">add</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#AuditRepository.list">list</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
                     <a class="class" href="#Repositories">Repositories</a>
                             <ul class="memberlist">
                         <li>
@@ -233,6 +278,15 @@
                         </li>
                         <li>
                                 <a class="variable" href="#Repositories.db">db</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repositories.spaceports">spaceports</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repositories.forecasts">forecasts</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repositories.audit">audit</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Repositories.staff">staff</a>
@@ -310,6 +364,67 @@
     
     
 
+                            </div>
+                </section>
+                <section id="SpaceportRepository">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">SpaceportRepository</span><wbr>(<span class="base"><a href="#Repository">Repository</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#SpaceportRepository"></a>
+    
+    
+
+                            <div id="SpaceportRepository.add" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">sp</span><span class="p">:</span> <span class="n"><a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a></span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a></span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#SpaceportRepository.add"></a>
+    
+    
+
+                            </div>
+                            <div id="SpaceportRepository.get" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">get</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n"><a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a></span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#SpaceportRepository.get"></a>
+    
+    
+
+                            </div>
+                            <div id="SpaceportRepository.list_all" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">list_all</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Spaceport">lcc.model.entities.Spaceport</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#SpaceportRepository.list_all"></a>
+    
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#Repository">Repository</a></dt>
+                                <dd id="SpaceportRepository.__init__" class="function"><a href="#Repository.__init__">Repository</a></dd>
+
+            </div>
+                                </dl>
                             </div>
                 </section>
                 <section id="StaffRepository">
@@ -528,7 +643,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_all</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span><span class="p">]</span>:</span></span>
+        <span class="name">list_all</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#LaunchPad">lcc.model.entities.LaunchPad</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -669,13 +784,28 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_all</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
+        <span class="name">list_all</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">statuses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="enums.html#LaunchStatus">lcc.model.enums.LaunchStatus</a></span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#Launch">lcc.model.entities.Launch</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#LaunchRepository.list_all"></a>
     
     
+
+                            </div>
+                            <div id="LaunchRepository.labels" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">labels</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#LaunchRepository.labels"></a>
+    
+            <div class="docstring"><p>Номер пуска → (тип РН, код космодрома). Минимум сведений для журналов инспектора (П11).</p>
+</div>
+
 
                             </div>
                             <div id="LaunchRepository.count_active_on_pad" class="classattr">
@@ -721,7 +851,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">stats_by_vehicle</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>:</span></span>
+        <span class="name">stats_by_vehicle</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -767,7 +897,9 @@
     </div>
     <a class="headerlink" href="#FuelRepository"></a>
     
-    
+            <div class="docstring"><p>Масса хранится целым числом гектограммов (ЛР4, Т5.1), наружу отдается <code>Mass</code>.</p>
+</div>
+
 
                             <div id="FuelRepository.add_batch" class="classattr">
                                 <div class="attr function">
@@ -799,7 +931,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">list_batches</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span><span class="p">]</span>:</span></span>
+        <span class="name">list_batches</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -808,15 +940,15 @@
     
 
                             </div>
-                            <div id="FuelRepository.used_volume" class="classattr">
+                            <div id="FuelRepository.used_mass" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">used_volume</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">float</span>:</span></span>
+        <span class="name">used_mass</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">batch_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span>:</span></span>
 
         
     </div>
-    <a class="headerlink" href="#FuelRepository.used_volume"></a>
+    <a class="headerlink" href="#FuelRepository.used_mass"></a>
     
     
 
@@ -838,7 +970,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">loaded_by_component</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">dict</span><span class="p">[</span><span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>:</span></span>
+        <span class="name">loaded_by_component</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">dict</span><span class="p">[</span><span class="n"><a href="enums.html#FuelComponent">lcc.model.enums.FuelComponent</a></span><span class="p">,</span> <span class="n"><a href="units.html#Mass">lcc.model.units.Mass</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -847,17 +979,32 @@
     
 
                             </div>
+                            <div id="FuelRepository.loaded_batches" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">loaded_batches</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="entities.html#FuelBatch">lcc.model.entities.FuelBatch</a></span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#FuelRepository.loaded_batches"></a>
+    
+            <div class="docstring"><p>Партии, из которых заправлен пуск: нужны для проверки срока годности в баке (П8).</p>
+</div>
+
+
+                            </div>
                             <div id="FuelRepository.batch_usage" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">batch_usage</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>:</span></span>
+        <span class="name">batch_usage</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#FuelRepository.batch_usage"></a>
     
-            <div class="docstring"><p>Для отчёта: расход по каждой партии за период и всего.</p>
+            <div class="docstring"><p>Для отчета: расход по каждой партии за период и всего (в гектограммах).</p>
 </div>
 
 
@@ -1038,7 +1185,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">incidents</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="journal.html#Incident">lcc.model.journal.Incident</a></span><span class="p">]</span>:</span></span>
+        <span class="name">incidents</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="journal.html#Incident">lcc.model.journal.Incident</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -1051,20 +1198,22 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">postponements</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="journal.html#Postponement">lcc.model.journal.Postponement</a></span><span class="p">]</span>:</span></span>
+        <span class="name">postponements</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">reason</span><span class="p">:</span> <span class="n"><a href="enums.html#PostponeReason">lcc.model.enums.PostponeReason</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="journal.html#Postponement">lcc.model.journal.Postponement</a></span><span class="p">]</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#JournalRepository.postponements"></a>
     
-    
+            <div class="docstring"><p>Журнал переносов с фильтром по причине и космодрому (ЛР4, Т6.2). Индекс ix_postponement_reason.</p>
+</div>
+
 
                             </div>
                             <div id="JournalRepository.postponements_by_vehicle" class="classattr">
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">postponements_by_vehicle</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span></span><span class="return-annotation">) -> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>:</span></span>
+        <span class="name">postponements_by_vehicle</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -1077,7 +1226,7 @@
                                 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">incidents_by_system</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>:</span></span>
+        <span class="name">incidents_by_system</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>:</span></span>
 
         
     </div>
@@ -1091,6 +1240,104 @@
                                 <dl>
                                     <div><dt><a href="#Repository">Repository</a></dt>
                                 <dd id="JournalRepository.__init__" class="function"><a href="#Repository.__init__">Repository</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="ForecastRepository">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">ForecastRepository</span><wbr>(<span class="base"><a href="#Repository">Repository</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastRepository"></a>
+    
+    
+
+                            <div id="ForecastRepository.add" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">rec</span><span class="p">:</span> <span class="n"><a href="forecast.html#ForecastRecord">lcc.model.forecast.ForecastRecord</a></span></span><span class="return-annotation">) -> <span class="n"><a href="forecast.html#ForecastRecord">lcc.model.forecast.ForecastRecord</a></span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastRepository.add"></a>
+    
+    
+
+                            </div>
+                            <div id="ForecastRepository.latest" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">latest</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">launch_id</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">window_start</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span></span><span class="return-annotation">) -> <span class="n"><a href="forecast.html#ForecastRecord">lcc.model.forecast.ForecastRecord</a></span> <span class="o">|</span> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastRepository.latest"></a>
+    
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#Repository">Repository</a></dt>
+                                <dd id="ForecastRepository.__init__" class="function"><a href="#Repository.__init__">Repository</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="AuditRepository">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">AuditRepository</span><wbr>(<span class="base"><a href="#Repository">Repository</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#AuditRepository"></a>
+    
+            <div class="docstring"><p>Только добавление и чтение: методов изменения и удаления нет.</p>
+</div>
+
+
+                            <div id="AuditRepository.add" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">add</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">a</span><span class="p">:</span> <span class="n"><a href="audit.html#AuditRecord">lcc.model.audit.AuditRecord</a></span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#AuditRepository.add"></a>
+    
+    
+
+                            </div>
+                            <div id="AuditRepository.list" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">list</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="bp">self</span>,</span><span class="param">	<span class="n">date_from</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">date_to</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">login</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="s1">'list[AuditRecord]'</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#AuditRepository.list"></a>
+    
+    
+
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="#Repository">Repository</a></dt>
+                                <dd id="AuditRepository.__init__" class="function"><a href="#Repository.__init__">Repository</a></dd>
 
             </div>
                                 </dl>
@@ -1129,6 +1376,39 @@
         
     </div>
     <a class="headerlink" href="#Repositories.db"></a>
+    
+    
+
+                            </div>
+                            <div id="Repositories.spaceports" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceports</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Repositories.spaceports"></a>
+    
+    
+
+                            </div>
+                            <div id="Repositories.forecasts" class="classattr">
+                                <div class="attr variable">
+            <span class="name">forecasts</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Repositories.forecasts"></a>
+    
+    
+
+                            </div>
+                            <div id="Repositories.audit" class="classattr">
+                                <div class="attr variable">
+            <span class="name">audit</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Repositories.audit"></a>
     
     
 

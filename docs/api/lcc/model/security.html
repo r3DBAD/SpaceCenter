@@ -64,10 +64,22 @@
                                 <a class="variable" href="#Session.staff_id">staff_id</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Session.spaceport_id">spaceport_id</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Session.is_global">is_global</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Session.scope">scope</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Session.can">can</a>
                         </li>
                         <li>
                                 <a class="function" href="#Session.require">require</a>
+                        </li>
+                        <li>
+                                <a class="function" href="#Session.ensure_spaceport">ensure_spaceport</a>
                         </li>
                 </ul>
 
@@ -189,13 +201,17 @@
     <a class="headerlink" href="#Session"></a>
     
             <div class="docstring"><p>Аутентифицированный пользователь. Все сервисы Model проверяют права через <code><a href="#Session.require">require()</a></code>.</p>
+
+<p>ЛР4: у сессии есть область видимости. Сотрудник космодрома видит только его данные
+(<code><a href="#Session.ensure_spaceport">ensure_spaceport()</a></code>), роли уровня центра видят все. Отказы передаются в
+<code>on_denied</code>, чтобы аудит записал попытку (Т3.3, П12).</p>
 </div>
 
 
                             <div id="Session.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">Session</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">staff</span></span>)</span>
+        <span class="name">Session</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">staff</span>,</span><span class="param">	<span class="n">on_denied</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n"><a href="#Session">Session</a></span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">NoneType</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
@@ -226,6 +242,45 @@
     
 
                             </div>
+                            <div id="Session.spaceport_id" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceport_id</span><span class="annotation">: int | None</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Session.spaceport_id"></a>
+    
+            <div class="docstring"><p>Космодром сотрудника; None — роль уровня центра.</p>
+</div>
+
+
+                            </div>
+                            <div id="Session.is_global" class="classattr">
+                                <div class="attr variable">
+            <span class="name">is_global</span><span class="annotation">: bool</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Session.is_global"></a>
+    
+    
+
+                            </div>
+                            <div id="Session.scope" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">scope</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">requested</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Session.scope"></a>
+    
+            <div class="docstring"><p>Фильтр по космодрому для выборок: свой космодром или выбранный руководителем центра.</p>
+</div>
+
+
+                            </div>
                             <div id="Session.can" class="classattr">
                                 <div class="attr function">
             
@@ -250,6 +305,21 @@
     <a class="headerlink" href="#Session.require"></a>
     
             <div class="docstring"><p>Требуется хотя бы одно из перечисленных прав.</p>
+</div>
+
+
+                            </div>
+                            <div id="Session.ensure_spaceport" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">ensure_spaceport</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">spaceport_id</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Session.ensure_spaceport"></a>
+    
+            <div class="docstring"><p>Объект должен относиться к космодрому сотрудника (роли центра проходят всегда).</p>
 </div>
 
 

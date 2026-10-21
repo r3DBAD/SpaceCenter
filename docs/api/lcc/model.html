@@ -40,6 +40,9 @@
                                 <a class="function" href="#Database.init_schema">init_schema</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Database.schema_version">schema_version</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Database.execute">execute</a>
                         </li>
                         <li>
@@ -55,6 +58,9 @@
                                 <a class="function" href="#Database.transaction">transaction</a>
                         </li>
                         <li>
+                                <a class="function" href="#Database.after_transaction">after_transaction</a>
+                        </li>
+                        <li>
                                 <a class="function" href="#Database.close">close</a>
                         </li>
                 </ul>
@@ -68,6 +74,15 @@
                         </li>
                         <li>
                                 <a class="variable" href="#Repositories.db">db</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repositories.spaceports">spaceports</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repositories.forecasts">forecasts</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Repositories.audit">audit</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Repositories.staff">staff</a>
@@ -103,6 +118,9 @@
                                 <a class="function" href="#Services.__init__">Services</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Services.audit">audit</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Services.auth">auth</a>
                         </li>
                         <li>
@@ -124,7 +142,13 @@
                                 <a class="variable" href="#Services.weather">weather</a>
                         </li>
                         <li>
+                                <a class="variable" href="#Services.forecasts">forecasts</a>
+                        </li>
+                        <li>
                                 <a class="variable" href="#Services.telemetry">telemetry</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Services.journal">journal</a>
                         </li>
                         <li>
                                 <a class="variable" href="#Services.reports">reports</a>
@@ -175,7 +199,9 @@
 <ul>
 <li>внешние ключи включены (<code>PRAGMA foreign_keys</code>);</li>
 <li>все запросы репозиториев параметризованы (<code>?</code>), конкатенации SQL нет;</li>
-<li><code><a href="#Database.transaction">transaction()</a></code> — атомарная группа операций (откат при исключении).</li>
+<li><code><a href="#Database.transaction">transaction()</a></code> — атомарная группа операций (откат при исключении);</li>
+<li><code><a href="#Database.after_transaction">after_transaction()</a></code> — действие, которое выполнится после фиксации или
+отката (нужно для записи отказов в аудит, ЛР4).</li>
 </ul>
 </div>
 
@@ -201,6 +227,19 @@
         
     </div>
     <a class="headerlink" href="#Database.init_schema"></a>
+    
+            <div class="docstring"><p>Создать схему. База ЛР3 сначала переводится на текущую версию.</p>
+</div>
+
+
+                            </div>
+                            <div id="Database.schema_version" class="classattr">
+                                <div class="attr variable">
+            <span class="name">schema_version</span><span class="annotation">: int</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Database.schema_version"></a>
     
     
 
@@ -271,6 +310,21 @@
     
 
                             </div>
+                            <div id="Database.after_transaction" class="classattr">
+                                <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">after_transaction</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">action</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">NoneType</span><span class="p">]</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#Database.after_transaction"></a>
+    
+            <div class="docstring"><p>Выполнить действие вне текущей транзакции: сразу или после ее завершения.</p>
+</div>
+
+
+                            </div>
                             <div id="Database.close" class="classattr">
                                 <div class="attr function">
             
@@ -318,6 +372,39 @@
         
     </div>
     <a class="headerlink" href="#Repositories.db"></a>
+    
+    
+
+                            </div>
+                            <div id="Repositories.spaceports" class="classattr">
+                                <div class="attr variable">
+            <span class="name">spaceports</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Repositories.spaceports"></a>
+    
+    
+
+                            </div>
+                            <div id="Repositories.forecasts" class="classattr">
+                                <div class="attr variable">
+            <span class="name">forecasts</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Repositories.forecasts"></a>
+    
+    
+
+                            </div>
+                            <div id="Repositories.audit" class="classattr">
+                                <div class="attr variable">
+            <span class="name">audit</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Repositories.audit"></a>
     
     
 
@@ -428,11 +515,22 @@
                             <div id="Services.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">Services</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="#Repositories">Repositories</a></span>,</span><span class="param">	<span class="n">clock</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_now_default</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">weather_limits</span><span class="p">:</span> <span class="n"><a href="model/weather.html#WeatherLimits">lcc.model.weather.WeatherLimits</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+        <span class="name">Services</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">repos</span><span class="p">:</span> <span class="n"><a href="#Repositories">Repositories</a></span>,</span><span class="param">	<span class="n">clock</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">function</span> <span class="n">_now_default</span><span class="o">&gt;</span>,</span><span class="param">	<span class="n">weather_limits</span><span class="p">:</span> <span class="n"><a href="model/weather.html#WeatherLimits">lcc.model.weather.WeatherLimits</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">meteo</span><span class="p">:</span> <span class="n"><a href="model/meteo_client.html#MeteoProvider">lcc.model.meteo_client.MeteoProvider</a></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
     <a class="headerlink" href="#Services.__init__"></a>
+    
+    
+
+                            </div>
+                            <div id="Services.audit" class="classattr">
+                                <div class="attr variable">
+            <span class="name">audit</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Services.audit"></a>
     
     
 
@@ -514,6 +612,17 @@
     
 
                             </div>
+                            <div id="Services.forecasts" class="classattr">
+                                <div class="attr variable">
+            <span class="name">forecasts</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Services.forecasts"></a>
+    
+    
+
+                            </div>
                             <div id="Services.telemetry" class="classattr">
                                 <div class="attr variable">
             <span class="name">telemetry</span>
@@ -521,6 +630,17 @@
         
     </div>
     <a class="headerlink" href="#Services.telemetry"></a>
+    
+    
+
+                            </div>
+                            <div id="Services.journal" class="classattr">
+                                <div class="attr variable">
+            <span class="name">journal</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Services.journal"></a>
     
     
 

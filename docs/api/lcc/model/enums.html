@@ -148,10 +148,34 @@
                                 <a class="variable" href="#PostponeReason.TECHNICAL">TECHNICAL</a>
                         </li>
                         <li>
-                                <a class="variable" href="#PostponeReason.INCIDENT">INCIDENT</a>
+                                <a class="variable" href="#PostponeReason.ORGANIZATIONAL">ORGANIZATIONAL</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#ForecastSource">ForecastSource</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#ForecastSource.AUTO">AUTO</a>
                         </li>
                         <li>
-                                <a class="variable" href="#PostponeReason.OTHER">OTHER</a>
+                                <a class="variable" href="#ForecastSource.MANUAL">MANUAL</a>
+                        </li>
+                </ul>
+
+            </li>
+            <li>
+                    <a class="class" href="#ForecastStatus">ForecastStatus</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="variable" href="#ForecastStatus.OK">OK</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#ForecastStatus.WARNING">WARNING</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#ForecastStatus.UNAVAILABLE">UNAVAILABLE</a>
                         </li>
                 </ul>
 
@@ -174,8 +198,17 @@
                         <li>
                                 <a class="variable" href="#Role.TELEMETRY_OPERATOR">TELEMETRY_OPERATOR</a>
                         </li>
+                        <li>
+                                <a class="variable" href="#Role.LAUNCH_DIRECTOR">LAUNCH_DIRECTOR</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Role.SAFETY_INSPECTOR">SAFETY_INSPECTOR</a>
+                        </li>
                 </ul>
 
+            </li>
+            <li>
+                    <a class="variable" href="#GLOBAL_ROLES">GLOBAL_ROLES</a>
             </li>
             <li>
                     <a class="class" href="#Permission">Permission</a>
@@ -218,6 +251,21 @@
                         </li>
                         <li>
                                 <a class="variable" href="#Permission.MANAGE_STAFF">MANAGE_STAFF</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Permission.MANAGE_SPACEPORTS">MANAGE_SPACEPORTS</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Permission.VIEW_JOURNALS">VIEW_JOURNALS</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Permission.VIEW_INCIDENT_REPORTS">VIEW_INCIDENT_REPORTS</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Permission.VIEW_AUDIT">VIEW_AUDIT</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#Permission.REQUEST_FORECAST">REQUEST_FORECAST</a>
                         </li>
                 </ul>
 
@@ -412,7 +460,7 @@
                     <div class="attr variable">
             <span class="name">ACTIVE_STATUSES</span>        =
 <input id="ACTIVE_STATUSES-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="ACTIVE_STATUSES-view-value"></label><span class="default_value">frozenset({&lt;<a href="#LaunchStatus.PRELAUNCH_CHECK">LaunchStatus.PRELAUNCH_CHECK</a>: &#39;prelaunch_check&#39;&gt;, &lt;<a href="#LaunchStatus.ASSEMBLY">LaunchStatus.ASSEMBLY</a>: &#39;assembly&#39;&gt;, &lt;<a href="#LaunchStatus.FUELING">LaunchStatus.FUELING</a>: &#39;fueling&#39;&gt;, &lt;<a href="#LaunchStatus.READY">LaunchStatus.READY</a>: &#39;ready&#39;&gt;, &lt;<a href="#LaunchStatus.TRANSPORT">LaunchStatus.TRANSPORT</a>: &#39;transport&#39;&gt;})</span>
+            <label class="view-value-button pdoc-button" for="ACTIVE_STATUSES-view-value"></label><span class="default_value">frozenset({&lt;<a href="#LaunchStatus.PRELAUNCH_CHECK">LaunchStatus.PRELAUNCH_CHECK</a>: &#39;prelaunch_check&#39;&gt;, &lt;<a href="#LaunchStatus.TRANSPORT">LaunchStatus.TRANSPORT</a>: &#39;transport&#39;&gt;, &lt;<a href="#LaunchStatus.READY">LaunchStatus.READY</a>: &#39;ready&#39;&gt;, &lt;<a href="#LaunchStatus.FUELING">LaunchStatus.FUELING</a>: &#39;fueling&#39;&gt;, &lt;<a href="#LaunchStatus.ASSEMBLY">LaunchStatus.ASSEMBLY</a>: &#39;assembly&#39;&gt;})</span>
 
         
     </div>
@@ -425,7 +473,7 @@
                     <div class="attr variable">
             <span class="name">FINAL_STATUSES</span>        =
 <input id="FINAL_STATUSES-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="FINAL_STATUSES-view-value"></label><span class="default_value">frozenset({&lt;<a href="#LaunchStatus.FAILED">LaunchStatus.FAILED</a>: &#39;failed&#39;&gt;, &lt;<a href="#LaunchStatus.CANCELLED">LaunchStatus.CANCELLED</a>: &#39;cancelled&#39;&gt;, &lt;<a href="#LaunchStatus.LAUNCHED">LaunchStatus.LAUNCHED</a>: &#39;launched&#39;&gt;})</span>
+            <label class="view-value-button pdoc-button" for="FINAL_STATUSES-view-value"></label><span class="default_value">frozenset({&lt;<a href="#LaunchStatus.CANCELLED">LaunchStatus.CANCELLED</a>: &#39;cancelled&#39;&gt;, &lt;<a href="#LaunchStatus.FAILED">LaunchStatus.FAILED</a>: &#39;failed&#39;&gt;, &lt;<a href="#LaunchStatus.LAUNCHED">LaunchStatus.LAUNCHED</a>: &#39;launched&#39;&gt;})</span>
 
         
     </div>
@@ -648,7 +696,7 @@
     </div>
     <a class="headerlink" href="#PostponeReason"></a>
     
-            <div class="docstring"><p>Перечисление с человекочитаемым названием на русском языке.</p>
+            <div class="docstring"><p>Причины переноса по требованию Т6.2 (ЛР4). Старые «НС» и «прочее» переведены миграцией.</p>
 </div>
 
 
@@ -676,26 +724,104 @@
     
 
                             </div>
-                            <div id="PostponeReason.INCIDENT" class="classattr">
+                            <div id="PostponeReason.ORGANIZATIONAL" class="classattr">
                                 <div class="attr variable">
-            <span class="name">INCIDENT</span>        =
-<span class="default_value">&lt;<a href="#PostponeReason.INCIDENT">PostponeReason.INCIDENT</a>: &#39;incident&#39;&gt;</span>
+            <span class="name">ORGANIZATIONAL</span>        =
+<span class="default_value">&lt;<a href="#PostponeReason.ORGANIZATIONAL">PostponeReason.ORGANIZATIONAL</a>: &#39;organizational&#39;&gt;</span>
 
         
     </div>
-    <a class="headerlink" href="#PostponeReason.INCIDENT"></a>
+    <a class="headerlink" href="#PostponeReason.ORGANIZATIONAL"></a>
     
     
 
                             </div>
-                            <div id="PostponeReason.OTHER" class="classattr">
-                                <div class="attr variable">
-            <span class="name">OTHER</span>        =
-<span class="default_value">&lt;<a href="#PostponeReason.OTHER">PostponeReason.OTHER</a>: &#39;other&#39;&gt;</span>
+                </section>
+                <section id="ForecastSource">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">ForecastSource</span><wbr>(<span class="base"><a href="#_TitledEnum">_TitledEnum</a></span>):
 
         
     </div>
-    <a class="headerlink" href="#PostponeReason.OTHER"></a>
+    <a class="headerlink" href="#ForecastSource"></a>
+    
+            <div class="docstring"><p>Перечисление с человекочитаемым названием на русском языке.</p>
+</div>
+
+
+                            <div id="ForecastSource.AUTO" class="classattr">
+                                <div class="attr variable">
+            <span class="name">AUTO</span>        =
+<span class="default_value">&lt;<a href="#ForecastSource.AUTO">ForecastSource.AUTO</a>: &#39;auto&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastSource.AUTO"></a>
+    
+    
+
+                            </div>
+                            <div id="ForecastSource.MANUAL" class="classattr">
+                                <div class="attr variable">
+            <span class="name">MANUAL</span>        =
+<span class="default_value">&lt;<a href="#ForecastSource.MANUAL">ForecastSource.MANUAL</a>: &#39;manual&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastSource.MANUAL"></a>
+    
+    
+
+                            </div>
+                </section>
+                <section id="ForecastStatus">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">ForecastStatus</span><wbr>(<span class="base"><a href="#_TitledEnum">_TitledEnum</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastStatus"></a>
+    
+            <div class="docstring"><p>Перечисление с человекочитаемым названием на русском языке.</p>
+</div>
+
+
+                            <div id="ForecastStatus.OK" class="classattr">
+                                <div class="attr variable">
+            <span class="name">OK</span>        =
+<span class="default_value">&lt;<a href="#ForecastStatus.OK">ForecastStatus.OK</a>: &#39;ok&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastStatus.OK"></a>
+    
+    
+
+                            </div>
+                            <div id="ForecastStatus.WARNING" class="classattr">
+                                <div class="attr variable">
+            <span class="name">WARNING</span>        =
+<span class="default_value">&lt;<a href="#ForecastStatus.WARNING">ForecastStatus.WARNING</a>: &#39;warning&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastStatus.WARNING"></a>
+    
+    
+
+                            </div>
+                            <div id="ForecastStatus.UNAVAILABLE" class="classattr">
+                                <div class="attr variable">
+            <span class="name">UNAVAILABLE</span>        =
+<span class="default_value">&lt;<a href="#ForecastStatus.UNAVAILABLE">ForecastStatus.UNAVAILABLE</a>: &#39;unavailable&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ForecastStatus.UNAVAILABLE"></a>
     
     
 
@@ -775,6 +901,42 @@
     
 
                             </div>
+                            <div id="Role.LAUNCH_DIRECTOR" class="classattr">
+                                <div class="attr variable">
+            <span class="name">LAUNCH_DIRECTOR</span>        =
+<span class="default_value">&lt;<a href="#Role.LAUNCH_DIRECTOR">Role.LAUNCH_DIRECTOR</a>: &#39;launch_director&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Role.LAUNCH_DIRECTOR"></a>
+    
+    
+
+                            </div>
+                            <div id="Role.SAFETY_INSPECTOR" class="classattr">
+                                <div class="attr variable">
+            <span class="name">SAFETY_INSPECTOR</span>        =
+<span class="default_value">&lt;<a href="#Role.SAFETY_INSPECTOR">Role.SAFETY_INSPECTOR</a>: &#39;safety_inspector&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Role.SAFETY_INSPECTOR"></a>
+    
+    
+
+                            </div>
+                </section>
+                <section id="GLOBAL_ROLES">
+                    <div class="attr variable">
+            <span class="name">GLOBAL_ROLES</span>        =
+<span class="default_value">frozenset({&lt;<a href="#Role.SAFETY_INSPECTOR">Role.SAFETY_INSPECTOR</a>: &#39;safety_inspector&#39;&gt;, &lt;<a href="#Role.HEAD">Role.HEAD</a>: &#39;head&#39;&gt;})</span>
+
+        
+    </div>
+    <a class="headerlink" href="#GLOBAL_ROLES"></a>
+    
+    
+
                 </section>
                 <section id="Permission">
                     <div class="attr class">
@@ -944,12 +1106,72 @@
     
 
                             </div>
+                            <div id="Permission.MANAGE_SPACEPORTS" class="classattr">
+                                <div class="attr variable">
+            <span class="name">MANAGE_SPACEPORTS</span>        =
+<span class="default_value">&lt;<a href="#Permission.MANAGE_SPACEPORTS">Permission.MANAGE_SPACEPORTS</a>: &#39;manage_spaceports&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Permission.MANAGE_SPACEPORTS"></a>
+    
+    
+
+                            </div>
+                            <div id="Permission.VIEW_JOURNALS" class="classattr">
+                                <div class="attr variable">
+            <span class="name">VIEW_JOURNALS</span>        =
+<span class="default_value">&lt;<a href="#Permission.VIEW_JOURNALS">Permission.VIEW_JOURNALS</a>: &#39;view_journals&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Permission.VIEW_JOURNALS"></a>
+    
+    
+
+                            </div>
+                            <div id="Permission.VIEW_INCIDENT_REPORTS" class="classattr">
+                                <div class="attr variable">
+            <span class="name">VIEW_INCIDENT_REPORTS</span>        =
+<span class="default_value">&lt;<a href="#Permission.VIEW_INCIDENT_REPORTS">Permission.VIEW_INCIDENT_REPORTS</a>: &#39;view_incident_reports&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Permission.VIEW_INCIDENT_REPORTS"></a>
+    
+    
+
+                            </div>
+                            <div id="Permission.VIEW_AUDIT" class="classattr">
+                                <div class="attr variable">
+            <span class="name">VIEW_AUDIT</span>        =
+<span class="default_value">&lt;<a href="#Permission.VIEW_AUDIT">Permission.VIEW_AUDIT</a>: &#39;view_audit&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Permission.VIEW_AUDIT"></a>
+    
+    
+
+                            </div>
+                            <div id="Permission.REQUEST_FORECAST" class="classattr">
+                                <div class="attr variable">
+            <span class="name">REQUEST_FORECAST</span>        =
+<span class="default_value">&lt;<a href="#Permission.REQUEST_FORECAST">Permission.REQUEST_FORECAST</a>: &#39;request_forecast&#39;&gt;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#Permission.REQUEST_FORECAST"></a>
+    
+    
+
+                            </div>
                 </section>
                 <section id="ROLE_PERMISSIONS">
                     <div class="attr variable">
             <span class="name">ROLE_PERMISSIONS</span><span class="annotation">: dict[<a href="#Role">Role</a>, frozenset[<a href="#Permission">Permission</a>]]</span>        =
 <input id="ROLE_PERMISSIONS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="ROLE_PERMISSIONS-view-value"></label><span class="default_value">{&lt;<a href="#Role.HEAD">Role.HEAD</a>: &#39;head&#39;&gt;: frozenset({&lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.MANAGE_CHANNELS">Permission.MANAGE_CHANNELS</a>: &#39;manage_channels&#39;&gt;, &lt;<a href="#Permission.MANAGE_LAUNCHES">Permission.MANAGE_LAUNCHES</a>: &#39;manage_launches&#39;&gt;, &lt;<a href="#Permission.RECORD_WEATHER">Permission.RECORD_WEATHER</a>: &#39;record_weather&#39;&gt;, &lt;<a href="#Permission.RECORD_INCIDENT">Permission.RECORD_INCIDENT</a>: &#39;record_incident&#39;&gt;, &lt;<a href="#Permission.VIEW_REPORTS">Permission.VIEW_REPORTS</a>: &#39;view_reports&#39;&gt;, &lt;<a href="#Permission.MARK_PAD_STAGES">Permission.MARK_PAD_STAGES</a>: &#39;mark_pad_stages&#39;&gt;, &lt;<a href="#Permission.MANAGE_FUEL">Permission.MANAGE_FUEL</a>: &#39;manage_fuel&#39;&gt;, &lt;<a href="#Permission.RECORD_RESULT">Permission.RECORD_RESULT</a>: &#39;record_result&#39;&gt;, &lt;<a href="#Permission.POSTPONE_LAUNCH">Permission.POSTPONE_LAUNCH</a>: &#39;postpone_launch&#39;&gt;, &lt;<a href="#Permission.MANAGE_PADS">Permission.MANAGE_PADS</a>: &#39;manage_pads&#39;&gt;, &lt;<a href="#Permission.MANAGE_STAFF">Permission.MANAGE_STAFF</a>: &#39;manage_staff&#39;&gt;, &lt;<a href="#Permission.MAINTAIN_PADS">Permission.MAINTAIN_PADS</a>: &#39;maintain_pads&#39;&gt;}), &lt;<a href="#Role.PAD_ENGINEER">Role.PAD_ENGINEER</a>: &#39;pad_engineer&#39;&gt;: frozenset({&lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.MAINTAIN_PADS">Permission.MAINTAIN_PADS</a>: &#39;maintain_pads&#39;&gt;, &lt;<a href="#Permission.MARK_PAD_STAGES">Permission.MARK_PAD_STAGES</a>: &#39;mark_pad_stages&#39;&gt;}), &lt;<a href="#Role.FUEL_ENGINEER">Role.FUEL_ENGINEER</a>: &#39;fuel_engineer&#39;&gt;: frozenset({&lt;<a href="#Permission.MANAGE_FUEL">Permission.MANAGE_FUEL</a>: &#39;manage_fuel&#39;&gt;, &lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;}), &lt;<a href="#Role.METEOROLOGIST">Role.METEOROLOGIST</a>: &#39;meteorologist&#39;&gt;: frozenset({&lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.POSTPONE_LAUNCH">Permission.POSTPONE_LAUNCH</a>: &#39;postpone_launch&#39;&gt;, &lt;<a href="#Permission.RECORD_WEATHER">Permission.RECORD_WEATHER</a>: &#39;record_weather&#39;&gt;}), &lt;<a href="#Role.TELEMETRY_OPERATOR">Role.TELEMETRY_OPERATOR</a>: &#39;telemetry_operator&#39;&gt;: frozenset({&lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.MANAGE_CHANNELS">Permission.MANAGE_CHANNELS</a>: &#39;manage_channels&#39;&gt;, &lt;<a href="#Permission.RECORD_INCIDENT">Permission.RECORD_INCIDENT</a>: &#39;record_incident&#39;&gt;})}</span>
+            <label class="view-value-button pdoc-button" for="ROLE_PERMISSIONS-view-value"></label><span class="default_value">{&lt;<a href="#Role.HEAD">Role.HEAD</a>: &#39;head&#39;&gt;: frozenset({&lt;<a href="#Permission.RECORD_RESULT">Permission.RECORD_RESULT</a>: &#39;record_result&#39;&gt;, &lt;<a href="#Permission.VIEW_AUDIT">Permission.VIEW_AUDIT</a>: &#39;view_audit&#39;&gt;, &lt;<a href="#Permission.MANAGE_SPACEPORTS">Permission.MANAGE_SPACEPORTS</a>: &#39;manage_spaceports&#39;&gt;, &lt;<a href="#Permission.VIEW_REPORTS">Permission.VIEW_REPORTS</a>: &#39;view_reports&#39;&gt;, &lt;<a href="#Permission.VIEW_JOURNALS">Permission.VIEW_JOURNALS</a>: &#39;view_journals&#39;&gt;, &lt;<a href="#Permission.MAINTAIN_PADS">Permission.MAINTAIN_PADS</a>: &#39;maintain_pads&#39;&gt;, &lt;<a href="#Permission.MANAGE_LAUNCHES">Permission.MANAGE_LAUNCHES</a>: &#39;manage_launches&#39;&gt;, &lt;<a href="#Permission.VIEW_INCIDENT_REPORTS">Permission.VIEW_INCIDENT_REPORTS</a>: &#39;view_incident_reports&#39;&gt;, &lt;<a href="#Permission.MARK_PAD_STAGES">Permission.MARK_PAD_STAGES</a>: &#39;mark_pad_stages&#39;&gt;, &lt;<a href="#Permission.REQUEST_FORECAST">Permission.REQUEST_FORECAST</a>: &#39;request_forecast&#39;&gt;, &lt;<a href="#Permission.MANAGE_CHANNELS">Permission.MANAGE_CHANNELS</a>: &#39;manage_channels&#39;&gt;, &lt;<a href="#Permission.MANAGE_PADS">Permission.MANAGE_PADS</a>: &#39;manage_pads&#39;&gt;, &lt;<a href="#Permission.MANAGE_STAFF">Permission.MANAGE_STAFF</a>: &#39;manage_staff&#39;&gt;, &lt;<a href="#Permission.MANAGE_FUEL">Permission.MANAGE_FUEL</a>: &#39;manage_fuel&#39;&gt;, &lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.RECORD_WEATHER">Permission.RECORD_WEATHER</a>: &#39;record_weather&#39;&gt;, &lt;<a href="#Permission.POSTPONE_LAUNCH">Permission.POSTPONE_LAUNCH</a>: &#39;postpone_launch&#39;&gt;, &lt;<a href="#Permission.RECORD_INCIDENT">Permission.RECORD_INCIDENT</a>: &#39;record_incident&#39;&gt;}), &lt;<a href="#Role.PAD_ENGINEER">Role.PAD_ENGINEER</a>: &#39;pad_engineer&#39;&gt;: frozenset({&lt;<a href="#Permission.MAINTAIN_PADS">Permission.MAINTAIN_PADS</a>: &#39;maintain_pads&#39;&gt;, &lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.MARK_PAD_STAGES">Permission.MARK_PAD_STAGES</a>: &#39;mark_pad_stages&#39;&gt;}), &lt;<a href="#Role.FUEL_ENGINEER">Role.FUEL_ENGINEER</a>: &#39;fuel_engineer&#39;&gt;: frozenset({&lt;<a href="#Permission.MANAGE_FUEL">Permission.MANAGE_FUEL</a>: &#39;manage_fuel&#39;&gt;, &lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;}), &lt;<a href="#Role.METEOROLOGIST">Role.METEOROLOGIST</a>: &#39;meteorologist&#39;&gt;: frozenset({&lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.REQUEST_FORECAST">Permission.REQUEST_FORECAST</a>: &#39;request_forecast&#39;&gt;, &lt;<a href="#Permission.RECORD_WEATHER">Permission.RECORD_WEATHER</a>: &#39;record_weather&#39;&gt;, &lt;<a href="#Permission.POSTPONE_LAUNCH">Permission.POSTPONE_LAUNCH</a>: &#39;postpone_launch&#39;&gt;}), &lt;<a href="#Role.TELEMETRY_OPERATOR">Role.TELEMETRY_OPERATOR</a>: &#39;telemetry_operator&#39;&gt;: frozenset({&lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.MANAGE_CHANNELS">Permission.MANAGE_CHANNELS</a>: &#39;manage_channels&#39;&gt;, &lt;<a href="#Permission.RECORD_INCIDENT">Permission.RECORD_INCIDENT</a>: &#39;record_incident&#39;&gt;}), &lt;<a href="#Role.LAUNCH_DIRECTOR">Role.LAUNCH_DIRECTOR</a>: &#39;launch_director&#39;&gt;: frozenset({&lt;<a href="#Permission.RECORD_RESULT">Permission.RECORD_RESULT</a>: &#39;record_result&#39;&gt;, &lt;<a href="#Permission.VIEW_REPORTS">Permission.VIEW_REPORTS</a>: &#39;view_reports&#39;&gt;, &lt;<a href="#Permission.VIEW_JOURNALS">Permission.VIEW_JOURNALS</a>: &#39;view_journals&#39;&gt;, &lt;<a href="#Permission.MANAGE_LAUNCHES">Permission.MANAGE_LAUNCHES</a>: &#39;manage_launches&#39;&gt;, &lt;<a href="#Permission.VIEW_INCIDENT_REPORTS">Permission.VIEW_INCIDENT_REPORTS</a>: &#39;view_incident_reports&#39;&gt;, &lt;<a href="#Permission.REQUEST_FORECAST">Permission.REQUEST_FORECAST</a>: &#39;request_forecast&#39;&gt;, &lt;<a href="#Permission.VIEW_SCHEDULE">Permission.VIEW_SCHEDULE</a>: &#39;view_schedule&#39;&gt;, &lt;<a href="#Permission.POSTPONE_LAUNCH">Permission.POSTPONE_LAUNCH</a>: &#39;postpone_launch&#39;&gt;}), &lt;<a href="#Role.SAFETY_INSPECTOR">Role.SAFETY_INSPECTOR</a>: &#39;safety_inspector&#39;&gt;: frozenset({&lt;<a href="#Permission.VIEW_INCIDENT_REPORTS">Permission.VIEW_INCIDENT_REPORTS</a>: &#39;view_incident_reports&#39;&gt;, &lt;<a href="#Permission.VIEW_JOURNALS">Permission.VIEW_JOURNALS</a>: &#39;view_journals&#39;&gt;})}</span>
 
         
     </div>
