@@ -1,0 +1,28 @@
+         272578 function calls in 10.703 seconds
+
+   Ordered by: internal time
+   List reduced from 119 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     2003   10.560    0.005   10.560    0.005 {method 'execute' of 'sqlite3.Connection' objects}
+     2000    0.023    0.000    0.023    0.000 {method 'fetchone' of 'sqlite3.Cursor' objects}
+        1    0.010    0.010    0.118    0.118 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/reports.py:127(build)
+     2000    0.009    0.000   10.517    0.005 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:320(used_mass)
+    10002    0.008    0.000    0.011    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/units.py:56(__str__)
+     2000    0.008    0.000   10.495    0.005 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/database.py:78(scalar)
+        1    0.007    0.007   10.585   10.585 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/controller/web.py:314(fuel)
+        3    0.007    0.002    0.007    0.002 {method 'fetchall' of 'sqlite3.Cursor' objects}
+        1    0.006    0.006   10.568   10.568 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/services.py:345(list_batches)
+    12002    0.006    0.000    0.009    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/units.py:22(__post_init__)
+    39065    0.006    0.000    0.008    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:23(<genexpr>)
+    48084    0.005    0.000    0.005    0.000 {built-in method builtins.isinstance}
+        2    0.005    0.002    0.005    0.002 /usr/lib/python3.13/json/encoder.py:205(iterencode)
+     2000    0.004    0.000    0.025    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:300(__init__)
+     2000    0.004    0.000    0.033    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:355(_batch)
+     4008    0.004    0.000    0.011    0.000 {built-in method builtins.any}
+     2000    0.003    0.000    0.007    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:330(remaining)
+        1    0.003    0.003    0.129    0.129 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/controller/web.py:447(report)
+     4006    0.003    0.000    0.015    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:14(require_text)
+    35059    0.002    0.000    0.002    0.000 {built-in method builtins.ord}
+
+

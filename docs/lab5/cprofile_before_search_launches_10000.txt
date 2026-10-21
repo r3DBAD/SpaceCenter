@@ -1,0 +1,28 @@
+         1590906 function calls in 0.719 seconds
+
+   Ordered by: internal time
+   List reduced from 132 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+    20000    0.110    0.000    0.204    0.000 /usr/lib/python3.13/_strptime.py:413(_strptime)
+    10000    0.066    0.000    0.099    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/controller/web.py:177(_launch)
+       53    0.040    0.001    0.040    0.001 {method 'execute' of 'sqlite3.Connection' objects}
+        2    0.033    0.017    0.033    0.017 /usr/lib/python3.13/json/encoder.py:205(iterencode)
+    10000    0.031    0.000    0.502    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:288(_row)
+   150583    0.027    0.000    0.038    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:23(<genexpr>)
+    10000    0.027    0.000    0.186    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:223(__init__)
+    38870    0.026    0.000    0.041    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:35(require_number)
+   249042    0.021    0.000    0.021    0.000 {built-in method builtins.isinstance}
+    21196    0.020    0.000    0.084    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:14(require_text)
+    21200    0.019    0.000    0.057    0.000 {built-in method builtins.any}
+    20000    0.018    0.000    0.223    0.000 /usr/lib/python3.13/_strptime.py:670(_strptime_datetime)
+    30040    0.017    0.000    0.054    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:52(require_int)
+        1    0.016    0.016    0.016    0.016 /usr/lib/python3.13/json/decoder.py:351(raw_decode)
+    20000    0.015    0.000    0.237    0.000 {built-in method strptime}
+    20000    0.014    0.000    0.014    0.000 {method 'isoformat' of 'datetime.datetime' objects}
+        5    0.013    0.003    0.013    0.003 {method 'fetchall' of 'sqlite3.Cursor' objects}
+    90009    0.012    0.000    0.012    0.000 {method 'get' of 'dict' objects}
+    20000    0.012    0.000    0.018    0.000 /usr/lib/python3.13/locale.py:381(normalize)
+    20002    0.011    0.000    0.011    0.000 {method 'match' of 're.Pattern' objects}
+
+

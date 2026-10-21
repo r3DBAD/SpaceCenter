@@ -1,0 +1,439 @@
+{
+ "label": "before",
+ "measured_at": "2026-10-21T19:02",
+ "python": "3.13.5",
+ "results": [
+  {
+   "scenario": "fuel_report",
+   "n": 1000,
+   "ms": 7.9,
+   "calls": 6018,
+   "top5": [
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 43,
+     "tottime_ms": 6.2
+    },
+    {
+     "func": "reports.py:127(build)",
+     "ncalls": 1,
+     "tottime_ms": 0.2
+    },
+    {
+     "func": "web.py:314(fuel)",
+     "ncalls": 1,
+     "tottime_ms": 0.2
+    },
+    {
+     "func": "units.py:56(__str__)",
+     "ncalls": 202,
+     "tottime_ms": 0.2
+    },
+    {
+     "func": "~:0(<method 'fetchall' of 'sqlite3.Cursor' objects>)",
+     "ncalls": 3,
+     "tottime_ms": 0.1
+    }
+   ],
+   "peak_mb": 0.08,
+   "sha256": "f77ac3d6ccb7968a",
+   "bytes": 17624
+  },
+  {
+   "scenario": "search_launches",
+   "n": 1000,
+   "ms": 25.3,
+   "calls": 158413,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 2000,
+     "tottime_ms": 9.5
+    },
+    {
+     "func": "web.py:177(_launch)",
+     "ncalls": 1000,
+     "tottime_ms": 6.6
+    },
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 53,
+     "tottime_ms": 3.2
+    },
+    {
+     "func": "repositories.py:288(_row)",
+     "ncalls": 1000,
+     "tottime_ms": 2.4
+    },
+    {
+     "func": "entities.py:223(__init__)",
+     "ncalls": 1000,
+     "tottime_ms": 2.4
+    }
+   ],
+   "peak_mb": 2.64,
+   "sha256": "2e14b582f93e5961",
+   "bytes": 59984
+  },
+  {
+   "scenario": "pads_report",
+   "n": 1000,
+   "ms": 13.4,
+   "calls": 61324,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 1954,
+     "tottime_ms": 8.8
+    },
+    {
+     "func": "~:0(<method 'fetchall' of 'sqlite3.Cursor' objects>)",
+     "ncalls": 8,
+     "tottime_ms": 3.6
+    },
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 32,
+     "tottime_ms": 1.8
+    },
+    {
+     "func": "_strptime.py:670(_strptime_datetime)",
+     "ncalls": 1954,
+     "tottime_ms": 1.4
+    },
+    {
+     "func": "~:0(<built-in method strptime>)",
+     "ncalls": 1954,
+     "tottime_ms": 1.3
+    }
+   ],
+   "peak_mb": 0.1,
+   "sha256": "d73db0d73a1d4929",
+   "bytes": 1167
+  },
+  {
+   "scenario": "forecast_check",
+   "n": 1000,
+   "ms": 13.8,
+   "calls": 136849,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 2000,
+     "tottime_ms": 11.0
+    },
+    {
+     "func": "~:0(<built-in method builtins.any>)",
+     "ncalls": 2115,
+     "tottime_ms": 3.2
+    },
+    {
+     "func": "repositories.py:288(_row)",
+     "ncalls": 1000,
+     "tottime_ms": 3.0
+    },
+    {
+     "func": "entities.py:223(__init__)",
+     "ncalls": 1000,
+     "tottime_ms": 2.7
+    },
+    {
+     "func": "validation.py:35(require_number)",
+     "ncalls": 3865,
+     "tottime_ms": 2.5
+    }
+   ],
+   "peak_mb": 0.71,
+   "sha256": "e09427a9ae707487",
+   "bytes": 5
+  },
+  {
+   "scenario": "fuel_report",
+   "n": 10000,
+   "ms": 318.1,
+   "calls": 54978,
+   "top5": [
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 403,
+     "tottime_ms": 328.9
+    },
+    {
+     "func": "~:0(<method 'fetchone' of 'sqlite3.Cursor' objects>)",
+     "ncalls": 400,
+     "tottime_ms": 1.8
+    },
+    {
+     "func": "reports.py:127(build)",
+     "ncalls": 1,
+     "tottime_ms": 1.7
+    },
+    {
+     "func": "web.py:314(fuel)",
+     "ncalls": 1,
+     "tottime_ms": 1.6
+    },
+    {
+     "func": "units.py:56(__str__)",
+     "ncalls": 2002,
+     "tottime_ms": 1.5
+    }
+   ],
+   "peak_mb": 0.79,
+   "sha256": "8558b3dc593a0988",
+   "bytes": 170803
+  },
+  {
+   "scenario": "search_launches",
+   "n": 10000,
+   "ms": 262.8,
+   "calls": 1590906,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 20000,
+     "tottime_ms": 110.2
+    },
+    {
+     "func": "web.py:177(_launch)",
+     "ncalls": 10000,
+     "tottime_ms": 65.6
+    },
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 53,
+     "tottime_ms": 40.1
+    },
+    {
+     "func": "encoder.py:205(iterencode)",
+     "ncalls": 2,
+     "tottime_ms": 33.4
+    },
+    {
+     "func": "repositories.py:288(_row)",
+     "ncalls": 10000,
+     "tottime_ms": 31.3
+    }
+   ],
+   "peak_mb": 26.6,
+   "sha256": "422fbbed774435d3",
+   "bytes": 690441
+  },
+  {
+   "scenario": "pads_report",
+   "n": 10000,
+   "ms": 172.3,
+   "calls": 606796,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 19676,
+     "tottime_ms": 95.6
+    },
+    {
+     "func": "~:0(<method 'fetchall' of 'sqlite3.Cursor' objects>)",
+     "ncalls": 8,
+     "tottime_ms": 54.6
+    },
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 32,
+     "tottime_ms": 26.8
+    },
+    {
+     "func": "_strptime.py:670(_strptime_datetime)",
+     "ncalls": 19676,
+     "tottime_ms": 14.3
+    },
+    {
+     "func": "reports.py:153(build)",
+     "ncalls": 1,
+     "tottime_ms": 13.2
+    }
+   ],
+   "peak_mb": 0.87,
+   "sha256": "96092e96c77c396a",
+   "bytes": 1179
+  },
+  {
+   "scenario": "forecast_check",
+   "n": 10000,
+   "ms": 143.5,
+   "calls": 1389342,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 20000,
+     "tottime_ms": 113.0
+    },
+    {
+     "func": "repositories.py:288(_row)",
+     "ncalls": 10000,
+     "tottime_ms": 31.2
+    },
+    {
+     "func": "validation.py:23(<genexpr>)",
+     "ncalls": 150268,
+     "tottime_ms": 27.5
+    },
+    {
+     "func": "entities.py:223(__init__)",
+     "ncalls": 10000,
+     "tottime_ms": 27.0
+    },
+    {
+     "func": "validation.py:35(require_number)",
+     "ncalls": 38818,
+     "tottime_ms": 26.1
+    }
+   ],
+   "peak_mb": 8.2,
+   "sha256": "8337b823ee15b723",
+   "bytes": 6
+  },
+  {
+   "scenario": "fuel_report",
+   "n": 50000,
+   "ms": 10364.7,
+   "calls": 272578,
+   "top5": [
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 2003,
+     "tottime_ms": 10560.3
+    },
+    {
+     "func": "~:0(<method 'fetchone' of 'sqlite3.Cursor' objects>)",
+     "ncalls": 2000,
+     "tottime_ms": 23.0
+    },
+    {
+     "func": "reports.py:127(build)",
+     "ncalls": 1,
+     "tottime_ms": 9.7
+    },
+    {
+     "func": "repositories.py:320(used_mass)",
+     "ncalls": 2000,
+     "tottime_ms": 8.9
+    },
+    {
+     "func": "units.py:56(__str__)",
+     "ncalls": 10002,
+     "tottime_ms": 7.6
+    }
+   ],
+   "peak_mb": 3.91,
+   "sha256": "d89a76195f2bd07d",
+   "bytes": 852773
+  },
+  {
+   "scenario": "search_launches",
+   "n": 50000,
+   "ms": 1441.4,
+   "calls": 8049652,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 100000,
+     "tottime_ms": 485.1
+    },
+    {
+     "func": "web.py:177(_launch)",
+     "ncalls": 50000,
+     "tottime_ms": 328.3
+    },
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 53,
+     "tottime_ms": 212.8
+    },
+    {
+     "func": "repositories.py:288(_row)",
+     "ncalls": 50000,
+     "tottime_ms": 132.7
+    },
+    {
+     "func": "validation.py:23(<genexpr>)",
+     "ncalls": 802397,
+     "tottime_ms": 127.2
+    }
+   ],
+   "peak_mb": 132.51,
+   "sha256": "2cffbbc18066bcab",
+   "bytes": 3451455
+  },
+  {
+   "scenario": "pads_report",
+   "n": 50000,
+   "ms": 797.6,
+   "calls": 3029648,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 98422,
+     "tottime_ms": 486.0
+    },
+    {
+     "func": "~:0(<method 'fetchall' of 'sqlite3.Cursor' objects>)",
+     "ncalls": 8,
+     "tottime_ms": 255.1
+    },
+    {
+     "func": "~:0(<method 'execute' of 'sqlite3.Connection' objects>)",
+     "ncalls": 32,
+     "tottime_ms": 108.1
+    },
+    {
+     "func": "_strptime.py:670(_strptime_datetime)",
+     "ncalls": 98422,
+     "tottime_ms": 75.8
+    },
+    {
+     "func": "~:0(<built-in method strptime>)",
+     "ncalls": 98422,
+     "tottime_ms": 60.5
+    }
+   ],
+   "peak_mb": 4.77,
+   "sha256": "dd7db7aa89b1a8c4",
+   "bytes": 1185
+  },
+  {
+   "scenario": "forecast_check",
+   "n": 50000,
+   "ms": 688.2,
+   "calls": 7048077,
+   "top5": [
+    {
+     "func": "_strptime.py:413(_strptime)",
+     "ncalls": 100000,
+     "tottime_ms": 515.1
+    },
+    {
+     "func": "repositories.py:288(_row)",
+     "ncalls": 50000,
+     "tottime_ms": 143.5
+    },
+    {
+     "func": "validation.py:23(<genexpr>)",
+     "ncalls": 802082,
+     "tottime_ms": 131.8
+    },
+    {
+     "func": "entities.py:223(__init__)",
+     "ncalls": 50000,
+     "tottime_ms": 127.5
+    },
+    {
+     "func": "validation.py:35(require_number)",
+     "ncalls": 193936,
+     "tottime_ms": 122.6
+    }
+   ],
+   "peak_mb": 42.13,
+   "sha256": "4f53cda18c2baa0c",
+   "bytes": 2
+  }
+ ]
+}

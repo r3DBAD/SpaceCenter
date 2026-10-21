@@ -1,0 +1,28 @@
+         8049652 function calls in 3.316 seconds
+
+   Ordered by: internal time
+   List reduced from 132 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   100000    0.485    0.000    0.902    0.000 /usr/lib/python3.13/_strptime.py:413(_strptime)
+    50000    0.328    0.000    0.491    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/controller/web.py:177(_launch)
+       53    0.213    0.004    0.213    0.004 {method 'execute' of 'sqlite3.Connection' objects}
+    50000    0.133    0.000    2.247    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:288(_row)
+   802397    0.127    0.000    0.176    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:23(<genexpr>)
+        2    0.123    0.062    0.123    0.062 /usr/lib/python3.13/json/encoder.py:205(iterencode)
+    50000    0.120    0.000    0.863    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:223(__init__)
+   193988    0.119    0.000    0.185    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:35(require_number)
+        1    0.104    0.104    0.104    0.104 /usr/lib/python3.13/json/decoder.py:351(raw_decode)
+   106082    0.104    0.000    0.279    0.000 {built-in method builtins.any}
+  1244160    0.095    0.000    0.095    0.000 {built-in method builtins.isinstance}
+   106078    0.091    0.000    0.404    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:14(require_text)
+   100000    0.080    0.000    0.981    0.000 /usr/lib/python3.13/_strptime.py:670(_strptime_datetime)
+   150040    0.079    0.000    0.241    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:52(require_int)
+        5    0.076    0.015    0.076    0.015 {method 'fetchall' of 'sqlite3.Cursor' objects}
+   100000    0.069    0.000    0.069    0.000 {method 'isoformat' of 'datetime.datetime' objects}
+   100000    0.063    0.000    1.045    0.000 {built-in method strptime}
+   450009    0.053    0.000    0.053    0.000 {method 'get' of 'dict' objects}
+   100000    0.052    0.000    0.078    0.000 /usr/lib/python3.13/locale.py:381(normalize)
+   696319    0.049    0.000    0.049    0.000 {built-in method builtins.ord}
+
+

@@ -1,0 +1,28 @@
+         136849 function calls in 0.054 seconds
+
+   Ordered by: internal time
+   List reduced from 66 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     2000    0.011    0.000    0.020    0.000 /usr/lib/python3.13/_strptime.py:413(_strptime)
+     2115    0.003    0.000    0.007    0.000 {built-in method builtins.any}
+     1000    0.003    0.000    0.051    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:288(_row)
+     1000    0.003    0.000    0.019    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:223(__init__)
+     3865    0.003    0.000    0.004    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:35(require_number)
+    13998    0.002    0.000    0.003    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:23(<genexpr>)
+    24847    0.002    0.000    0.002    0.000 {built-in method builtins.isinstance}
+     2000    0.002    0.000    0.022    0.000 /usr/lib/python3.13/_strptime.py:670(_strptime_datetime)
+     2115    0.002    0.000    0.009    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:14(require_text)
+     3000    0.002    0.000    0.005    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:52(require_int)
+     2000    0.002    0.000    0.024    0.000 {built-in method strptime}
+        1    0.001    0.001    0.001    0.001 {method 'fetchall' of 'sqlite3.Cursor' objects}
+     2000    0.001    0.000    0.001    0.000 {method 'match' of 're.Pattern' objects}
+     2000    0.001    0.000    0.002    0.000 /usr/lib/python3.13/locale.py:381(normalize)
+     1000    0.001    0.000    0.003    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:198(__post_init__)
+    11883    0.001    0.000    0.001    0.000 {built-in method builtins.ord}
+     2000    0.001    0.000    0.001    0.000 {method 'groupdict' of 're.Match' objects}
+     6000    0.001    0.000    0.001    0.000 {method 'get' of 'dict' objects}
+     2000    0.001    0.000    0.004    0.000 /usr/lib/python3.13/locale.py:582(getlocale)
+     2000    0.001    0.000    0.001    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:59(require_datetime)
+
+

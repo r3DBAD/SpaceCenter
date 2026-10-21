@@ -1,0 +1,28 @@
+         606796 function calls in 0.336 seconds
+
+   Ordered by: internal time
+   List reduced from 126 to 20 due to restriction <20>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+    19676    0.096    0.000    0.174    0.000 /usr/lib/python3.13/_strptime.py:413(_strptime)
+        8    0.055    0.007    0.055    0.007 {method 'fetchall' of 'sqlite3.Cursor' objects}
+       32    0.027    0.001    0.027    0.001 {method 'execute' of 'sqlite3.Connection' objects}
+    19676    0.014    0.000    0.189    0.000 /usr/lib/python3.13/_strptime.py:670(_strptime_datetime)
+        1    0.013    0.013    0.335    0.335 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/reports.py:153(build)
+        6    0.013    0.002    0.278    0.046 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:276(occupancy)
+    19676    0.011    0.000    0.200    0.000 {built-in method strptime}
+    19676    0.009    0.000    0.014    0.000 /usr/lib/python3.13/locale.py:381(normalize)
+    19676    0.009    0.000    0.009    0.000 {method 'match' of 're.Pattern' objects}
+    19676    0.008    0.000    0.008    0.000 {method 'groupdict' of 're.Match' objects}
+    59040    0.008    0.000    0.008    0.000 {method 'get' of 'dict' objects}
+    19676    0.007    0.000    0.031    0.000 /usr/lib/python3.13/locale.py:582(getlocale)
+    18514    0.006    0.000    0.008    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/reports.py:47(end)
+    19676    0.006    0.000    0.020    0.000 /usr/lib/python3.13/locale.py:464(_parse_localename)
+    20000    0.005    0.000    0.205    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/database.py:22(dt_from_db)
+    37028    0.005    0.000    0.005    0.000 {built-in method combine}
+    19676    0.005    0.000    0.036    0.000 /usr/lib/python3.13/_strptime.py:28(_getlang)
+    39352    0.005    0.000    0.005    0.000 {method 'toordinal' of 'datetime.date' objects}
+    19676    0.004    0.000    0.004    0.000 {built-in method _locale.setlocale}
+    39370    0.004    0.000    0.004    0.000 {built-in method builtins.len}
+
+
