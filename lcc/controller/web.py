@@ -180,7 +180,9 @@ class WebApi:
         now = self._clock()
         for token in [t for t, (_, seen) in self._sessions.items() if now - seen > self.SESSION_TTL]:
             del self._sessions[token]
-        own = sorted((seen, t) for t, (sess, seen) in self._sessions.items() if sess.staff_id == staff_id)
+        # устойчивая сортировка по времени: при равном времени раньше идет сеанс, созданный раньше
+        own = sorted(((seen, t) for t, (sess, seen) in self._sessions.items() if sess.staff_id == staff_id),
+                     key=lambda item: item[0])
         for _, token in own[:max(0, len(own) - self.MAX_SESSIONS_PER_USER + 1)]:
             del self._sessions[token]
 

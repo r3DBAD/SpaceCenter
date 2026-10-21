@@ -6,23 +6,23 @@
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
         2    0.000    0.000    0.000    0.000 {method 'execute' of 'sqlite3.Connection' objects}
         3    0.000    0.000    0.000    0.000 {method 'strftime' of 'datetime.date' objects}
-        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:223(__init__)
         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/entities.py:223(__init__)
+        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:245(starting_between)
         1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:301(_row)
         1    0.000    0.000    0.000    0.000 {method 'fetchall' of 'sqlite3.Cursor' objects}
-        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/repositories.py:245(starting_between)
         2    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:14(require_text)
-        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/forecast.py:85(due)
+        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/forecast.py:96(due)
         1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/tools/profile_lab5.py:77(forecast_check)
-        3    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:35(require_number)
         1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/database.py:74(query)
-       12    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:23(<genexpr>)
-        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/forecast.py:53(_now)
+        1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/forecast.py:55(_now)
+        3    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:35(require_number)
         1    0.000    0.000    0.000    0.000 /usr/lib/python3.13/json/encoder.py:205(iterencode)
-        3    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:52(require_int)
+       12    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:23(<genexpr>)
         1    0.000    0.000    0.000    0.000 /usr/lib/python3.13/json/encoder.py:183(encode)
-       21    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
         1    0.000    0.000    0.000    0.000 /usr/lib/python3.13/enum.py:695(__call__)
+        3    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/validation.py:52(require_int)
+       21    0.000    0.000    0.000    0.000 {built-in method builtins.isinstance}
         1    0.000    0.000    0.000    0.000 /home/r3dbad/Учёба/МДК 03.01 Моделирование и анализ программного обеспечения/Готово/ЛР5/spaceport-lcc/lcc/model/database.py:81(query_one)
 
 

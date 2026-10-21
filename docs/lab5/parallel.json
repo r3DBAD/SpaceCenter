@@ -1,0 +1,12 @@
+{
+ "pool4_fork_ms": 5.8,
+ "pool4_spawn_ms": 88.1,
+ "S3_pads_seq_ms": 298.0,
+ "S1_fuel_seq_ms": 67.8,
+ "S2_search_seq_ms": 20.2,
+ "S3_pads_pool_ms_warm": 157.7,
+ "S1_fuel_pool_ms_warm": 50.3,
+ "S2_search_pool_ms_warm": 17.8,
+ "IO_forecast_seq_ms": 2005.4,
+ "IO_forecast_threads_ms": 502.5
+}

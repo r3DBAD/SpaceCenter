@@ -81,6 +81,43 @@ class OptimizationTest(unittest.TestCase):
         self.assertEqual([l.id for l in w.s.forecasts.due()], [soon.id])
 
 
+class ParallelForecastTest(unittest.TestCase):
+    """Запросы к службе выполняются параллельно, результаты пишутся в порядке пусков."""
+
+    def test_run_auto_fetches_in_parallel(self):
+        import threading
+        import time
+        from lcc.model.enums import ForecastStatus
+        from lcc.model.meteo_client import Forecast, MeteoProvider, MeteoUnavailable
+
+        class Slow(MeteoProvider):
+            threads = set()
+
+            def fetch(self, site, at):
+                self.threads.add(threading.get_ident())
+                time.sleep(0.3)
+                if at.day % 2:
+                    raise MeteoUnavailable("нет связи")
+                return Forecast(at, 5.0, 10.0, 5.0, False, None)
+
+        w = World(meteo=Slow())
+        launches = [w.new_launch(days_ahead=1)]
+        start = w.clock.now + timedelta(hours=20)
+        for k in range(3):
+            s0 = start + timedelta(hours=k)
+            launches.append(w.s.launches.register_launch(w.head, w.vt.id, w.pad_p.id, "КА", "ССО", s0,
+                                                         s0 + timedelta(minutes=10)))
+        w.clock.advance(hours=1)
+        t = time.perf_counter()
+        recs = w.s.forecasts.run_auto()
+        elapsed = time.perf_counter() - t
+        self.assertEqual([r.launch_id for r in recs],                  # порядок стартовых окон
+                         [l.id for l in sorted(launches, key=lambda l: l.window.start)])
+        self.assertLess(elapsed, 0.9)                                  # 4 × 0,3 с последовательно = 1,2 с
+        self.assertGreater(len(Slow.threads), 1)
+        self.assertEqual({r.status for r in recs} - {ForecastStatus.OK, ForecastStatus.UNAVAILABLE}, set())
+
+
 class LeakTest(unittest.TestCase):
     def setUp(self):
         self.w = World()
