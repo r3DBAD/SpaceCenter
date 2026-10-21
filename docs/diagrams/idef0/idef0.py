@@ -21,14 +21,22 @@ DATE = "28.09.2026"
 
 
 class Diagram:
+    WORK = "Лабораторная\nработа №3"
+    DATE = DATE
+
     def __init__(self, node: str, title: str, number: int, context: str):
         self.node, self.title, self.number, self.context = node, title, number, context
         self.items: list[str] = []
 
     # ---------- примитивы ----------
-    def text(self, x, y, lines, size=12, anchor="start", weight="normal"):
+    def text(self, x, y, lines, size=12, anchor="start", weight="normal", bg=False):
         if isinstance(lines, str):
             lines = lines.split("\n")
+        if bg:                                 # белая подложка, чтобы подпись читалась поверх линий
+            w = max(len(t) for t in lines) * size * 0.56 + 4
+            x0 = {"start": x - 2, "middle": x - w / 2, "end": x - w + 2}[anchor]
+            h = len(lines) * (size + 2) + 2
+            self.items.append(f'<rect x="{x0:.0f}" y="{y - size:.0f}" width="{w:.0f}" height="{h}" fill="#fff"/>')
         spans = "".join(
             f'<tspan x="{x}" dy="{0 if i == 0 else size + 2}">{escape(t)}</tspan>'
             for i, t in enumerate(lines))
@@ -99,13 +107,13 @@ class Diagram:
         self.rect(632, 3, 16, 20, fill="#000")
         t = self.text
         t(6, 18, "ИСПОЛЬЗУЕТСЯ В:")
-        t(105, 60, "Лабораторная\nработа №3", anchor="middle")
+        t(105, 60, self.WORK, anchor="middle")
         t(215, 18, f"АВТОР:  {AUTHOR}")
         t(215, 42, "ПРОЕКТ:")
         t(270, 42, ["АИС «Центр управления", "космическими пусками»"])
         t(215, 92, "ЗАМЕЧАНИЯ: 1 2 3 4 5 6 7 8 9 10")
         t(470, 18, f"ДАТА:     {DATE}")
-        t(470, 42, f"РЕВИЗИЯ: {DATE}")
+        t(470, 42, f"РЕВИЗИЯ: {self.DATE}")
         for i, s in enumerate(("РАЗРАБАТЫВАЕТСЯ", "ЧЕРНОВИК", "РЕКОМЕНДОВАНО", "ПУБЛИКАЦИЯ")):
             t(655, 18 + 25 * i, s)
         t(875, 18, "ЧИТАТЕЛЬ")
@@ -125,8 +133,9 @@ class Diagram:
             self.text(1180, 62, "ВЕРХ", size=14, anchor="middle", weight="bold")
         elif c.startswith("child:"):           # родитель — диаграмма декомпозиции с n блоками
             n, k = map(int, c.split(":")[1].split("/"))
+            step = min(32, 160 // n)
             for i in range(n):
-                self.rect(1110 + i * 32, 40 + i * 9, 22, 11, fill="#000" if i + 1 == k else "none")
+                self.rect(1110 + i * step, 40 + i * 9, step - 10, 11, fill="#000" if i + 1 == k else "none")
         else:                                  # декомпозиция контекстного блока
             self.rect(1160, 50, 40, 16, fill="#000")
             self.text(1092, 92, "A-0", size=11)
