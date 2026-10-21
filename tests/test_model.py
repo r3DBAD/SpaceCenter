@@ -7,6 +7,7 @@ from lcc.model.entities import FuelBatch, Launch, LaunchPad, LaunchWindow, PadUs
 from lcc.model.enums import FuelComponent, LaunchStatus, PadState, PostponeReason
 from lcc.model.errors import BusinessRuleError, ValidationError
 from lcc.model.security import PasswordHasher
+from lcc.model.units import Mass
 from lcc.model.weather import WeatherLimits, WeatherObservation
 
 T = datetime(2026, 10, 1, 10, 0)
@@ -76,7 +77,7 @@ class LaunchTest(unittest.TestCase):
 
 class PadTest(unittest.TestCase):
     def setUp(self):
-        self.pad = LaunchPad("sk-1", "Площадка", 2, 3, 100)
+        self.pad = LaunchPad("sk-1", "Площадка", 2, 3, 100, spaceport_id=1)
 
     def test_state_is_computed(self):
         self.assertIs(self.pad.state(PadUsage()), PadState.READY)
@@ -93,30 +94,30 @@ class PadTest(unittest.TestCase):
 
     def test_invalid_limits(self):
         with self.assertRaises(ValidationError):
-            LaunchPad("X", "Y", 0, 3, 100)
+            LaunchPad("X", "Y", 0, 3, 100, spaceport_id=1)
         with self.assertRaises(ValidationError):
-            LaunchPad("X", "Y", 1, 3, -1)
+            LaunchPad("X", "Y", 1, 3, -1, spaceport_id=1)
 
 
 class FuelBatchTest(unittest.TestCase):
     def setUp(self):
-        self.b = FuelBatch("rg-1", FuelComponent.FUEL, "РГ-1", 100, date(2026, 1, 1), date(2026, 12, 31))
+        self.b = FuelBatch("rg-1", FuelComponent.FUEL, "РГ-1", 100, date(2026, 1, 1), date(2026, 12, 31), spaceport_id=1)
 
     def test_withdraw_rules(self):
-        on = date(2026, 6, 1)
-        self.assertEqual(self.b.ensure_can_withdraw(40, 50, on, FuelComponent.FUEL), 40)
+        on, used, zero = date(2026, 6, 1), Mass.from_kg(50), Mass.zero()     # ЛР4: масса — объект Mass
+        self.assertEqual(self.b.ensure_can_withdraw(40, used, on, FuelComponent.FUEL).kg, 40)
         with self.assertRaises(BusinessRuleError):          # больше остатка
-            self.b.ensure_can_withdraw(60, 50, on, FuelComponent.FUEL)
+            self.b.ensure_can_withdraw(60, used, on, FuelComponent.FUEL)
         with self.assertRaises(BusinessRuleError):          # просрочена
-            self.b.ensure_can_withdraw(1, 0, date(2027, 1, 1), FuelComponent.FUEL)
+            self.b.ensure_can_withdraw(1, zero, date(2027, 1, 1), FuelComponent.FUEL)
         with self.assertRaises(BusinessRuleError):          # не тот компонент
-            self.b.ensure_can_withdraw(1, 0, on, FuelComponent.OXIDIZER)
+            self.b.ensure_can_withdraw(1, zero, on, FuelComponent.OXIDIZER)
         with self.assertRaises(ValidationError):            # отрицательный объём
-            self.b.ensure_can_withdraw(-1, 0, on, FuelComponent.FUEL)
+            self.b.ensure_can_withdraw(-1, zero, on, FuelComponent.FUEL)
 
     def test_expiry_after_production(self):
         with self.assertRaises(ValidationError):
-            FuelBatch("X", FuelComponent.FUEL, "РГ-1", 10, date(2026, 5, 1), date(2026, 5, 1))
+            FuelBatch("X", FuelComponent.FUEL, "РГ-1", 10, date(2026, 5, 1), date(2026, 5, 1), spaceport_id=1)
 
 
 class WeatherTest(unittest.TestCase):

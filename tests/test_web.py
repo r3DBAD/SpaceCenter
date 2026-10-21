@@ -54,9 +54,9 @@ class WebApiTest(unittest.TestCase):
         for _ in range(3):
             self.assertEqual(self.call("POST", f"/api/launches/{l.id}/advance", {}, eng)[0], 200)
         self.assertEqual(self.call("POST", f"/api/launches/{l.id}/refuel",
-                                   {"batch_id": self.w.kero.id, "volume": "много"}, fuel)[0], 400)
+                                   {"batch_id": self.w.kero.id, "mass_kg": "много"}, fuel)[0], 400)
         for batch, vol in ((self.w.kero.id, 30), (self.w.lox.id, 70)):
-            self.assertEqual(self.call("POST", f"/api/launches/{l.id}/refuel", {"batch_id": batch, "volume": vol},
+            self.assertEqual(self.call("POST", f"/api/launches/{l.id}/refuel", {"batch_id": batch, "mass_kg": vol},
                                        fuel)[0], 200)
         self.call("POST", f"/api/launches/{l.id}/advance", {}, fuel)
         status, d = self.call("POST", f"/api/launches/{l.id}/weather",
@@ -65,7 +65,8 @@ class WebApiTest(unittest.TestCase):
         self.assertEqual((status, d["allowed"]), (200, False))
         status, rep = self.call("GET", "/api/reports/fuel?from=2026-08-01&to=2026-09-30", token=self.login("head"))
         self.assertEqual(status, 200)
-        self.assertIn(["RG-1", "Горючее", "РГ-1", "100", "30", "1", "70", "30.0", "10.12.2026"], rep["rows"])
+        self.assertIn(["VOS", "RG-1", "Горючее", "РГ-1", "100,0 кг", "30,0 кг", "1", "70,0 кг", "30.0", "10.12.2026"],
+                      rep["rows"])                          # ЛР4: колонка космодрома, масса в кг
         status, csv_body = self.call("GET", "/api/reports/fuel.csv?from=2026-08-01&to=2026-09-30",
                                      token=self.login("head"))
         self.assertEqual(status, 200)
@@ -85,7 +86,7 @@ class WebApiTest(unittest.TestCase):
         self.assertEqual(status, 400)
         self.assertIn("не заправлено", d["error"])
         for batch, vol in ((self.w.kero.id, 30), (self.w.lox.id, 70)):
-            self.call("POST", f"/api/launches/{lid}/refuel", {"batch_id": batch, "volume": vol}, fuel)
+            self.call("POST", f"/api/launches/{lid}/refuel", {"batch_id": batch, "mass_kg": vol}, fuel)
         self.assertEqual(self.call("POST", f"/api/launches/{lid}/advance", {}, fuel)[0], 200)
         bad = {"ground_wind": 22, "altitude_wind": 35, "temperature": 5, "cloud_base": 1000, "thunderstorm": False}
         _, d = self.call("POST", f"/api/launches/{lid}/weather", bad, meteo)
@@ -105,14 +106,14 @@ class WebApiTest(unittest.TestCase):
         self.assertEqual(card["status"], "launched")
         self.assertEqual([j["category"] for j in card["journal"]], ["Перенос", "НС"])
         _, rep = self.call("GET", "/api/reports/incidents?from=2026-09-01&to=2026-09-30", token=head)
-        self.assertIn(["Перенос пуска", "Метеоусловия", "1"], rep["rows"])
+        self.assertIn(["Перенос пуска", "Погода", "1"], rep["rows"])
         # ТО площадки и персонал
         self.assertEqual(self.call("POST", f"/api/pads/{self.w.pad.id}/maintenance", {"kind": "inspection"}, eng)[0], 200)
         self.assertEqual(self.call("POST", f"/api/pads/{self.w.pad.id}/maintenance/close", {}, eng)[0], 200)
         self.assertEqual(self.call("POST", "/api/staff", {"login": "new", "full_name": "Новиков", "role": "meteorologist",
                                                          "password": "123"}, head)[0], 400)      # слабый пароль
         self.assertEqual(self.call("POST", "/api/staff", {"login": "new", "full_name": "Новиков", "role": "meteorologist",
-                                                         "password": "secret123"}, head)[0], 201)
+                                                         "password": "secret123", "spaceport_id": self.w.vos.id}, head)[0], 201)
         self.assertEqual(self.call("GET", "/api/staff", token=eng)[0], 403)
 
     def test_bad_json_and_period(self):

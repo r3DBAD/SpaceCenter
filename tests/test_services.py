@@ -90,7 +90,7 @@ class LaunchFlowTest(unittest.TestCase):
         w.s.fuel.refuel(w.fuel, l.id, w.lox.id, 50)
         self.assertIs(w.s.launches.advance_stage(w.fuel, l.id), LaunchStatus.PRELAUNCH_CHECK)
         remaining = dict((b.batch_no, rest) for b, rest in w.s.fuel.list_batches(w.fuel))
-        self.assertEqual(remaining["RG-1"], 70)
+        self.assertEqual(remaining["RG-1"].kg, 70)
 
     def test_expired_batch(self):
         w = self.w
@@ -167,7 +167,8 @@ class ReportsTest(unittest.TestCase):
         r1 = w.s.reports.build(w.head, "launches", period)
         self.assertEqual(r1.rows[0][:4], ["Союз-2.1б", "средний", 1, 1])
         r2 = w.s.reports.build(w.head, "fuel", period)
-        self.assertEqual({row[0]: row[6] for row in r2.rows}, {"RG-1": "70", "LOX-1": "130"})
+        self.assertEqual({row[1]: str(row[7]) for row in r2.rows if row[0] == "VOS"},
+                         {"RG-1": "70,0 кг", "LOX-1": "130,0 кг"})
         r3 = w.s.reports.build(w.head, "pads", period)
         self.assertEqual(r3.rows[0][3], 1)
         r4 = w.s.reports.build(w.head, "incidents", period)
