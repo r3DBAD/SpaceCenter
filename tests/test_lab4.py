@@ -427,8 +427,8 @@ class MigrationTest(unittest.TestCase):
             conn.execute("UPDATE launch SET pad_id = 99")
             conn.commit()
             conn.close()
-            with self.assertRaises(sqlite3.IntegrityError):
-                Database(path).init_schema()
+            with self.assertRaises(sqlite3.IntegrityError), Database(path) as db:
+                db.init_schema()
             conn = sqlite3.connect(path)
             self.assertEqual(conn.execute("PRAGMA user_version").fetchone()[0], 0)
             self.assertEqual(conn.execute("SELECT initial_volume FROM fuel_batch").fetchone()[0], 180.0)

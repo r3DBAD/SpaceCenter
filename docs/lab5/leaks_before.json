@@ -1,0 +1,38 @@
+{
+ "timeline": [
+  {
+   "hours": 4,
+   "sessions": 1440,
+   "failed": 1440
+  },
+  {
+   "hours": 8,
+   "sessions": 2880,
+   "failed": 2880
+  },
+  {
+   "hours": 12,
+   "sessions": 4320,
+   "failed": 4320
+  },
+  {
+   "hours": 16,
+   "sessions": 5760,
+   "failed": 5760
+  },
+  {
+   "hours": 20,
+   "sessions": 7200,
+   "failed": 7200
+  },
+  {
+   "hours": 24,
+   "sessions": 8640,
+   "failed": 8640
+  }
+ ],
+ "sessions": 8640,
+ "failed": 8640,
+ "memory_growth_mb": 7.28,
+ "unclosed_connections_in_tests": 47
+}

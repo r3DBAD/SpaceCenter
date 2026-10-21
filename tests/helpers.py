@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import weakref
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -36,6 +37,7 @@ class World:
     def __init__(self, meteo=None):
         self.clock = Clock()
         self.db = Database(":memory:")
+        weakref.finalize(self, self.db.close)        # ЛР5: соединение закрывается вместе с фикстурой
         self.db.init_schema()
         self.repos = Repositories(self.db)
         self.s = Services(self.repos, self.clock, meteo=meteo)

@@ -112,3 +112,10 @@ class Database:
 
     def close(self) -> None:
         self._conn.close()
+
+    # ЛР5, утечка №3: соединение закрывается и при исключении — `with Database(path) as db: …`
+    def __enter__(self) -> "Database":
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.close()

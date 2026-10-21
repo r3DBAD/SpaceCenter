@@ -62,6 +62,7 @@ class AuthService(Service):
 
     MAX_FAILED = 5
     LOCK_TIME = timedelta(minutes=15)
+    PURGE_AT = 256          # ЛР5, утечка №2: записи старше LOCK_TIME вычищаются, когда их больше PURGE_AT
 
     def __init__(self, repos: Repositories, clock: Clock = _now_default, audit: AuditLogger | None = None):
         super().__init__(repos, clock)
@@ -81,11 +82,20 @@ class AuthService(Service):
         if staff is None or not staff.is_active or not PasswordHasher.verify(password or "", staff.password_hash,
                                                                            staff.password_salt):
             self._failed[key] = (count + 1, self._now())
+            if len(self._failed) > self.PURGE_AT:
+                self._purge_failed()
             raise AuthenticationError("Неверный логин или пароль")
         self._failed.pop(key, None)
         session = Session(staff, on_denied=self._audit.denied)
         self._audit.record(session, "Вход в систему", "сеанс")
         return session
+
+
+    def _purge_failed(self) -> None:
+        """Счетчики, у которых последняя ошибка старше времени блокировки, уже ни на что не влияют."""
+        now = self._now()
+        for key in [k for k, (_, last) in self._failed.items() if now - last >= self.LOCK_TIME]:
+            del self._failed[key]
 
 
 class StaffService(Service):

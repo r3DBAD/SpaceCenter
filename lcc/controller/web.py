@@ -84,9 +84,14 @@ def _period(query) -> tuple[datetime, datetime]:
 class WebApi:
     """Маршрутизация запросов API. Не зависит от HTTP-сервера — удобно тестировать напрямую."""
 
-    def __init__(self, services: Services):
+    #: ЛР5, утечка №1: без срока жизни токен закрытой без «Выхода» вкладки оставался в памяти навсегда.
+    SESSION_TTL = 8 * 3600              # простой сеанса, с
+    MAX_SESSIONS_PER_USER = 5           # старые сеансы сотрудника вытесняются новыми
+
+    def __init__(self, services: Services, clock=time.monotonic):
         self.s = services
-        self._sessions: dict[str, object] = {}        # токен → Session (в памяти процесса)
+        self._clock = clock
+        self._sessions: dict[str, tuple[object, float]] = {}   # токен → (Session, время последнего запроса)
         self._routes = [
             ("POST", r"/api/login", self.login, False),
             ("POST", r"/api/logout", self.logout, True),
@@ -160,10 +165,24 @@ class WebApi:
     def _session(self, headers: dict):
         auth = headers.get("authorization", "")
         token = auth[7:] if auth.startswith("Bearer ") else ""
-        session = self._sessions.get(token)
-        if session is None:
+        entry = self._sessions.get(token)
+        now = self._clock()
+        if entry is not None and now - entry[1] > self.SESSION_TTL:
+            del self._sessions[token]
+            raise AuthenticationError("Сеанс истек, войдите снова")
+        if entry is None:
             raise AuthenticationError("Требуется вход в систему")
-        return session
+        self._sessions[token] = (entry[0], now)
+        return entry[0]
+
+    def _purge_sessions(self, staff_id: int) -> None:
+        """Удалить истекшие сеансы и лишние сеансы этого сотрудника (оставить MAX − 1 самых свежих)."""
+        now = self._clock()
+        for token in [t for t, (_, seen) in self._sessions.items() if now - seen > self.SESSION_TTL]:
+            del self._sessions[token]
+        own = sorted((seen, t) for t, (sess, seen) in self._sessions.items() if sess.staff_id == staff_id)
+        for _, token in own[:max(0, len(own) - self.MAX_SESSIONS_PER_USER + 1)]:
+            del self._sessions[token]
 
     @staticmethod
     def _static(name: str) -> Response:
@@ -207,7 +226,8 @@ class WebApi:
     def login(self, _session, data, **_):
         session = self.s.auth.login(data.get("login", ""), data.get("password", ""))
         token = secrets.token_urlsafe(32)
-        self._sessions[token] = session
+        self._purge_sessions(session.staff_id)
+        self._sessions[token] = (session, self._clock())
         return _json(200, {"token": token})
 
     def logout(self, _session, headers, **_):
