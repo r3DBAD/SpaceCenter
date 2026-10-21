@@ -1,0 +1,43 @@
+@startuml seq_inspector_journal
+' Просмотр журнала переносов инспектором и запись в аудит (ЛР4, Т3)
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam BackgroundColor white
+skinparam shadowing false
+
+actor "Инспектор\nбезопасности" as I
+participant "Vue-страница\n<<View>>" as V
+participant "WebApi\n<<Controller>>" as C
+participant "JournalService\n<<Model>>" as J
+participant "Session\n<<Model>>" as S
+participant "JournalRepository\nLaunchRepository" as R
+participant "AuditLogger\n<<Model>>" as A
+database "SQLite" as DB
+
+I -> V : «Журналы» → журнал переносов,\nпричина «Техническая»
+V -> C : GET /api/journal/postponements?reason=technical&from=..&to=..
+C -> J : postponements(session, from, to, reason)
+J -> S : require(VIEW_JOURNALS)
+S --> J : ok
+J -> S : scope(None)
+S --> J : None (роль центра: все космодромы)
+J -> R : postponements(reason, period), labels()
+R -> DB : SELECT ... WHERE reason = ?\n(индекс ix_postponement_reason)
+DB --> R : строки
+J -> A : record(session, "Просмотр журнала",\n"журнал переносов", фильтр)
+A -> DB : INSERT INTO audit_log (outcome='ok')
+J --> C : [JournalRow: №, тип РН, космодром, запись]
+C --> V : 200 JSON
+V --> I : таблица переносов
+
+== Попытка открыть расписание в обход интерфейса ==
+I -> C : GET /api/launches
+C -> J : list_launches(session)
+note over J : LaunchService
+J -> S : require(VIEW_SCHEDULE)
+S -> A : on_denied(session, "право", "view_schedule")
+A -> DB : after_transaction:\nINSERT INTO audit_log (outcome='denied')
+S --> J : AccessDeniedError
+J --> C : AccessDeniedError
+C --> I : 403 «Недостаточно прав»
+@enduml

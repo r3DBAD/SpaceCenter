@@ -1,0 +1,93 @@
+@startuml usecase_lab4
+' UseCase после адаптации (ЛР4). Новые акторы и сценарии выделены цветом.
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  BackgroundColor<<new>> #DCEBFF
+  BackgroundColor<<changed>> #FFF3CC
+}
+left to right direction
+
+actor "Сотрудник ЦУП" as Staff
+actor "Руководитель\nцентра" as Head
+actor "Руководитель\nпуска" as Dir #DCEBFF
+actor "Инспектор\nбезопасности" as Insp #DCEBFF
+actor "Инженер ТК" as Eng
+actor "Инженер\nпо заправке" as Fuel
+actor "Метеоролог" as Met
+actor "Оператор\nтелеметрии" as Tm
+actor "Внешняя\nметеослужба" as Ext #DCEBFF
+actor "Таймер\nсервера" as Timer #DCEBFF
+
+Head -up-|> Staff
+Dir -up-|> Staff
+Insp -up-|> Staff
+Eng -up-|> Staff
+Fuel -up-|> Staff
+Met -up-|> Staff
+Tm -up-|> Staff
+
+rectangle "АИС «Центр управления космическими пусками»" {
+  usecase "Войти в систему" as UC_Login
+  usecase "Проверить права и\nкосмодром сотрудника" as UC_Scope <<new>>
+  usecase "Записать действие\nв журнал аудита" as UC_Audit <<new>>
+
+  usecase "Просмотреть расписание\n(свой космодром / все)" as UC_Schedule <<changed>>
+  usecase "Зарегистрировать пуск\nна площадке своего космодрома" as UC_Reg <<changed>>
+  usecase "Перенести пуск\n(погода / техническая /\nорганизационная)" as UC_Postpone <<changed>>
+  usecase "Управлять космодромами,\nплощадками, персоналом" as UC_Ref <<changed>>
+  usecase "Отметить этап подготовки" as UC_Stage
+  usecase "Провести заправку\n(масса с точностью 0,1 кг)" as UC_Refuel <<changed>>
+  usecase "Проверить срок годности\nдо конца окна" as UC_Expire <<changed>>
+  usecase "Ввести метеоданные\nи получить допуск" as UC_Weather
+  usecase "Зарегистрировать НС" as UC_Inc
+
+  usecase "Запросить прогноз\nза 24 ч до окна" as UC_Fc <<new>>
+  usecase "Ввести прогноз вручную\n(служба недоступна)" as UC_FcManual <<new>>
+  usecase "Сравнить прогноз\nс пределами" as UC_FcEval <<new>>
+
+  usecase "Просмотреть журнал НС" as UC_JInc <<new>>
+  usecase "Просмотреть журнал переносов\nс фильтром по причине" as UC_JPost <<new>>
+  usecase "Сформировать отчет\nпо инцидентам и переносам" as UC_RepInc <<new>>
+  usecase "Сформировать отчеты\n(по космодрому и сводные)" as UC_Rep <<changed>>
+  usecase "Просмотреть журнал аудита" as UC_AuditView <<new>>
+}
+
+Staff --> UC_Login
+Staff --> UC_Schedule
+UC_Schedule ..> UC_Scope : <<include>>
+Head --> UC_Ref
+Head --> UC_AuditView
+Head --> UC_Rep
+Dir --> UC_Reg
+Dir --> UC_Postpone
+Dir --> UC_Rep
+Dir --> UC_JPost
+Eng --> UC_Stage
+Fuel --> UC_Refuel
+UC_Refuel ..> UC_Expire : <<include>>
+Met --> UC_Weather
+Met --> UC_Postpone
+Met --> UC_FcManual
+Tm --> UC_Inc
+
+Timer --> UC_Fc
+Met --> UC_Fc
+UC_Fc --> Ext
+UC_Fc ..> UC_FcEval : <<include>>
+UC_FcManual ..> UC_Fc : <<extend>>\n[таймаут / нет связи]
+UC_FcManual ..> UC_FcEval : <<include>>
+
+Insp --> UC_JInc
+Insp --> UC_JPost
+Insp --> UC_RepInc
+UC_JInc ..> UC_Audit : <<include>>
+UC_JPost ..> UC_Audit : <<include>>
+UC_RepInc ..> UC_Audit : <<include>>
+UC_Reg ..> UC_Scope : <<include>>
+@enduml

@@ -1,0 +1,129 @@
+@startuml class_lab4
+' Классы, добавленные и измененные в ЛР4 (остальные — class_domain.puml и class_mvc.puml)
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 11
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor<<new>> #DCEBFF
+  BackgroundColor<<changed>> #FFF3CC
+}
+hide empty members
+
+package "Model" {
+  class Spaceport <<new>> {
+    -code: str
+    -name: str
+    -region: str
+  }
+  class Entity
+  class Staff <<changed>> {
+    -spaceport_id: int | None
+    проверка: роли центра без космодрома
+  }
+  class LaunchPad <<changed>> {
+    -spaceport_id: int
+  }
+  class FuelBatch <<changed>> {
+    -initial_mass: Mass
+    -spaceport_id: int
+    +ensure_can_withdraw(mass, used, on, component, valid_until): Mass
+  }
+  class Mass <<new>> {
+    +hg: int
+    +from_kg(value): Mass
+    +kg: float
+    +__add__(), __sub__()
+  }
+  class Session <<changed>> {
+    +spaceport_id: int | None
+    +is_global: bool
+    +scope(requested): int | None
+    +ensure_spaceport(id)
+    +require(*permissions)
+    -_deny(message, object_type, object_ref)
+  }
+  class AuditLogger <<new>> {
+    +record(session, action, object_type, ref, details)
+    +denied(session, message, object_type, ref)
+    +list_records(session, from, to, login)
+  }
+  class AuditRecord <<new>> {
+    recorded_at, staff_id, role,
+    action, object_type, outcome, details
+  }
+  class JournalService <<new>> {
+    +incidents(session, from, to, spaceport)
+    +postponements(session, from, to, reason, spaceport)
+  }
+  class ForecastService <<new>> {
+    LEAD_TIME = 24 ч
+    RETRY_AFTER = 30 мин
+    +due(): list[Launch]
+    +run_auto(): list[ForecastRecord]
+    +request(session, launch_id)
+    +enter_manual(session, launch_id, ...)
+  }
+  class ForecastRecord <<new>> {
+    source: ForecastSource
+    status: ForecastStatus
+    forecast: Forecast | None
+  }
+  abstract class MeteoProvider <<new>> {
+    +{abstract} fetch(site, at): Forecast
+  }
+  class HttpMeteoProvider <<new>> {
+    TIMEOUT = 30 с
+    +fetch(site, at): Forecast
+  }
+  class Forecast <<new>> {
+    ground_wind, altitude_wind,
+    temperature, thunderstorm, cloud_base
+  }
+  class WeatherLimits {
+    +violations(obs_or_forecast): list[str]
+  }
+  abstract class Report {
+    permissions: tuple
+    -_spaceport: int | None
+  }
+  class PostponementStatsReport <<new>>
+  class IncidentsReport <<changed>>
+  class "migrations\nmigrate_v0_to_v2()" as Mig <<new>>
+}
+
+package "Controller" {
+  class WebApi <<changed>> {
+    +journal_incidents(), journal_postponements()
+    +audit(), forecasts()
+    +request_forecast(), manual_forecast()
+  }
+  class _Server <<new>> {
+    +service_actions(): таймер прогноза
+  }
+}
+
+Entity <|-- Spaceport
+Entity <|-- Staff
+Entity <|-- LaunchPad
+Entity <|-- FuelBatch
+FuelBatch *-- Mass
+Spaceport "1" -- "0..*" LaunchPad
+Spaceport "1" -- "0..*" FuelBatch
+Spaceport "0..1" -- "0..*" Staff
+Session o-- Staff
+Session ..> AuditLogger : on_denied
+AuditLogger ..> AuditRecord
+JournalService --> AuditLogger
+MeteoProvider <|-- HttpMeteoProvider
+ForecastService --> MeteoProvider
+ForecastService --> WeatherLimits
+ForecastService ..> ForecastRecord
+ForecastRecord o-- Forecast
+Report <|-- PostponementStatsReport
+Report <|-- IncidentsReport
+WebApi --> JournalService
+WebApi --> ForecastService
+_Server --> ForecastService : run_auto()
+@enduml

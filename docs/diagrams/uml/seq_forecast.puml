@@ -1,0 +1,58 @@
+@startuml seq_forecast
+' Запрос прогноза у внешней метеослужбы за 24 ч до окна (ЛР4, Т4)
+skinparam DefaultFontName Arial
+skinparam DefaultFontSize 12
+skinparam BackgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+participant "_Server\n(таймер, Controller)" as T
+participant "ForecastService\n<<Model>>" as FS
+participant "LaunchRepository\nForecastRepository" as R
+participant "HttpMeteoProvider\n<<Model>>" as P
+participant "Внешняя\nметеослужба" as EXT
+participant "WeatherLimits\n<<Model>>" as L
+actor "Метеоролог" as M
+participant "Vue-страница\n<<View>>" as V
+
+== Автоматический запрос (раз в минуту) ==
+T -> FS : run_auto()
+FS -> R : list_all(), latest(launch, window_start)
+FS -> FS : due(): окно через ≤ 24 ч,\nпрогноза еще нет
+loop для каждого такого пуска
+  FS -> P : fetch(site=код космодрома, at=начало окна)
+  P -> EXT : GET /forecast?site=VOS&time=... (timeout 30 с)
+  alt ответ получен
+    EXT --> P : 200 JSON {valid_at, levels[], thunderstorm}
+    P -> P : parse_forecast(): проверка формата,\nветер у земли и max на высотах
+    P --> FS : Forecast
+    FS -> L : violations(forecast)
+    alt нарушений нет
+      FS -> R : add(status=ok, source=auto)
+    else превышены пределы
+      FS -> R : add(status=warning, details=нарушения)
+      note right of FS : только предупреждение,\nподготовка не блокируется (П6)
+    end
+  else нет ответа за 30 с / нет связи / не JSON
+    EXT --x P
+    P --> FS : MeteoUnavailable
+    FS -> R : add(status=unavailable,\n"нужен ручной ввод")
+  end
+end
+
+== Ручной ввод, если служба недоступна ==
+M -> V : вкладка «Метео», форма прогноза
+V -> T : POST /api/launches/3/forecast/manual
+T -> FS : enter_manual(session, ...)
+FS -> FS : require(RECORD_WEATHER),\nensure_spaceport()
+FS -> R : latest(...)
+alt последний прогноз «служба недоступна»
+  FS -> L : violations(forecast)\n(те же пределы, П5)
+  FS -> R : add(source=manual)
+  FS --> T : ForecastRecord
+  T --> V : 200 «Ручной прогноз сохранен»
+else служба отвечала
+  FS --> T : BusinessRuleError
+  T --> V : 400 «Ручной ввод разрешен, только если служба недоступна»
+end
+@enduml
